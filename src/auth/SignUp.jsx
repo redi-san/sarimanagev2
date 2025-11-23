@@ -95,29 +95,32 @@ await axios.post(`${BASE_URL}/users`, {
         <p className={styles.subtitle}>Manage your sari-sari store with ease</p>
 
         <form onSubmit={handleSubmit}>
-          <div className={styles.inputGroup}>
-  <label htmlFor="firstName">First Name</label>
-  <input
-    type="text"
-    id="firstName"
-    placeholder="Enter your first name"
-    value={formData.firstName}
-    onChange={handleChange}
-    required
-  />
+<div className={styles.nameRow}>
+  <div className={styles.inputGroup}>
+    <label htmlFor="firstName">First Name</label>
+    <input
+      type="text"
+      id="firstName"
+      placeholder="Enter your first name"
+      value={formData.firstName}
+      onChange={handleChange}
+      required
+    />
+  </div>
+
+  <div className={styles.inputGroup}>
+    <label htmlFor="lastName">Last Name</label>
+    <input
+      type="text"
+      id="lastName"
+      placeholder="Enter your last name"
+      value={formData.lastName}
+      onChange={handleChange}
+      required
+    />
+  </div>
 </div>
 
-<div className={styles.inputGroup}>
-  <label htmlFor="lastName">Last Name</label>
-  <input
-    type="text"
-    id="lastName"
-    placeholder="Enter your last name"
-    value={formData.lastName}
-    onChange={handleChange}
-    required
-  />
-</div>
 
 
           <div className={styles.inputGroup}>

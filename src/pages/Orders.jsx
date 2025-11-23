@@ -97,7 +97,8 @@ const [scanningIndex] = useState(null); // keep value, discard setter
   );
 
   useEffect(() => {
-    if (showScanner && scanningIndex !== null) {
+    //if (showScanner && scanningIndex !== null) {
+    if (showScanner) {
       const scanner = new Html5QrcodeScanner("order-barcode-reader", {
         fps: 10,
         qrbox: 180,

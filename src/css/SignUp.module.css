@@ -164,3 +164,17 @@
   cursor: pointer;
   user-select: none;
 }
+
+
+.nameRow {
+  display: flex;
+  gap: 10px;
+}
+
+.nameRow .inputGroup {
+  flex: 1;
+}
+
+.nameRow .inputGroup input {
+  width: 160px; /* adjust to your liking */
+}
