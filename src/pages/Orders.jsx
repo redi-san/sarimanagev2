@@ -25,7 +25,8 @@ export default function Orders({ setPage }) {
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [stocks, setStocks] = useState([]);
   const [showScanner, setShowScanner] = useState(false);
-  const [scanningIndex, setScanningIndex] = useState(null);
+// const [scanningIndex, setScanningIndex] = useState(null);
+const [scanningIndex] = useState(null); // keep value, discard setter
   const [filterDate, setFilterDate] = useState(new Date());
   const [showAll, setShowAll] = useState(false);
   const [activeSuggestionIndex, setActiveSuggestionIndex] = useState(null);
