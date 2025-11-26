@@ -5,8 +5,7 @@ import { getAuth } from "firebase/auth";
 
 import BottomNav from "../components/BottomNav";
 
-    const BASE_URL = process.env.REACT_APP_API_URL || "http://localhost:5000";
-
+const BASE_URL = process.env.REACT_APP_API_URL || "http://localhost:5000";
 
 export default function Reports() {
   const [orders, setOrders] = useState([]);
@@ -14,35 +13,34 @@ export default function Reports() {
   const [filterDate, setFilterDate] = useState(new Date());
   const [showAll, setShowAll] = useState(false);
 
+  const [activeTab, setActiveTab] = useState("sales"); // "sales" | "profit"
 
+  useEffect(() => {
+    const auth = getAuth();
 
-useEffect(() => {
-  const auth = getAuth();
+    const unsubscribe = auth.onAuthStateChanged(async (user) => {
+      if (user) {
+        try {
+          // Fetch data only for the logged-in user
+          const [ordersRes, stocksRes] = await Promise.all([
+            axios.get(`${BASE_URL}/orders/user/${user.uid}`),
+            axios.get(`${BASE_URL}/stocks/user/${user.uid}`),
+          ]);
 
-  const unsubscribe = auth.onAuthStateChanged(async (user) => {
-    if (user) {
-      try {
-        // Fetch data only for the logged-in user
-        const [ordersRes, stocksRes] = await Promise.all([
-          axios.get(`${BASE_URL}/orders/user/${user.uid}`),
-          axios.get(`${BASE_URL}/stocks/user/${user.uid}`),
-        ]);
-
-        setOrders(ordersRes.data);
-        setStocks(stocksRes.data);
-      } catch (err) {
-        console.error("Error fetching user-specific reports:", err);
+          setOrders(ordersRes.data);
+          setStocks(stocksRes.data);
+        } catch (err) {
+          console.error("Error fetching user-specific reports:", err);
+        }
+      } else {
+        // If user logs out → clear old data
+        setOrders([]);
+        setStocks([]);
       }
-    } else {
-      // If user logs out → clear old data
-      setOrders([]);
-      setStocks([]);
-    }
-  });
+    });
 
-  return () => unsubscribe();
-}, []);
-
+    return () => unsubscribe();
+  }, []);
 
   const formatDate = (date) => date.toISOString().split("T")[0];
 
@@ -121,7 +119,44 @@ useEffect(() => {
 
       {/* Main Content */}
       <div className={styles.main}>
- 
+        {/* Tab Bar */}
+        <div className={styles.tabBar}>
+          <button
+            className={`${styles.tabButton} ${
+              activeTab === "sales" ? styles.active : ""
+            }`}
+            onClick={() => setActiveTab("sales")}
+          >
+            Sales
+          </button>
+
+          <button
+            className={`${styles.tabButton} ${
+              activeTab === "profit" ? styles.active : ""
+            }`}
+            onClick={() => setActiveTab("profit")}
+          >
+            Profit
+          </button>
+
+          <button
+            className={`${styles.tabButton} ${
+              activeTab === "inventory" ? styles.active : ""
+            }`}
+            onClick={() => setActiveTab("inventory")}
+          >
+            Inventory
+          </button>
+
+          <button
+            className={`${styles.tabButton} ${
+              activeTab === "debt" ? styles.active : ""
+            }`}
+            onClick={() => setActiveTab("debt")}
+          >
+            Debt
+          </button>
+        </div>
 
         {/* Filters */}
         <div className={styles["filter-controls"]}>
@@ -205,7 +240,13 @@ useEffect(() => {
         {/* Sales Overview */}
         <div className={styles.weeklySalesSection}>
           <h3>
-            {showAll ? "Sales of the Month" : "Sales of the Day"}
+            {activeTab === "sales"
+              ? showAll
+                ? "Sales of the Month"
+                : "Sales of the Day"
+              : showAll
+              ? "Profits of the Month"
+              : "Profits of the Day"}
           </h3>
 
           <div
@@ -241,12 +282,19 @@ useEffect(() => {
                   const date = getOrderDate(order);
                   if (date.getFullYear() === selectedYear) {
                     const monthIndex = date.getMonth(); // 0–11
-                    const orderTotal = order.products.reduce((sum, p) => {
+                    const orderValue = order.products.reduce((sum, p) => {
                       const qty = parseFloat(p.quantity) || 0;
-                      const price = parseFloat(p.selling_price) || 0;
-                      return sum + qty * price;
+                      const sell = parseFloat(p.selling_price) || 0;
+                      const buy = parseFloat(p.buying_price) || 0;
+
+                      if (activeTab === "sales") return sum + qty * sell;
+                      if (activeTab === "profit")
+                        return sum + qty * (sell - buy);
+
+                      return sum;
                     }, 0);
-                    salesByMonth[monthIndex].sales += orderTotal;
+
+                    salesByMonth[monthIndex].sales += orderValue;
                   }
                 });
 
@@ -254,7 +302,6 @@ useEffect(() => {
                   Math.max(...salesByMonth.map((m) => m.sales)) || 1;
 
                 return salesByMonth.map((m, i) => {
-
                   return (
                     <div
                       key={i}
@@ -321,12 +368,19 @@ useEffect(() => {
                   if (date >= monday && date <= sunday) {
                     const dayIndex = date.getDay(); // 0=Sun, 1=Mon...
                     const mappedIndex = dayIndex === 0 ? 6 : dayIndex - 1;
-                    const orderTotal = order.products.reduce((sum, p) => {
+                    const orderValue = order.products.reduce((sum, p) => {
                       const qty = parseFloat(p.quantity) || 0;
-                      const price = parseFloat(p.selling_price) || 0;
-                      return sum + qty * price;
+                      const sell = parseFloat(p.selling_price) || 0;
+                      const buy = parseFloat(p.buying_price) || 0;
+
+                      if (activeTab === "sales") return sum + qty * sell;
+                      if (activeTab === "profit")
+                        return sum + qty * (sell - buy);
+
+                      return sum;
                     }, 0);
-                    salesByDay[mappedIndex].sales += orderTotal;
+
+                    salesByDay[mappedIndex].sales += orderValue;
                   }
                 });
 
@@ -390,51 +444,49 @@ useEffect(() => {
               <tr>
                 <th></th>
                 <th>Products</th>
-                <th>Price</th>
+                <th>Price</th> {/* Selling price */}
+                <th>Buy Price</th>
                 <th>Quantity</th>
-                <th>Sales</th>
-                <th>Profit</th>
+                {activeTab === "sales" && <th>Sales</th>}
+                {activeTab === "profit" && <th>Profit</th>}
               </tr>
             </thead>
+
             <tbody>
               {reportData.map((p, idx) => (
                 <tr key={idx}>
                   <td>{idx + 1}</td>
                   <td>{p.name}</td>
+                  <td>₱{p.unitPrice.toFixed(2)}</td>
                   <td>
                     ₱
-                    {p.unitPrice.toLocaleString(undefined, {
-                      minimumFractionDigits: 2,
-                      maximumFractionDigits: 2,
-                    })}
+                    {Number(
+                      stocks.find((s) => s.name === p.name)?.buying_price || 0
+                    ).toFixed(2)}
                   </td>
-                  <td>{p.totalQty.toLocaleString()}</td>
+                  <td>{p.totalQty}</td>
 
-                  <td
-                    style={{
-                      color: p.totalSales > 0 ? "green" : "black",
-                      fontWeight: p.totalSales > 0 ? "600" : "normal",
-                    }}
-                  >
-                    ₱
-                    {p.totalSales.toLocaleString(undefined, {
-                      minimumFractionDigits: 2,
-                      maximumFractionDigits: 2,
-                    })}
-                  </td>
+                  {activeTab === "sales" && (
+                    <td
+                      style={{
+                        color: p.totalSales > 0 ? "green" : "black",
+                        fontWeight: p.totalSales > 0 ? "600" : "normal",
+                      }}
+                    >
+                      ₱{p.totalSales.toFixed(2)}
+                    </td>
+                  )}
 
-                  <td
-                    style={{
-                      color: p.profit > 0 ? "green" : "black",
-                      fontWeight: p.profit !== 0 ? "600" : "normal",
-                    }}
-                  >
-                    ₱
-                    {p.profit.toLocaleString(undefined, {
-                      minimumFractionDigits: 2,
-                      maximumFractionDigits: 2,
-                    })}
-                  </td>
+                  {activeTab === "profit" && (
+                    <td
+                      style={{
+                        color: p.profit > 0 ? "green" : "black",
+                        fontWeight: p.profit !== 0 ? "600" : "normal",
+                      }}
+                    >
+                      ₱{p.profit.toFixed(2)}
+                    </td>
+                  )}
                 </tr>
               ))}
             </tbody>

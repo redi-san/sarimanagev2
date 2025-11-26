@@ -175,6 +175,34 @@
   flex: 1;
 }
 
+/*.card {
+  background: #fff;
+  padding: 2rem 1rem; /* less horizontal padding
+  border-radius: 12px;
+  width: 100%;
+  max-width: 350px;
+  box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.1);
+  text-align: center;
+}*/
+
+.nameRow {
+  display: flex;
+  gap: 10px;
+}
+
+.nameRow .inputGroup {
+  flex: 1;
+}
+
 .nameRow .inputGroup input {
-  width: 160px; /* adjust to your liking */
+  width: 100%; /* remove any fixed width */
+  box-sizing: border-box; /* ensure padding is counted */
+}
+
+/* Center single inputs to match the width of name fields */
+.inputGroup:not(.nameRow .inputGroup) input {
+  max-width: 1200px; /* same width as name inputs */
+  margin: 0 auto;   /* center them horizontally */
+  display: block;   /* needed for margin auto to work */
+  box-sizing: border-box;
 }

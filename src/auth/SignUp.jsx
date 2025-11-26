@@ -10,16 +10,15 @@ import showPasswordIcon from "../assets/showPassword.png";
 
 const BASE_URL = process.env.REACT_APP_API_URL || "http://localhost:5000";
 
-
 function SignUp() {
   const navigate = useNavigate();
-const [formData, setFormData] = useState({
-  firstName: "",
-  lastName: "",
-  email: "",
-  password: "",
-  confirmPassword: "",
-});
+  const [formData, setFormData] = useState({
+    firstName: "",
+    lastName: "",
+    email: "",
+    password: "",
+    confirmPassword: "",
+  });
 
   const [showPassword, setShowPassword] = useState(false);
   const [passwordError, setPasswordError] = useState("");
@@ -38,45 +37,44 @@ const [formData, setFormData] = useState({
     return regex.test(password);
   };
 
-const handleSubmit = async (e) => {
-  e.preventDefault();
-  if (!validatePassword(formData.password)) {
-    setPasswordError(
-      "Password must be 12–16 chars, include uppercase, lowercase, number, and special character."
-    );
-    return;
-  }
-  if (formData.password !== formData.confirmPassword) {
-    setPasswordError("Passwords do not match.");
-    return;
-  }
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!validatePassword(formData.password)) {
+      setPasswordError(
+        "Password must be 12–16 chars, include uppercase, lowercase, number, and special character."
+      );
+      return;
+    }
+    if (formData.password !== formData.confirmPassword) {
+      setPasswordError("Passwords do not match.");
+      return;
+    }
 
-  try {
-    const userCredential = await createUserWithEmailAndPassword(
-      auth,
-      formData.email,
-      formData.password
-    );
+    try {
+      const userCredential = await createUserWithEmailAndPassword(
+        auth,
+        formData.email,
+        formData.password
+      );
 
-    const user = userCredential.user;
-    await updateProfile(userCredential.user, {
-      displayName: `${formData.firstName} ${formData.lastName}`,
-    });
+      const user = userCredential.user;
+      await updateProfile(userCredential.user, {
+        displayName: `${formData.firstName} ${formData.lastName}`,
+      });
 
-await axios.post(`${BASE_URL}/users`, {
-  firebase_uid: user.uid,
-  name: formData.firstName,
-  last_name: formData.lastName,
-  email: user.email,
-});
+      await axios.post(`${BASE_URL}/users`, {
+        firebase_uid: user.uid,
+        name: formData.firstName,
+        last_name: formData.lastName,
+        email: user.email,
+      });
 
-    setPasswordError("");
-    setShowModal(true);
-  } catch (err) {
-    setPasswordError(err.message);
-  }
-};
-
+      setPasswordError("");
+      setShowModal(true);
+    } catch (err) {
+      setPasswordError(err.message);
+    }
+  };
 
   const handleContinue = () => {
     setShowModal(false);
@@ -95,33 +93,31 @@ await axios.post(`${BASE_URL}/users`, {
         <p className={styles.subtitle}>Manage your sari-sari store with ease</p>
 
         <form onSubmit={handleSubmit}>
-<div className={styles.nameRow}>
-  <div className={styles.inputGroup}>
-    <label htmlFor="firstName">First Name</label>
-    <input
-      type="text"
-      id="firstName"
-      placeholder="Enter your first name"
-      value={formData.firstName}
-      onChange={handleChange}
-      required
-    />
-  </div>
+          <div className={styles.nameRow}>
+            <div className={styles.inputGroup}>
+              <label htmlFor="firstName">First Name</label>
+              <input
+                type="text"
+                id="firstName"
+                placeholder="Enter your first name"
+                value={formData.firstName}
+                onChange={handleChange}
+                required
+              />
+            </div>
 
-  <div className={styles.inputGroup}>
-    <label htmlFor="lastName">Last Name</label>
-    <input
-      type="text"
-      id="lastName"
-      placeholder="Enter your last name"
-      value={formData.lastName}
-      onChange={handleChange}
-      required
-    />
-  </div>
-</div>
-
-
+            <div className={styles.inputGroup}>
+              <label htmlFor="lastName">Last Name</label>
+              <input
+                type="text"
+                id="lastName"
+                placeholder="Enter your last name"
+                value={formData.lastName}
+                onChange={handleChange}
+                required
+              />
+            </div>
+          </div>
 
           <div className={styles.inputGroup}>
             <label htmlFor="email">Email Address</label>
