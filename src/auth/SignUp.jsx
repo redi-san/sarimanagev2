@@ -15,7 +15,9 @@ function SignUp() {
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
+    storeName: "",
     email: "",
+    mobileNumber: "",
     password: "",
     confirmPassword: "",
   });
@@ -37,44 +39,50 @@ function SignUp() {
     return regex.test(password);
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (!validatePassword(formData.password)) {
-      setPasswordError(
-        "Password must be 12–16 chars, include uppercase, lowercase, number, and special character."
-      );
-      return;
-    }
-    if (formData.password !== formData.confirmPassword) {
-      setPasswordError("Passwords do not match.");
-      return;
-    }
+const handleSubmit = async (e) => {
+  e.preventDefault();
+  if (!validatePassword(formData.password)) {
+    setPasswordError(
+      "Password must be 12–16 chars, include uppercase, lowercase, number, and special character."
+    );
+    return;
+  }
+  if (formData.password !== formData.confirmPassword) {
+    setPasswordError("Passwords do not match.");
+    return;
+  }
 
-    try {
-      const userCredential = await createUserWithEmailAndPassword(
-        auth,
-        formData.email,
-        formData.password
-      );
+  try {
+    const userCredential = await createUserWithEmailAndPassword(
+      auth,
+      formData.email,
+      formData.password
+    );
 
-      const user = userCredential.user;
-      await updateProfile(userCredential.user, {
-        displayName: `${formData.firstName} ${formData.lastName}`,
-      });
+    const user = userCredential.user;
+    await updateProfile(user, {
+      displayName: `${formData.firstName} ${formData.lastName}`,
+    });
 
-      await axios.post(`${BASE_URL}/users`, {
-        firebase_uid: user.uid,
-        name: formData.firstName,
-        last_name: formData.lastName,
-        email: user.email,
-      });
+    await axios.post(`${BASE_URL}/users`, {
+      firebase_uid: user.uid,
+      name: formData.firstName,
+      last_name: formData.lastName,
+      email: user.email,
+      store_name: formData.storeName,
+      mobile_number: formData.mobileNumber,
+    });
 
-      setPasswordError("");
-      setShowModal(true);
-    } catch (err) {
-      setPasswordError(err.message);
-    }
-  };
+    // ✅ Clear error
+    setPasswordError("");
+
+    // ✅ Automatically navigate to Home
+    navigate("/home");
+  } catch (err) {
+    setPasswordError(err.message);
+  }
+};
+
 
   const handleContinue = () => {
     setShowModal(false);
@@ -126,6 +134,30 @@ function SignUp() {
               id="email"
               placeholder="Enter your email"
               value={formData.email}
+              onChange={handleChange}
+              required
+            />
+          </div>
+
+          <div className={styles.inputGroup}>
+            <label htmlFor="storeName">Store Name</label>
+            <input
+              type="text"
+              id="storeName"
+              placeholder="Enter your store name"
+              value={formData.storeName}
+              onChange={handleChange}
+              required
+            />
+          </div>
+
+          <div className={styles.inputGroup}>
+            <label htmlFor="mobileNumber">Mobile Number</label>
+            <input
+              type="text"
+              id="mobileNumber"
+              placeholder="09XXXXXXXXX"
+              value={formData.mobileNumber}
               onChange={handleChange}
               required
             />

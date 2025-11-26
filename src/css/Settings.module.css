@@ -265,3 +265,12 @@
     transform: translateY(0);
   }
 }
+
+@media (max-width: 768px) {
+  .card {
+    width: 100%; /* ensures cards take full width */
+    min-width: 380px; /* optional, prevent extreme shrinking */
+    padding: 16px;
+    box-sizing: border-box; /* ensures padding doesn’t shrink card */
+  }
+}

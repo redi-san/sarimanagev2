@@ -6,8 +6,7 @@ import axios from "axios";
 
 import BottomNav from "../components/BottomNav";
 
-    const BASE_URL = process.env.REACT_APP_API_URL;
-
+const BASE_URL = process.env.REACT_APP_API_URL;
 
 export default function Settings() {
   const [editingProfile, setEditingProfile] = useState(false);
@@ -16,12 +15,12 @@ export default function Settings() {
     firstName: "",
     lastName: "",
     email: "",
+    storeName: "",
+    mobileNumber: "",
   });
 
   const navigate = useNavigate();
   const auth = getAuth();
-
-
 
   const handleLogout = async () => {
     try {
@@ -38,14 +37,15 @@ export default function Settings() {
       const user = auth.currentUser;
       if (!user) return;
 
-      
       try {
-      const res = await axios.get(`${BASE_URL}/users/${user.uid}`);
+        const res = await axios.get(`${BASE_URL}/users/${user.uid}`);
         setUserData(res.data);
         setEditedData({
           firstName: res.data.name || "",
           lastName: res.data.last_name || "",
           email: res.data.email || "",
+          storeName: res.data.store_name || "",
+          mobileNumber: res.data.mobile_number || "",
         });
       } catch (err) {
         console.error("Error fetching user:", err);
@@ -67,31 +67,35 @@ export default function Settings() {
     setEditedData({ ...editedData, [id]: value });
   };
 
-const handleSave = async () => {
-  try {
-    const user = auth.currentUser;
-    if (!user) return;
+  const handleSave = async () => {
+    try {
+      const user = auth.currentUser;
+      if (!user) return;
 
-    await axios.put(`${BASE_URL}/users/${user.uid}`, {
-      name: editedData.firstName,
-      last_name: editedData.lastName,
-      email: editedData.email,
-    });
+      // ✅ Include storeName and mobileNumber in the PUT request
+      await axios.put(`${BASE_URL}/users/${user.uid}`, {
+        name: editedData.firstName,
+        last_name: editedData.lastName,
+        email: editedData.email,
+        store_name: editedData.storeName,
+        mobile_number: editedData.mobileNumber,
+      });
 
-    // Update local state after successful save
-    setUserData({
-      ...userData,
-      name: editedData.firstName,
-      last_name: editedData.lastName,
-      email: editedData.email,
-    });
+      // ✅ Update local state after successful save
+      setUserData({
+        ...userData,
+        name: editedData.firstName,
+        last_name: editedData.lastName,
+        email: editedData.email,
+        store_name: editedData.storeName,
+        mobile_number: editedData.mobileNumber,
+      });
 
-    setEditingProfile(false);
-  } catch (err) {
-    console.error("Failed to update profile:", err);
-  }
-};
-
+      setEditingProfile(false);
+    } catch (err) {
+      console.error("Failed to update profile:", err);
+    }
+  };
 
   return (
     <div>
@@ -188,6 +192,27 @@ const handleSave = async () => {
                   value={editedData.email}
                   onChange={handleChange}
                   placeholder="Enter email address"
+                />
+              </div>
+
+              <div className={styles.formGroup}>
+                <label>Store Name</label>
+                <input
+                  id="storeName"
+                  type="text"
+                  value={editedData.storeName}
+                  onChange={handleChange}
+                  placeholder="where is your store name bro"
+                />
+              </div>
+
+              <div className={styles.formGroup}>
+                <label>Mobile Number</label>
+                <input
+                  id="mobileNumber"
+                  type="text"
+                  value={editedData.mobileNumber}
+                  onChange={handleChange}
                 />
               </div>
 
