@@ -29,8 +29,8 @@ const defaultCategories = [
 ];
 
 export default function Stocks({ setPage }) {
-  const [lowStockItems, setLowStockItems] = useState([]);
-  const [showNotifDropdown, setShowNotifDropdown] = useState(false);
+  const [, setLowStockItems] = useState([]);
+  //const [showNotifDropdown, setShowNotifDropdown] = useState(false);
   const auth = getAuth();
   const [search, setSearch] = useState("");
   const [showModal, setShowModal] = useState(false);
@@ -43,7 +43,8 @@ export default function Stocks({ setPage }) {
   const [selling_price, setSellingPrice] = useState("");
   const [buying_price, setBuyingPrice] = useState("");
   const [lowStock, setLowStock] = useState("");
-  const [expiringItems, setExpiringItems] = useState([]);
+  //const [expiringItems, setExpiringItems] = useState([]);
+  const [, setExpiringItems] = useState([]);
 
   const [manufacturing_date, setManufacturingDate] = useState("");
   const [expiry_date, setExpiryDate] = useState("");
