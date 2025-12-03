@@ -5,8 +5,7 @@ import { Html5Qrcode } from "html5-qrcode";
 import { getAuth } from "firebase/auth";
 import axios from "axios";
 
-  const BASE_URL = process.env.REACT_APP_API_URL;
-
+const BASE_URL = process.env.REACT_APP_API_URL;
 
 export default function Debts({ setPage }) {
   const formatPeso = (amount) => {
@@ -77,7 +76,22 @@ export default function Debts({ setPage }) {
         try {
           const res = await axios.get(`${BASE_URL}/debts/user/${user.uid}`);
 
-          setDebtsList(res.data);
+          // Update status based on due_date
+          const updatedDebts = res.data.map((debt) => {
+            const today = new Date();
+
+            if (debt.status === "Unpaid" && debt.due_date) {
+              const due = new Date(debt.due_date);
+              if (!isNaN(due) && due < today) {
+                return { ...debt, status: "Overdue" };
+              }
+            }
+
+            // If no due_date or not overdue, leave status as is
+            return debt;
+          });
+
+          setDebtsList(updatedDebts);
         } catch (err) {
           console.error("Error fetching debts:", err);
         }
@@ -254,7 +268,7 @@ export default function Debts({ setPage }) {
 
   const deleteDebt = async (id) => {
     try {
-    await axios.delete(`${BASE_URL}/debts/${id}`);
+      await axios.delete(`${BASE_URL}/debts/${id}`);
       fetchDebts();
       setDebtsList(debtsList.filter((debt) => debt.id !== id));
     } catch (err) {
@@ -270,7 +284,7 @@ export default function Debts({ setPage }) {
       }
 
       const res = await axios.post(
-      `${BASE_URL}/debts/${paymentDebtId}/payment`,
+        `${BASE_URL}/debts/${paymentDebtId}/payment`,
         { amount: parseFloat(paymentAmount) }
       );
 
@@ -323,6 +337,19 @@ export default function Debts({ setPage }) {
         form.requestSubmit();
       }
     }
+  };
+
+  const sendManualSMS = (number, message) => {
+    if (!number) {
+      alert("Customer does not have a contact number.");
+      return;
+    }
+
+    // Encode message to handle special characters
+    const encodedMessage = encodeURIComponent(message);
+
+    // For mobile devices: opens SMS app with number and message pre-filled
+    window.location.href = `sms:${number}?body=${encodedMessage}`;
   };
 
   return (
@@ -818,12 +845,28 @@ export default function Debts({ setPage }) {
                       <div className={styles["kebab-menu"]}>
                         <button
                           onClick={() => {
-                            alert("Reminder sent to customer!");
+                            const productList = (selectedDebt.products || [])
+                              .map((p) => `${p.name} x${p.quantity || 0}`)
+                              .join(", ");
+
+                            const message = `Hi ${
+                              selectedDebt.customer_name
+                            }, this is a friendly reminder that your debt of ${formatPeso(
+                              selectedDebt.total -
+                                (selectedDebt.total_paid || 0)
+                            )} is due${
+                              selectedDebt.due_date
+                                ? ` on ${selectedDebt.due_date}`
+                                : ""
+                            }. Products: ${productList}. Please settle it at your earliest convenience.`;
+
+                            sendManualSMS(selectedDebt.contact_number, message);
                             setShowKebabMenu(false);
                           }}
                         >
                           Remind Customer
                         </button>
+
                         <button
                           onClick={() => {
                             setEditingDebtIndex(

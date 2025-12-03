@@ -2,7 +2,7 @@ import styles from "../css/Home.module.css";
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import axios from "axios";
-import { getAuth } from "firebase/auth"; 
+import { getAuth } from "firebase/auth";
 import BottomNav from "../components/BottomNav";
 import SalesIcon from "../assets/SalesIcon.png";
 import ProfitsIcon from "../assets/ProfitsIcon.png";
@@ -11,9 +11,10 @@ import LowStockIcon from "../assets/LowStockIcon.png";
 
 import NotificationBell from "../components/NotificationBell";
 
+import MonthlySalesChart from "../components/MonthlySalesChart";
 
-    const BASE_URL = process.env.REACT_APP_API_URL; // Use live backend URL
 
+const BASE_URL = process.env.REACT_APP_API_URL; // Use live backend URL
 
 export default function Home() {
   const [todaysSale, setTodaysSale] = useState(0);
@@ -23,78 +24,135 @@ export default function Home() {
 
   const auth = getAuth();
 
-useEffect(() => {
-  const unsubscribe = auth.onAuthStateChanged(async (user) => {
-    if (!user) return;
+  const [recommendedProducts, setRecommendedProducts] = useState([]);
 
-    try {
-      // Fetch today's orders
-      const ordersRes = await axios.get(`${BASE_URL}/orders/user/${user.uid}`);
-      const allOrders = ordersRes.data;
+  /* const [showMonthly, setShowMonthly] = useState(true); // Monthly view
+const [showForecast, setShowForecast] = useState(false); // Toggle Actual/Forecast
+const [monthlyData, setMonthlyData] = useState([]); */
 
-      const today = new Date().toISOString().split("T")[0];
-      const getOrderDate = (order) => {
-        const datePart = order.order_number.split("-")[0];
-        const month = datePart.slice(0, 2);
-        const day = datePart.slice(2, 4);
-        const year = datePart.slice(4);
-        return `${year}-${month}-${day}`;
-      };
+const [orders, setOrders] = useState([]);
 
-      const todaysOrders = allOrders.filter(
-        (order) => getOrderDate(order) === today
-      );
 
-      setTodaysSale(
-        todaysOrders.reduce((sum, order) => sum + parseFloat(order.total || 0), 0)
-      );
-      setTodaysProfit(
-        todaysOrders.reduce((sum, order) => sum + parseFloat(order.profit || 0), 0)
-      );
-    } catch (err) {
-      console.error("Error fetching orders:", err);
-    }
 
-    try {
-      // Fetch stocks
-      const stocksRes = await axios.get(`${BASE_URL}/stocks/user/${user.uid}`);
-      const allStocks = stocksRes.data;
-      setLowStockCount(
-        allStocks.filter((stock) => Number(stock.stock) <= Number(stock.lowstock)).length
-      );
-    } catch (err) {
-      console.error("Error fetching stocks:", err);
-    }
+  useEffect(() => {
+    const unsubscribe = auth.onAuthStateChanged(async (user) => {
+      if (!user) return;
 
-    try {
-      // Fetch debts
-      const debtsRes = await axios.get(`${BASE_URL}/debts/user/${user.uid}`);
-      const allDebts = debtsRes.data;
+      try {
+        // Fetch today's orders
+        const ordersRes = await axios.get(
+          `${BASE_URL}/orders/user/${user.uid}`
+        );
+        const allOrders = ordersRes.data;
+        setOrders(allOrders); // ← add this
 
-      const currentBalance = allDebts
-        .filter((debt) => debt.status !== "Paid")
-        .reduce((sum, debt) => {
-          const total = parseFloat(debt.total || 0);
-          const paid = parseFloat(debt.total_paid || 0);
-          return sum + (total - paid);
-        }, 0);
+        const today = new Date().toISOString().split("T")[0];
+        const getOrderDate = (order) => {
+          const datePart = order.order_number.split("-")[0];
+          const month = datePart.slice(0, 2);
+          const day = datePart.slice(2, 4);
+          const year = datePart.slice(4);
+          return `${year}-${month}-${day}`;
+        };
 
-      setTotalDebts(currentBalance);
-    } catch (err) {
-      console.error("Error fetching debts:", err);
-    }
-  });
+        const todaysOrders = allOrders.filter(
+          (order) => getOrderDate(order) === today
+        );
 
-  return () => unsubscribe();
-}, [auth]);
+        setTodaysSale(
+          todaysOrders.reduce(
+            (sum, order) => sum + parseFloat(order.total || 0),
+            0
+          )
+        );
+        setTodaysProfit(
+          todaysOrders.reduce(
+            (sum, order) => sum + parseFloat(order.profit || 0),
+            0
+          )
+        );
+      } catch (err) {
+        console.error("Error fetching orders:", err);
+      }
 
+      try {
+        // Fetch stocks
+        const stocksRes = await axios.get(
+          `${BASE_URL}/stocks/user/${user.uid}`
+        );
+        const allStocks = stocksRes.data;
+        setLowStockCount(
+          allStocks.filter(
+            (stock) => Number(stock.stock) <= Number(stock.lowstock)
+          ).length
+        );
+      } catch (err) {
+        console.error("Error fetching stocks:", err);
+      }
+
+      try {
+        // Fetch debts
+        const debtsRes = await axios.get(`${BASE_URL}/debts/user/${user.uid}`);
+        const allDebts = debtsRes.data;
+
+        const currentBalance = allDebts
+          .filter((debt) => debt.status !== "Paid")
+          .reduce((sum, debt) => {
+            const total = parseFloat(debt.total || 0);
+            const paid = parseFloat(debt.total_paid || 0);
+            return sum + (total - paid);
+          }, 0);
+
+        setTotalDebts(currentBalance);
+      } catch (err) {
+        console.error("Error fetching debts:", err);
+      }
+    });
+
+    return () => unsubscribe();
+  }, [auth]);
+
+  useEffect(() => {
+    const unsubscribe = auth.onAuthStateChanged(async (user) => {
+      if (!user) return;
+
+      try {
+        const ordersRes = await axios.get(
+          `${BASE_URL}/orders/user/${user.uid}`
+        );
+        const allOrders = ordersRes.data;
+
+        // Compute total sales per product
+        const productSales = {};
+        allOrders.forEach((order) => {
+          order.products.forEach((p) => {
+            if (!productSales[p.name]) productSales[p.name] = 0;
+            productSales[p.name] +=
+              parseFloat(p.quantity) * parseFloat(p.selling_price);
+          });
+        });
+
+        // Convert to array and sort
+        const sortedProducts = Object.entries(productSales)
+          .map(([name, totalSales]) => ({ name, totalSales }))
+          .sort((a, b) => b.totalSales - a.totalSales);
+
+        // Take top 3
+        setRecommendedProducts(sortedProducts.slice(0, 5));
+      } catch (err) {
+        console.error("Error computing recommendations:", err);
+      }
+    });
+
+    return () => unsubscribe();
+  }, [auth]);
 
   return (
     <div>
-<div className={styles.topbar}>
-  <h2>Sari Manage</h2>
-  <NotificationBell />
-</div>
+      <div className={styles.topbar}>
+        <h2>Sari Manage</h2>
+        <NotificationBell />
+      </div>
 
       <div className={styles.main}>
         <h2 className={styles.sectionTitle}>Overview</h2>
@@ -156,6 +214,27 @@ useEffect(() => {
           </Link>
         </div>
       </div>
+
+        {/* Monthly Sales Chart */}
+  <MonthlySalesChart orders={orders} />
+
+      <h2 className={styles.sectionTitle}>Recommended Products</h2>
+      {recommendedProducts.length === 0 ? (
+        <p>No recommendations yet</p>
+      ) : (
+        <ul className={styles.recommendationList}>
+          {recommendedProducts.map((p, idx) => (
+            <li key={idx} className={styles.recommendationItem}>
+              <Link to="/reports">
+                <span className={styles.productName}>{p.name}</span>
+                <span className={styles.productSales}>
+                  ₱{p.totalSales.toFixed(2)}
+                </span>
+              </Link>
+            </li>
+          ))}
+        </ul>
+      )}
 
       <BottomNav />
     </div>

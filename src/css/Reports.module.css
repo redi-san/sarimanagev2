@@ -51,7 +51,6 @@
   font-size: 32px;
   font-weight: bold;
   color: #ffcc00;
-     -webkit-text-stroke: 1px #333;
 }
 
 .hamburger {
@@ -503,4 +502,96 @@
   color: #222;
   border-bottom: 3px solid #d1a700;
   box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+}
+
+
+.lineAnimation {
+  stroke-dasharray: 1000;
+  stroke-dashoffset: 1000;
+  animation: drawLine 2s ease forwards;
+}
+
+@keyframes drawLine {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+.salesForecastToggle {
+  display: flex;
+  justify-content: flex-start; /* keep buttons aligned to the left */
+  gap: 12px; 
+  margin: 20px 0;
+}
+
+.toggleButton {
+  padding: 6px 14px; /* smaller size */
+  border: 2px solid #ffcc00;
+  background: #fff; /* inactive background */
+  color: #444;
+  font-weight: 600;
+  border-radius: 25px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  min-width: 80px; /* smaller width */
+}
+
+
+.activeToggle {
+  background: #ffcc00;
+  color: #000;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+}
+
+/* Desktop */
+.summaryCards {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 12px; /* smaller gap */
+  margin: 15px 0;
+  flex-wrap: wrap;
+}
+
+.card {
+  background: linear-gradient(135deg, #ffcc00, #ffde66);
+  color: #000;
+  padding: 8px 8px; /* smaller padding */
+  border-radius: 12px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+  flex: 1 1 120px;   /* responsive flex */
+  min-width: 120px;
+  max-width: 150px;  /* smaller max width */
+  text-align: center;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.card h3 {
+  font-size: 14px; 
+}
+
+.card p {
+  font-size: 16px; 
+  font-weight: 600;
+  margin-top: 4px;
+}
+
+.weeklyContainer {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-around; 
+  gap: 12px;
+}
+
+@media (min-width: 1024px) {
+  svg {
+    width: 680px !important;
+    height: 200px !important;
+  }
+}
+
+
+#report-section {
+  width: 800px; /* better PDF width */
+  margin: auto;
 }

@@ -35,6 +35,9 @@ export default function Orders({ setPage }) {
 
   const scannerRef = useRef(null);
 
+  const [graphType, setGraphType] = useState("actual"); // "actual" | "forecast"
+
+
   useEffect(() => {
     const auth = getAuth();
 

@@ -50,7 +50,7 @@ export default function AddDebtModal({
               due_date,
               note,
             };
-            onSave(debtData); // ✅ unified — works for both add & edit
+            onSave(debtData); // ✅ unified - works for both add & edit
           }}
         >
           <div className={styles["form-group"]}>

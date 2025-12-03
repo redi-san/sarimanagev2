@@ -5,6 +5,9 @@ import { getAuth } from "firebase/auth";
 
 import BottomNav from "../components/BottomNav";
 
+import jsPDF from "jspdf";
+import html2canvas from "html2canvas";
+
 const BASE_URL = process.env.REACT_APP_API_URL || "http://localhost:5000";
 
 export default function Reports() {
@@ -14,6 +17,10 @@ export default function Reports() {
   const [showAll, setShowAll] = useState(false);
 
   const [activeTab, setActiveTab] = useState("sales"); // "sales" | "profit"
+
+  const [showForecast, setShowForecast] = useState(false);
+
+  const [selectedProduct, setSelectedProduct] = useState(null);
 
   useEffect(() => {
     const auth = getAuth();
@@ -65,6 +72,35 @@ export default function Reports() {
     }
   });
 
+  const inventoryData = stocks.map((stock) => {
+    // Sum of sold quantities before the filter date
+    /*const soldBefore = orders
+      .filter((order) => getOrderDate(order) < filterDate)
+      .reduce((sum, order) => {
+        const product = order.products.find((p) => p.name === stock.name);
+        return sum + (product ? parseFloat(product.quantity) : 0);
+      }, 0); */
+
+    // Sold today (or this month)
+    const soldToday = filteredOrders.reduce((sum, order) => {
+      const product = order.products.find((p) => p.name === stock.name);
+      return sum + (product ? parseFloat(product.quantity) : 0);
+    }, 0);
+
+    // Start stock = current stock + sold today
+    const startStock = parseFloat(stock.stock) + soldToday;
+
+    const remaining = startStock - soldToday;
+
+    return {
+      name: stock.name,
+      startStock,
+      soldToday,
+      remaining,
+      status: remaining <= stock.lowstock ? "Low" : "OK",
+    };
+  });
+
   const aggregatedProducts = {};
   filteredOrders.forEach((order) => {
     order.products.forEach((p) => {
@@ -87,11 +123,11 @@ export default function Reports() {
     });
   });
 
-  useEffect(() => {
+  /*useEffect(() => {
     if (orders.length > 0) {
       setFilterDate(new Date());
     }
-  }, [orders]);
+  }, [orders]); */
 
   const reportData = stocks.map((stock) => {
     const sold = aggregatedProducts[stock.name];
@@ -109,6 +145,173 @@ export default function Reports() {
 
   const totalSales = reportData.reduce((sum, p) => sum + p.totalSales, 0);
   const totalProfit = reportData.reduce((sum, p) => sum + p.profit, 0);
+
+  // Compute 3-month sales average for forecasting
+
+
+  //const forecastSales = getThreeMonthForecast();
+
+  // =========================
+  // RECURSIVE 3-MONTH FORECAST
+  // =========================
+  // Put this function *above* where you call it (or call it only after it's defined)
+  const getThreeMonthMovingAverage = (year) => {
+    if (typeof year === "undefined") {
+      // defensive: if no year passed, use current year
+      year = new Date().getFullYear();
+    }
+
+    // Build mapped actual sales by year-month
+    const salesByYearMonth = {};
+
+    orders.forEach((order) => {
+      const date = getOrderDate(order);
+      const y = date.getFullYear();
+      const m = date.getMonth();
+
+      if (!salesByYearMonth[y]) salesByYearMonth[y] = Array(12).fill(null);
+
+      // accumulate (if month never set starts as null -> treat as 0 when summing)
+      const value = order.products.reduce((sum, p) => {
+        const qty = parseFloat(p.quantity) || 0;
+        const sell = parseFloat(p.selling_price) || 0;
+        return sum + qty * sell;
+      }, 0);
+
+      // treat null as 0 for accumulation
+      salesByYearMonth[y][m] = (salesByYearMonth[y][m] || 0) + value;
+    });
+
+    // helper: return actual sales number or null if we truly have no actual data for that y/m
+    const getActualIfPresent = (y, m) => {
+      // normalize month into [0..11] while adjusting year
+      while (m < 0) {
+        y -= 1;
+        m += 12;
+      }
+      while (m > 11) {
+        y += 1;
+        m -= 12;
+      }
+      if (!salesByYearMonth[y]) return null;
+      // month may be null or a number
+      return salesByYearMonth[y][m] ?? null;
+    };
+
+    const forecast = Array(12).fill(0);
+
+    // compute months 0..11 in order, using actuals when present, otherwise
+    // use previously computed forecast values (never read forecast for negative index)
+    for (let i = 0; i < 12; i++) {
+      const needed = [i - 1, i - 2, i - 3];
+      const vals = needed.map((monthIndex, k) => {
+        // First try to get an actual for (year, monthIndex)
+        const actual = getActualIfPresent(year, monthIndex);
+        if (actual !== null) return actual;
+
+        // If no actual, try to use already-computed forecast value for that month
+        // For example, when computing month i, we can use forecast[i-1], forecast[i-2], etc.
+        const forecastIndex = monthIndex; // could be negative -> map to previous-year month number
+        // If forecastIndex is within 0..11 and already computed, use it
+        if (forecastIndex >= 0 && forecastIndex < i) {
+          return forecast[forecastIndex];
+        }
+
+        // If forecastIndex < 0, try to use actual from previous year (getActualIfPresent already checked that and returned null),
+        // otherwise fallback to 0
+        return 0;
+      });
+
+      // Ensure vals are numbers (no undefined)
+      const v0 = Number(vals[0] || 0);
+      const v1 = Number(vals[1] || 0);
+      const v2 = Number(vals[2] || 0);
+
+      forecast[i] = (v0 + v1 + v2) / 3;
+    }
+
+    return forecast;
+  };
+
+  // Generate forecast array once
+  //const forecastArray = getThreeMonthMovingAverage();
+
+  const [debts, setDebts] = useState([]);
+
+  useEffect(() => {
+    const auth = getAuth();
+    const unsubscribe = auth.onAuthStateChanged(async (user) => {
+      if (user) {
+        try {
+          const res = await axios.get(`${BASE_URL}/debts/user/${user.uid}`);
+          setDebts(res.data);
+        } catch (err) {
+          console.error("Error fetching debts:", err);
+        }
+      } else {
+        setDebts([]);
+      }
+    });
+
+    return () => unsubscribe();
+  }, []);
+
+  useEffect(() => {
+    if (activeTab === "debt") {
+      setShowAll(true);
+    }
+  }, [activeTab]);
+
+  useEffect(() => {
+  if (orders.length > 0) {
+    setFilterDate(new Date());
+  }
+}, [orders]);
+
+// <- Add this right after
+useEffect(() => {
+  setShowForecast(false);
+}, [showAll, setShowForecast]);
+
+
+const downloadPDF = async () => {
+  const report = document.getElementById("report-section");
+  if (!report) return;
+
+  // Save original styles
+  const originalWidth = report.style.width;
+  const originalTransform = report.style.transform;
+
+  // Force desktop width (e.g., 1000px or whatever your PC width is)
+  report.style.width = "1000px"; 
+  report.style.transform = "scale(1)"; // prevent scaling issues
+
+  const canvas = await html2canvas(report, { scale: 2 });
+  const imgData = canvas.toDataURL("image/png");
+  const pdf = new jsPDF("p", "mm", "a4");
+  const pdfWidth = pdf.internal.pageSize.getWidth();
+  const pageHeight = pdf.internal.pageSize.getHeight();
+  const imgHeight = (canvas.height * pdfWidth) / canvas.width;
+
+  let heightLeft = imgHeight;
+  let position = 0;
+
+  pdf.addImage(imgData, "PNG", 0, position, pdfWidth, imgHeight);
+  heightLeft -= pageHeight;
+
+  while (heightLeft > 0) {
+    position = heightLeft - imgHeight;
+    pdf.addPage();
+    pdf.addImage(imgData, "PNG", 0, position, pdfWidth, imgHeight);
+    heightLeft -= pageHeight;
+  }
+
+  pdf.save("report.pdf");
+
+  // Restore original styles
+  report.style.width = originalWidth;
+  report.style.transform = originalTransform;
+};
 
   return (
     <div>
@@ -160,26 +363,23 @@ export default function Reports() {
 
         {/* Filters */}
         <div className={styles["filter-controls"]}>
-          <select
-            className={styles.filterSelect}
-            value={showAll ? "monthly" : "daily"}
-            onChange={(e) => setShowAll(e.target.value === "monthly")}
-          >
-            <option value="daily">Daily</option>
-            <option value="monthly">Monthly</option>
-          </select>
+          {activeTab !== "debt" && (
+            <select
+              className={styles.filterSelect}
+              value={showAll ? "monthly" : "daily"}
+              onChange={(e) => setShowAll(e.target.value === "monthly")}
+            >
+              <option value="daily">Daily</option>
+              <option value="monthly">Monthly</option>
+            </select>
+          )}
 
           <div>
             <button
               onClick={() => {
                 const newDate = new Date(filterDate);
-                if (showAll) {
-                  // Monthly: move back one month
-                  newDate.setMonth(newDate.getMonth() - 1);
-                } else {
-                  // Daily: move back one day
-                  newDate.setDate(newDate.getDate() - 1);
-                }
+                if (showAll) newDate.setMonth(newDate.getMonth() - 1);
+                else newDate.setDate(newDate.getDate() - 1);
                 setFilterDate(newDate);
               }}
             >
@@ -198,13 +398,8 @@ export default function Reports() {
             <button
               onClick={() => {
                 const newDate = new Date(filterDate);
-                if (showAll) {
-                  // Monthly: move forward one month
-                  newDate.setMonth(newDate.getMonth() + 1);
-                } else {
-                  // Daily: move forward one day
-                  newDate.setDate(newDate.getDate() + 1);
-                }
+                if (showAll) newDate.setMonth(newDate.getMonth() + 1);
+                else newDate.setDate(newDate.getDate() + 1);
                 setFilterDate(newDate);
               }}
             >
@@ -212,6 +407,12 @@ export default function Reports() {
             </button>
           </div>
         </div>
+
+        <button onClick={downloadPDF} className={styles.pdfButton}>
+  Download as PDF
+</button>
+
+<div id="report-section">
 
         <div className={styles.summaryCards}>
           <div className={styles.card}>
@@ -237,27 +438,36 @@ export default function Reports() {
           </div>
         </div>
 
-        {/* Sales Overview */}
-        <div className={styles.weeklySalesSection}>
-          <h3>
-            {activeTab === "sales"
-              ? showAll
-                ? "Sales of the Month"
-                : "Sales of the Day"
-              : showAll
-              ? "Profits of the Month"
-              : "Profits of the Day"}
-          </h3>
+        {/* Only show Sales/Forecast toggle when in monthly view */}
+        {/* Only show Sales/Forecast toggle when in monthly view AND on Sales tab */}
+        {activeTab === "sales" && showAll && (
+          <div className={styles.salesForecastToggle}>
+            <button
+              className={`${styles.toggleButton} ${
+                !showForecast ? styles.activeToggle : ""
+              }`}
+              onClick={() => setShowForecast(false)}
+            >
+              Actual
+            </button>
 
-          <div
-            className={`${styles.weeklyContainer} ${
-              showAll ? styles.monthlyView : styles.weeklyView
-            }`}
-          >
-            {(() => {
-              if (showAll) {
-                //MONTHLY VIEW
-                const months = [
+            <button
+              className={`${styles.toggleButton} ${
+                showForecast ? styles.activeToggle : ""
+              }`}
+              onClick={() => setShowForecast(true)}
+            >
+              Forecast
+            </button>
+          </div>
+        )}
+
+        {/* Sales Overview */}
+        <div className={styles.weeklyContainer}>
+          {(() => {
+            const isMonthly = showAll;
+            const labels = isMonthly
+              ? [
                   "Jan",
                   "Feb",
                   "Mar",
@@ -270,228 +480,438 @@ export default function Reports() {
                   "Oct",
                   "Nov",
                   "Dec",
-                ];
-                const salesByMonth = months.map((month) => ({
-                  month,
-                  sales: 0,
-                }));
+                ]
+              : ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
-                const selectedYear = filterDate.getFullYear();
+            let dataPoints = [];
 
-                orders.forEach((order) => {
-                  const date = getOrderDate(order);
-                  if (date.getFullYear() === selectedYear) {
-                    const monthIndex = date.getMonth(); // 0–11
-                    const orderValue = order.products.reduce((sum, p) => {
-                      const qty = parseFloat(p.quantity) || 0;
-                      const sell = parseFloat(p.selling_price) || 0;
-                      const buy = parseFloat(p.buying_price) || 0;
-
-                      if (activeTab === "sales") return sum + qty * sell;
-                      if (activeTab === "profit")
-                        return sum + qty * (sell - buy);
-
-                      return sum;
-                    }, 0);
-
-                    salesByMonth[monthIndex].sales += orderValue;
+            if (activeTab === "debt") {
+              dataPoints = labels.map((month, i) => {
+                let value = 0;
+                debts.forEach((debt) => {
+                  const date = new Date(debt.date); // ← use debt creation date
+                  if (
+                    date.getFullYear() === filterDate.getFullYear() &&
+                    date.getMonth() === i
+                  ) {
+                    value += parseFloat(debt.total || 0);
                   }
                 });
-
-                const maxSales =
-                  Math.max(...salesByMonth.map((m) => m.sales)) || 1;
-
-                return salesByMonth.map((m, i) => {
-                  return (
-                    <div
-                      key={i}
-                      className={styles.dayCard}
-                      onClick={() => {
-                        const newDate = new Date(selectedYear, i, 1);
-                        setFilterDate(newDate);
-                      }}
-                      style={{ cursor: "pointer" }}
-                    >
-                      <h4>{m.month}</h4>
-                      <p>
-                        ₱
-                        {m.sales.toLocaleString(undefined, {
-                          minimumFractionDigits: 2,
-                          maximumFractionDigits: 2,
-                        })}
-                      </p>
-
-                      <div className={styles.barBackground}>
-                        <div
-                          className={`${styles.barFill} ${
-                            i === filterDate.getMonth() &&
-                            filterDate.getFullYear() === selectedYear
-                              ? styles.activeBar
-                              : ""
-                          }`}
-                          style={{
-                            height: `${(m.sales / maxSales) * 100}%`,
-                          }}
-                        ></div>
-                      </div>
-                    </div>
-                  );
+                return { label: month, value };
+              });
+            } else if (activeTab === "inventory" && selectedProduct) {
+              // Show chart for selected product only
+              if (isMonthly) {
+                // Monthly
+                dataPoints = labels.map((month, i) => {
+                  let value = 0;
+                  orders.forEach((order) => {
+                    const date = getOrderDate(order);
+                    if (
+                      date.getFullYear() === filterDate.getFullYear() &&
+                      date.getMonth() === i
+                    ) {
+                      const product = order.products.find(
+                        (p) => p.name === selectedProduct
+                      );
+                      if (product) value += parseFloat(product.quantity);
+                    }
+                  });
+                  return { label: month, value };
                 });
               } else {
-                //WEEKLY VIEW
-                const weekDays = [
-                  "Mon",
-                  "Tue",
-                  "Wed",
-                  "Thu",
-                  "Fri",
-                  "Sat",
-                  "Sun",
-                ];
-                const salesByDay = weekDays.map((day) => ({
-                  day,
-                  sales: 0,
-                }));
-
-                const selected = new Date(filterDate);
-                const dayOfWeek = selected.getDay(); // 0 = Sunday
-                const diffToMonday = (dayOfWeek + 6) % 7;
-                const monday = new Date(selected);
-                monday.setDate(selected.getDate() - diffToMonday);
-                monday.setHours(0, 0, 0, 0);
-                const sunday = new Date(monday);
-                sunday.setDate(monday.getDate() + 6);
-                sunday.setHours(23, 59, 59, 999);
-
-                orders.forEach((order) => {
-                  const date = getOrderDate(order);
-                  if (date >= monday && date <= sunday) {
-                    const dayIndex = date.getDay(); // 0=Sun, 1=Mon...
-                    const mappedIndex = dayIndex === 0 ? 6 : dayIndex - 1;
-                    const orderValue = order.products.reduce((sum, p) => {
-                      const qty = parseFloat(p.quantity) || 0;
-                      const sell = parseFloat(p.selling_price) || 0;
-                      const buy = parseFloat(p.buying_price) || 0;
-
-                      if (activeTab === "sales") return sum + qty * sell;
-                      if (activeTab === "profit")
-                        return sum + qty * (sell - buy);
-
-                      return sum;
-                    }, 0);
-
-                    salesByDay[mappedIndex].sales += orderValue;
-                  }
+                // Daily / Weekly
+                const startOfWeek = new Date(filterDate);
+                startOfWeek.setDate(filterDate.getDate() - filterDate.getDay()); // Sunday
+                const weekDates = Array.from({ length: 7 }, (_, i) => {
+                  const d = new Date(startOfWeek);
+                  d.setDate(startOfWeek.getDate() + i);
+                  return d;
                 });
 
-                const maxSales =
-                  Math.max(...salesByDay.map((d) => d.sales)) || 1;
-
-                return salesByDay.map((d, i) => {
-                  // compute the date for that day
-                  const selected = new Date(filterDate);
-                  const dayOfWeek = selected.getDay();
-                  const diffToMonday = (dayOfWeek + 6) % 7;
-                  const monday = new Date(selected);
-                  monday.setDate(selected.getDate() - diffToMonday);
-                  const currentDate = new Date(monday);
-                  currentDate.setDate(monday.getDate() + i);
-
-                  //const isSelected = currentDate.toDateString() === filterDate.toDateString();
-                  const isSelected =
-                    currentDate.toDateString() === filterDate.toDateString();
-
-                  return (
-                    <div
-                      key={i}
-                      className={`${styles.dayCard} ${
-                        isSelected ? styles.activeDay : ""
-                      }`}
-                      onClick={() => setFilterDate(currentDate)}
-                      style={{ cursor: "pointer" }}
-                    >
-                      <h4>{d.day}</h4>
-                      <p>
-                        ₱
-                        {d.sales.toLocaleString(undefined, {
-                          minimumFractionDigits: 2,
-                          maximumFractionDigits: 2,
-                        })}
-                      </p>
-
-                      <div className={styles.barBackground}>
-                        <div
-                          className={`${styles.barFill} ${
-                            isSelected ? styles.activeBar : ""
-                          }`}
-                          style={{
-                            height: `${(d.sales / maxSales) * 100}%`,
-                          }}
-                        ></div>
-                      </div>
-                    </div>
-                  );
+                dataPoints = weekDates.map((date, i) => {
+                  let value = 0;
+                  orders.forEach((order) => {
+                    const orderDate = getOrderDate(order);
+                    if (orderDate.toDateString() === date.toDateString()) {
+                      const product = order.products.find(
+                        (p) => p.name === selectedProduct
+                      );
+                      if (product) value += parseFloat(product.quantity);
+                    }
+                  });
+                  return { label: labels[i], value, date };
                 });
               }
-            })()}
-          </div>
+            } else {
+              // Sales/Profit tab logic (original)
+              if (isMonthly) {
+                const forecastArray = showForecast
+                  ? getThreeMonthMovingAverage(filterDate.getFullYear())
+                  : [];
+                dataPoints = labels.map((month, i) => {
+                  let value = 0;
+                  orders.forEach((order) => {
+                    const date = getOrderDate(order);
+                    if (
+                      date.getFullYear() === filterDate.getFullYear() &&
+                      date.getMonth() === i
+                    ) {
+                      const orderValue = order.products.reduce((sum, p) => {
+                        const qty = parseFloat(p.quantity) || 0;
+                        const sell = parseFloat(p.selling_price) || 0;
+                        const buy = parseFloat(p.buying_price) || 0;
+                        return (
+                          sum +
+                          (activeTab === "sales"
+                            ? qty * sell
+                            : activeTab === "profit"
+                            ? qty * (sell - buy)
+                            : 0)
+                        );
+                      }, 0);
+                      value += orderValue;
+                    }
+                  });
+                  if (showForecast) value = forecastArray[i] || 0;
+                  return { label: month, value };
+                });
+              } else {
+                // Daily/Weekly
+                const startOfWeek = new Date(filterDate);
+                startOfWeek.setDate(filterDate.getDate() - filterDate.getDay());
+                const weekDates = Array.from({ length: 7 }, (_, i) => {
+                  const d = new Date(startOfWeek);
+                  d.setDate(startOfWeek.getDate() + i);
+                  return d;
+                });
+
+                dataPoints = weekDates.map((date, i) => {
+                  let value = 0;
+                  orders.forEach((order) => {
+                    const orderDate = getOrderDate(order);
+                    if (orderDate.toDateString() === date.toDateString()) {
+                      const orderValue = order.products.reduce((sum, p) => {
+                        const qty = parseFloat(p.quantity) || 0;
+                        const sell = parseFloat(p.selling_price) || 0;
+                        const buy = parseFloat(p.buying_price) || 0;
+                        return (
+                          sum +
+                          (activeTab === "sales"
+                            ? qty * sell
+                            : activeTab === "profit"
+                            ? qty * (sell - buy)
+                            : 0)
+                        );
+                      }, 0);
+                      value += orderValue;
+                    }
+                  });
+                  return { label: labels[i], value, date };
+                });
+              }
+            }
+
+            const maxValue = Math.max(...dataPoints.map((d) => d.value)) || 1;
+            const width = 550;
+            const height = 180;
+            const padding = 30;
+
+            const points = dataPoints.map((d, i) => ({
+              x: padding + (i / (labels.length - 1)) * (width - 2 * padding),
+              y:
+                height -
+                padding -
+                (d.value / maxValue) * (height - 2 * padding),
+              label: d.label,
+              value: d.value,
+              date: d.date,
+            }));
+
+            const pathD = points
+              .map((p, i) => (i === 0 ? `M ${p.x} ${p.y}` : `L ${p.x} ${p.y}`))
+              .join(" ");
+
+            return (
+              <div>
+                <h3 style={{ marginBottom: "10px", marginLeft: "10px" }}>
+                  {activeTab === "inventory" && selectedProduct
+                    ? `${
+                        showAll ? "Sold This Month" : "Sold Today"
+                      } - ${selectedProduct}`
+                    : activeTab === "sales"
+                    ? showForecast
+                      ? "Sales Forecast"
+                      : `${showAll ? "Sales of the Month" : "Sales of the Day"}`
+                    : activeTab === "profit"
+                    ? `${
+                        showAll ? "Profits of the Month" : "Profits of the Day"
+                      }`
+                    : ""}
+                </h3>
+
+<svg
+  viewBox={`0 0 ${width} ${height}`}
+  style={{
+    width: "100%",
+    maxWidth: "100%", // prevent overflow
+    height: "auto",
+    background: "#fff",
+    borderRadius: "12px",
+    padding: "10px",
+    boxSizing: "border-box", // ensure padding doesn't add to width
+  }}
+>
+
+                  <line
+                    x1={padding}
+                    y1={padding}
+                    x2={padding}
+                    y2={height - padding}
+                    stroke="#999"
+                  />
+                  <line
+                    x1={padding}
+                    y1={height - padding}
+                    x2={width - padding}
+                    y2={height - padding}
+                    stroke="#999"
+                  />
+                  <path
+                    d={pathD}
+                    stroke="#4caf50"
+                    strokeWidth="2"
+                    fill="none"
+                    className={styles.lineAnimation}
+                  />
+
+                  {points.map((p, i) => (
+                    <circle
+                      key={i}
+                      cx={p.x}
+                      cy={p.y}
+                      r={
+                        (!isMonthly &&
+                          p.date?.toDateString() ===
+                            filterDate.toDateString()) ||
+                        (isMonthly && i === filterDate.getMonth())
+                          ? 6
+                          : 5
+                      }
+                      fill={
+                        (!isMonthly &&
+                          p.date?.toDateString() ===
+                            filterDate.toDateString()) ||
+                        (isMonthly && i === filterDate.getMonth())
+                          ? "#ffcc00"
+                          : "#4caf50"
+                      }
+                      style={{ cursor: "pointer" }}
+                      onClick={() => {
+                        if (isMonthly) {
+                          const newDate = new Date(filterDate);
+                          newDate.setMonth(i);
+                          setFilterDate(newDate);
+                        } else {
+                          setFilterDate(p.date);
+                        }
+                      }}
+                    />
+                  ))}
+
+                  {points.map((p, i) => (
+                    <text
+                      key={i}
+                      x={p.x}
+                      y={height - padding + 15}
+                      fontSize="14"
+                      textAnchor="middle"
+                    >
+                      {p.label}
+                    </text>
+                  ))}
+
+                  {points.map((p, i) => (
+                    <text
+                      key={i}
+                      x={p.x}
+                      y={p.y - 6}
+                      fontSize="14"
+                      textAnchor="middle"
+                      fill="#444"
+                    >
+                      {p.value.toLocaleString(undefined, {
+                        maximumFractionDigits: 0,
+                      })}
+                    </text>
+                  ))}
+                </svg>
+              </div>
+            );
+          })()}
         </div>
 
         {/* Table */}
         <div className={styles.tableContainer}>
-          <table className={styles.reportTable}>
-            <thead>
-              <tr>
-                <th></th>
-                <th>Products</th>
-                <th>Price</th> {/* Selling price */}
-                <th>Buy Price</th>
-                <th>Quantity</th>
-                {activeTab === "sales" && <th>Sales</th>}
-                {activeTab === "profit" && <th>Profit</th>}
-              </tr>
-            </thead>
-
-            <tbody>
-              {reportData.map((p, idx) => (
-                <tr key={idx}>
-                  <td>{idx + 1}</td>
-                  <td>{p.name}</td>
-                  <td>₱{p.unitPrice.toFixed(2)}</td>
-                  <td>
-                    ₱
-                    {Number(
-                      stocks.find((s) => s.name === p.name)?.buying_price || 0
-                    ).toFixed(2)}
-                  </td>
-                  <td>{p.totalQty}</td>
-
-                  {activeTab === "sales" && (
-                    <td
-                      style={{
-                        color: p.totalSales > 0 ? "green" : "black",
-                        fontWeight: p.totalSales > 0 ? "600" : "normal",
-                      }}
-                    >
-                      ₱{p.totalSales.toFixed(2)}
-                    </td>
-                  )}
-
-                  {activeTab === "profit" && (
-                    <td
-                      style={{
-                        color: p.profit > 0 ? "green" : "black",
-                        fontWeight: p.profit !== 0 ? "600" : "normal",
-                      }}
-                    >
-                      ₱{p.profit.toFixed(2)}
-                    </td>
-                  )}
+          {activeTab === "inventory" ? (
+            <table className={styles.reportTable}>
+              <thead>
+                <tr>
+                  <th></th>
+                  <th>Product</th>
+                  <th>Sold {showAll ? "This Month" : "Today"}</th>
+                  <th>Stock</th>
+                  <th>Status</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {inventoryData.map((p, idx) => (
+                  <tr
+                    key={idx}
+                    style={{
+                      cursor: "pointer",
+                      backgroundColor:
+                        selectedProduct === p.name ? "#f0f0f0" : "transparent",
+                    }}
+                    onClick={() => setSelectedProduct(p.name)}
+                  >
+                    <td>{idx + 1}</td>
+                    <td>{p.name}</td>
+                    <td>{p.soldToday}</td>
+                    <td>{p.remaining}</td>
+                    <td
+                      style={{
+                        color: p.status === "Low" ? "red" : "green",
+                        fontWeight: "600",
+                      }}
+                    >
+                      {p.status}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          ) : activeTab === "debt" ? (
+            <table className={styles.reportTable}>
+              <thead>
+                <tr>
+                  <th></th>
+                  <th>Customer</th>
+                  <th>Amount</th>
+                  <th>Balance</th>
+                  <th>Due Date</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                {debts
+                  .filter((debt) => {
+                    const debtDate = new Date(debt.date); // debt creation date
+                    return (
+                      debtDate.getMonth() === filterDate.getMonth() &&
+                      debtDate.getFullYear() === filterDate.getFullYear()
+                    );
+                  })
+                  .map((debt, idx) => {
+                    const paidAmount =
+                      debt.payments?.reduce(
+                        (sum, p) => sum + parseFloat(p.amount),
+                        0
+                      ) || 0;
+                    const balance = (parseFloat(debt.total) || 0) - paidAmount;
+
+                    return (
+                      <tr key={debt.id}>
+                        <td>{idx + 1}</td>
+                        <td>{debt.customer_name}</td>
+                        <td>
+                          ₱
+                          {parseFloat(debt.total || 0).toLocaleString(
+                            undefined,
+                            {
+                              minimumFractionDigits: 2,
+                              maximumFractionDigits: 2,
+                            }
+                          )}
+                        </td>
+                        <td>
+                          ₱
+                          {balance.toLocaleString(undefined, {
+                            minimumFractionDigits: 2,
+                            maximumFractionDigits: 2,
+                          })}
+                        </td>
+                        <td>{debt.due_date}</td>
+                        <td
+                          style={{
+                            color: debt.status === "Unpaid" ? "red" : "green",
+                            fontWeight: "600",
+                          }}
+                        >
+                          {debt.status}
+                        </td>
+                      </tr>
+                    );
+                  })}
+              </tbody>
+            </table>
+          ) : (
+            <table className={styles.reportTable}>
+              <thead>
+                <tr>
+                  <th></th>
+                  <th>Products</th>
+                  <th>Price</th>
+                  <th>Buy Price</th>
+                  <th>Quantity</th>
+                  {activeTab === "sales" && <th>Sales</th>}
+                  {activeTab === "profit" && <th>Profit</th>}
+                </tr>
+              </thead>
+              <tbody>
+                {reportData.map((p, idx) => (
+                  <tr key={idx}>
+                    <td>{idx + 1}</td>
+                    <td>{p.name}</td>
+                    <td>₱{p.unitPrice.toFixed(2)}</td>
+                    <td>
+                      ₱
+                      {Number(
+                        stocks.find((s) => s.name === p.name)?.buying_price || 0
+                      ).toFixed(2)}
+                    </td>
+                    <td>{p.totalQty}</td>
+
+                    {activeTab === "sales" && (
+                      <td
+                        style={{
+                          color: p.totalSales > 0 ? "green" : "black",
+                          fontWeight: p.totalSales > 0 ? "600" : "normal",
+                        }}
+                      >
+                        ₱{p.totalSales.toFixed(2)}
+                      </td>
+                    )}
+
+                    {activeTab === "profit" && (
+                      <td
+                        style={{
+                          color: p.profit > 0 ? "green" : "black",
+                          fontWeight: p.profit !== 0 ? "600" : "normal",
+                        }}
+                      >
+                        ₱{p.profit.toFixed(2)}
+                      </td>
+                    )}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
         </div>
+        </div>
+
+
         <BottomNav />
       </div>
     </div>
