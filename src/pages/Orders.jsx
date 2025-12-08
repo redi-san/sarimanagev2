@@ -3,7 +3,7 @@ import styles from "../css/Orders.module.css";
 import deleteIcon from "../assets/deleteIcon.png";
 import axios from "axios";
 import { getAuth } from "firebase/auth";
-import { Html5QrcodeScanner } from "html5-qrcode";
+import { Html5QrcodeScanner, Html5QrcodeScanType } from "html5-qrcode";
 import BottomNav from "../components/BottomNav";
 import AddDebtModal from "../components/AddDebtModal";
 import Debts from "./Debts"; // reuse your component
@@ -121,54 +121,69 @@ export default function Orders({ setPage }) {
     if (!showScanner) return;
 
     const elementId = "order-barcode-reader";
+
+    // If scanner div doesn't exist, stop.
     const el = document.getElementById(elementId);
     if (!el) return;
 
-    // Initialize scanner only if not already initialized
-    if (!scannerRef.current) {
-      const scanner = new Html5QrcodeScanner(elementId, {
-        fps: 10,
-        qrbox: 180,
-      });
-      scannerRef.current = scanner;
-
-      scanner.render(
-        (decodedText) => {
-          const foundStock = stocks.find(
-            (s) => s.barcode?.toString() === decodedText
-          );
-
-          setProducts((prevProducts) => {
-            const newProducts = [
-              ...prevProducts,
-              {
-                stock_id: decodedText,
-                name: foundStock ? foundStock.name : "",
-                selling_price: foundStock ? foundStock.selling_price : "",
-                buying_price: foundStock ? foundStock.buying_price : "",
-                quantity: 1,
-              },
-            ];
-            calculateTotals(newProducts);
-            return newProducts;
-          });
-
-          scanner.clear().catch(() => {});
-          scannerRef.current = null;
-          setShowScanner(false);
-          setOrderNumber(generateOrderNumber());
-        },
-        (error) => console.warn("Scan error:", error)
-      );
+    // 🔥 If scanner already exists, DO NOT recreate it
+    if (scannerRef.current && scannerRef.current._html5Qrcode?.isScanning) {
+      console.log("Scanner already active. Not creating a new one.");
+      return;
     }
 
-    // Cleanup on unmount or scanner hide
+    // Create new scanner once
+    if (!scannerRef.current) {
+      scannerRef.current = new Html5QrcodeScanner(elementId, {
+        fps: 10,
+        qrbox: 180,
+        rememberLastUsedCamera: true,
+        supportedScanTypes: [
+          Html5QrcodeScanType.SCAN_TYPE_CAMERA,
+          Html5QrcodeScanType.SCAN_TYPE_FILE,
+        ],
+      });
+    }
+
+    scannerRef.current.render(
+      (decodedText) => {
+        const foundStock = stocks.find(
+          (s) => s.barcode?.toString() === decodedText
+        );
+
+        setProducts((prev) => {
+          const newProducts = [
+            ...prev,
+            {
+              stock_id: decodedText,
+              name: foundStock?.name || "",
+              selling_price: foundStock?.selling_price || "",
+              buying_price: foundStock?.buying_price || "",
+              quantity: 1,
+            },
+          ];
+          calculateTotals(newProducts);
+          return newProducts;
+        });
+
+        // Stop scanner after scanning
+        scannerRef.current.clear().catch(() => {});
+        scannerRef.current = null;
+        setShowScanner(false);
+        setOrderNumber(generateOrderNumber());
+      },
+      (error) => console.warn("Scan error:", error)
+    );
+
+    // Cleanup
     return () => {
       if (scannerRef.current) {
         scannerRef.current.clear().catch(() => {});
         scannerRef.current = null;
-        if (el) el.innerHTML = "";
       }
+
+      const el = document.getElementById(elementId);
+      if (el) el.innerHTML = "";
     };
   }, [showScanner, stocks, generateOrderNumber]);
 
@@ -542,29 +557,28 @@ export default function Orders({ setPage }) {
                 />
                 <label htmlFor="customerName">Customer Name</label>
               </div>
-<div className={styles["modal-actions"]}>
-  <button
-    className={styles.Cancel}
-    onClick={() => {
-      // Close Add Order modal
-      setShowModal(false);
+              <div className={styles["modal-actions"]}>
+                <button
+                  className={styles.Cancel}
+                  onClick={() => {
+                    // Close Add Order modal
+                    setShowModal(false);
 
-      // Open Add Products modal
-      setShowSecondModal(true);
-    }}
-  >
-    Back
-  </button>
-  <button
-    className={styles.Next}
-    onClick={() => {
-      saveOrder();
-    }}
-  >
-    Save
-  </button>
-</div>
-
+                    // Open Add Products modal
+                    setShowSecondModal(true);
+                  }}
+                >
+                  Back
+                </button>
+                <button
+                  className={styles.Next}
+                  onClick={() => {
+                    saveOrder();
+                  }}
+                >
+                  Save
+                </button>
+              </div>
             </div>
           </div>
         )}
@@ -800,6 +814,7 @@ export default function Orders({ setPage }) {
                   className={styles.Cancel}
                   onClick={() => {
                     // STOP SCANNER
+                    scannerRef.current?._html5Qrcode?.stop().catch(() => {});
                     scannerRef.current?.clear().catch(() => {});
                     scannerRef.current = null;
                     setShowScanner(false);
@@ -850,16 +865,15 @@ export default function Orders({ setPage }) {
           </div>
         )}
 
-<AddDebtModal
-  show={showDebtModal}
-  onClose={() => setShowDebtModal(false)} // optional if you still want a normal close
-  onBackToProducts={() => {
-    setShowDebtModal(false);
-    setShowSecondModal(true);
-  }}
-  onSave={saveAsDebt}
-/>
-
+        <AddDebtModal
+          show={showDebtModal}
+          onClose={() => setShowDebtModal(false)} // optional if you still want a normal close
+          onBackToProducts={() => {
+            setShowDebtModal(false);
+            setShowSecondModal(true);
+          }}
+          onSave={saveAsDebt}
+        />
 
         {selectedOrder && (
           <div className={styles.modal}>

@@ -3,37 +3,90 @@ import { useState } from "react";
 const MonthlySalesChart = ({ orders }) => {
   const [showForecast, setShowForecast] = useState(false);
 
-  // Helper: get sales per month
-  const getMonthlySales = () => {
-    const monthSales = Array(12).fill(0); // Jan-Dec
-    orders.forEach((order) => {
-      const datePart = order.order_number.split("-")[0];
-      const month = parseInt(datePart.slice(0, 2), 10) - 1;
-      //const day = parseInt(datePart.slice(2, 4), 10);
-      //const yearOrder = parseInt(datePart.slice(4), 10);
+// Helper: get sales per month (filter by same year)
+const getMonthlySales = () => {
+  const monthSales = Array(12).fill(0);
+  const currentYear = new Date().getFullYear();
 
-      const orderValue = order.products.reduce((sum, p) => {
-        const qty = parseFloat(p.quantity) || 0;
-        const sell = parseFloat(p.selling_price) || 0;
-        return sum + qty * sell;
-      }, 0);
+  orders.forEach((order) => {
+    const datePart = order.order_number.split("-")[0]; // MMDDYYYY
+    const month = parseInt(datePart.slice(0, 2), 10) - 1;
+    const year = parseInt(datePart.slice(4), 10);
 
-      monthSales[month] += orderValue;
+    // ⭐ Only include this year
+    if (year !== currentYear) return;
+
+    const orderValue = order.products.reduce((sum, p) => {
+      const qty = parseFloat(p.quantity) || 0;
+      const sell = parseFloat(p.selling_price) || 0;
+      return sum + qty * sell;
+    }, 0);
+
+    monthSales[month] += orderValue;
+  });
+
+  return monthSales;
+};
+
+
+const getThreeMonthMovingAverage = () => {
+  const currentYear = new Date().getFullYear();
+
+  // Build monthly sales for *all* years
+  const salesByYearMonth = {};
+
+  orders.forEach((order) => {
+    const datePart = order.order_number.split("-")[0];
+    const month = parseInt(datePart.slice(0, 2), 10) - 1;
+    const day = parseInt(datePart.slice(2, 4), 10);
+    const year = parseInt(datePart.slice(4), 10);
+
+    const date = new Date(year, month, day);
+    const y = date.getFullYear();
+    const m = date.getMonth();
+
+    if (!salesByYearMonth[y]) salesByYearMonth[y] = Array(12).fill(null);
+
+    const orderValue = order.products.reduce((sum, p) => {
+      const qty = parseFloat(p.quantity) || 0;
+      const sell = parseFloat(p.selling_price) || 0;
+      return sum + qty * sell;
+    }, 0);
+
+    salesByYearMonth[y][m] =
+      (salesByYearMonth[y][m] || 0) + orderValue;
+  });
+
+  // Helper: get actual sales if present
+  const getActual = (y, m) => {
+    while (m < 0) { y--; m += 12; }
+    while (m > 11) { y++; m -= 12; }
+    if (!salesByYearMonth[y]) return null;
+    return salesByYearMonth[y][m] ?? null;
+  };
+
+  const forecast = Array(12).fill(0);
+
+  for (let i = 0; i < 12; i++) {
+    const sources = [i - 1, i - 2, i - 3].map((idx) => {
+      const actual = getActual(currentYear, idx);
+      if (actual !== null) return actual;
+
+      if (idx >= 0) {
+        // Use forecast if it's already computed
+        if (idx < i) return forecast[idx];
+      }
+
+      return 0;
     });
-    return monthSales;
-  };
 
-  const getThreeMonthMovingAverage = () => {
-    const sales = getMonthlySales();
-    const forecast = [];
-    for (let i = 0; i < 12; i++) {
-      const prev1 = sales[i - 1] || 0;
-      const prev2 = sales[i - 2] || 0;
-      const prev3 = sales[i - 3] || 0;
-      forecast[i] = (prev1 + prev2 + prev3) / 3;
-    }
-    return forecast;
-  };
+    forecast[i] = (sources[0] + sources[1] + sources[2]) / 3;
+  }
+
+  return forecast;
+};
+
+
 
   const labels = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
   const actualSales = getMonthlySales();
