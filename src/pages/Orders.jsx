@@ -102,64 +102,75 @@ export default function Orders({ setPage }) {
     [products]
   );
 
-useEffect(() => {
-  if (!showScanner) return;
+  const generateOrderNumber = useCallback(() => {
+    const today = new Date();
+    const dateStr = `${String(today.getMonth() + 1).padStart(2, "0")}${String(
+      today.getDate()
+    ).padStart(2, "0")}${today.getFullYear()}`;
 
-  const elementId = "order-barcode-reader";
-  const el = document.getElementById(elementId);
-  if (!el) return;
+    const todaysOrders = ordersList.filter((order) =>
+      order.order_number.startsWith(dateStr)
+    );
 
-  // HARD RESET (prevents duplicate scanners)
-  if (scannerRef.current) {
-    scannerRef.current.clear().catch(() => {});
-    scannerRef.current = null;
-  }
-  el.innerHTML = ""; // IMPORTANT FIX
+    const nextNumber = String(todaysOrders.length + 1).padStart(2, "0");
 
-  const scanner = new Html5QrcodeScanner(elementId, {
-    fps: 10,
-    qrbox: 180,
-  });
-  scannerRef.current = scanner;
+    return `${dateStr}-${nextNumber}`;
+  }, [ordersList]);
 
-  scanner.render(
-    (decodedText) => {
-      const foundStock = stocks.find(
-        (s) => s.barcode?.toString() === decodedText
-      );
+  useEffect(() => {
+    if (!showScanner) return;
 
-      setProducts((prevProducts) => {
-        const newProducts = [
-          ...prevProducts,
-          {
-            stock_id: decodedText,
-            name: foundStock ? foundStock.name : "",
-            selling_price: foundStock ? foundStock.selling_price : "",
-            buying_price: foundStock ? foundStock.buying_price : "",
-            quantity: 1,
-          },
-        ];
-        calculateTotals(newProducts);
-        return newProducts;
+    const elementId = "order-barcode-reader";
+    const el = document.getElementById(elementId);
+    if (!el) return;
+
+    // Initialize scanner only if not already initialized
+    if (!scannerRef.current) {
+      const scanner = new Html5QrcodeScanner(elementId, {
+        fps: 10,
+        qrbox: 180,
       });
+      scannerRef.current = scanner;
 
-      // Close scanner after scan
-      scanner.clear().catch(() => {});
-      scannerRef.current = null;
-      setShowScanner(false);
-    },
-    (error) => console.warn("Scan error:", error)
-  );
+      scanner.render(
+        (decodedText) => {
+          const foundStock = stocks.find(
+            (s) => s.barcode?.toString() === decodedText
+          );
 
-  return () => {
-    if (scannerRef.current) {
-      scannerRef.current.clear().catch(() => {});
-      scannerRef.current = null;
-      if (el) el.innerHTML = ""; // also clean on unmount
+          setProducts((prevProducts) => {
+            const newProducts = [
+              ...prevProducts,
+              {
+                stock_id: decodedText,
+                name: foundStock ? foundStock.name : "",
+                selling_price: foundStock ? foundStock.selling_price : "",
+                buying_price: foundStock ? foundStock.buying_price : "",
+                quantity: 1,
+              },
+            ];
+            calculateTotals(newProducts);
+            return newProducts;
+          });
+
+          scanner.clear().catch(() => {});
+          scannerRef.current = null;
+          setShowScanner(false);
+          setOrderNumber(generateOrderNumber());
+        },
+        (error) => console.warn("Scan error:", error)
+      );
     }
-  };
-}, [showScanner, stocks]);
 
+    // Cleanup on unmount or scanner hide
+    return () => {
+      if (scannerRef.current) {
+        scannerRef.current.clear().catch(() => {});
+        scannerRef.current = null;
+        if (el) el.innerHTML = "";
+      }
+    };
+  }, [showScanner, stocks, generateOrderNumber]);
 
   const fetchOrders = async () => {
     const user = auth.currentUser;
@@ -295,21 +306,6 @@ useEffect(() => {
     setTotals({ total: 0, profit: 0 });
     setOrderNumber("");
     setCustomerName("");
-  };
-
-  const generateOrderNumber = () => {
-    const today = new Date();
-    const dateStr = `${String(today.getMonth() + 1).padStart(2, "0")}${String(
-      today.getDate()
-    ).padStart(2, "0")}${today.getFullYear()}`;
-
-    const todaysOrders = ordersList.filter((order) =>
-      order.order_number.startsWith(dateStr)
-    );
-
-    const nextNumber = String(todaysOrders.length + 1).padStart(2, "0");
-
-    return `${dateStr}-${nextNumber}`;
   };
 
   const formatDate = (date) => {
@@ -546,26 +542,29 @@ useEffect(() => {
                 />
                 <label htmlFor="customerName">Customer Name</label>
               </div>
-              <div className={styles["modal-actions"]}>
-                <button
-                  className={styles.Cancel}
-                  onClick={() => {
-                    setShowModal(false);
-                    setProducts([]);
-                    setTotals({ total: 0, profit: 0 });
-                  }}
-                >
-                  Cancel
-                </button>
-                <button
-                  className={styles.Next}
-                  onClick={() => {
-                    saveOrder();
-                  }}
-                >
-                  Save
-                </button>
-              </div>
+<div className={styles["modal-actions"]}>
+  <button
+    className={styles.Cancel}
+    onClick={() => {
+      // Close Add Order modal
+      setShowModal(false);
+
+      // Open Add Products modal
+      setShowSecondModal(true);
+    }}
+  >
+    Back
+  </button>
+  <button
+    className={styles.Next}
+    onClick={() => {
+      saveOrder();
+    }}
+  >
+    Save
+  </button>
+</div>
+
             </div>
           </div>
         )}
@@ -773,8 +772,9 @@ useEffect(() => {
                   <button
                     onClick={() => {
                       scannerRef.current?.clear().catch(() => {});
+                      scannerRef.current = null;
                       setShowScanner(false);
-                      setOrderNumber(generateOrderNumber()); // <--- ADD THIS
+                      setOrderNumber(generateOrderNumber());
                     }}
                   >
                     Cancel
@@ -795,67 +795,71 @@ useEffect(() => {
                 />
               </div>
 
-<div className={styles["modal-actions"]}>
-  <button
-    className={styles.Cancel}
-    onClick={() => {
-      // STOP SCANNER
-      scannerRef.current?.clear().catch(() => {});
-      scannerRef.current = null;
-      setShowScanner(false);
+              <div className={styles["modal-actions"]}>
+                <button
+                  className={styles.Cancel}
+                  onClick={() => {
+                    // STOP SCANNER
+                    scannerRef.current?.clear().catch(() => {});
+                    scannerRef.current = null;
+                    setShowScanner(false);
 
-      // CLOSE MODAL
-      setShowSecondModal(false);
-      resetForm();
-      setIsEditing(false);
-    }}
-  >
-    {location.state?.autoOpen ? "View Table" : "Cancel"}
-  </button>
+                    // CLOSE MODAL
+                    setShowSecondModal(false);
+                    resetForm();
+                    setIsEditing(false);
+                  }}
+                >
+                  {location.state?.autoOpen ? "View Table" : "Cancel"}
+                </button>
 
-  {isEditing ? (
-    <button
-      className={styles.Next}
-      onClick={() => {
-        saveOrder(); //
-      }}
-    >
-      Save
-    </button>
-  ) : (
-    <>
-      <button
-        className={styles.Next}
-        onClick={() => {
-          setShowSecondModal(false);
-          setShowModal(true);
-        }}
-      >
-        Add Order
-      </button>
+                {isEditing ? (
+                  <button
+                    className={styles.Next}
+                    onClick={() => {
+                      saveOrder(); //
+                    }}
+                  >
+                    Save
+                  </button>
+                ) : (
+                  <>
+                    <button
+                      className={styles.Next}
+                      onClick={() => {
+                        setShowSecondModal(false);
+                        setShowModal(true);
+                      }}
+                    >
+                      Add Order
+                    </button>
 
-      <button
-        className={styles.Next}
-        onClick={() => {
-          setShowSecondModal(false);
-          setShowDebtModal(true);
-        }}
-      >
-        Add Debt
-      </button>
-    </>
-  )}
-</div>
-
+                    <button
+                      className={styles.Next}
+                      onClick={() => {
+                        setShowSecondModal(false);
+                        setShowDebtModal(true);
+                      }}
+                    >
+                      Add Debt
+                    </button>
+                  </>
+                )}
+              </div>
             </div>
           </div>
         )}
 
-        <AddDebtModal
-          show={showDebtModal}
-          onClose={() => setShowDebtModal(false)}
-          onSave={saveAsDebt}
-        />
+<AddDebtModal
+  show={showDebtModal}
+  onClose={() => setShowDebtModal(false)} // optional if you still want a normal close
+  onBackToProducts={() => {
+    setShowDebtModal(false);
+    setShowSecondModal(true);
+  }}
+  onSave={saveAsDebt}
+/>
+
 
         {selectedOrder && (
           <div className={styles.modal}>

@@ -810,7 +810,7 @@ export default function Stocks({ setPage }) {
 
               <div className={styles["form-row"]}>
                 <div className={styles.formGroupNew}>
-                  <label>Manufacturing Date</label>
+                  <label>Manufactured Date</label>
                   <input
                     type="date"
                     value={

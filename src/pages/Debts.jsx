@@ -131,14 +131,18 @@ export default function Debts({ setPage }) {
     };
   }, [showScanner]);
 
-  const fetchDebts = async () => {
-    try {
-      const res = await axios.get(`${BASE_URL}/debts`);
-      setDebtsList(res.data);
-    } catch (err) {
-      console.error("Error fetching debts:", err);
-    }
-  };
+const fetchDebts = async () => {
+  const user = auth.currentUser;
+  if (!user) return;
+
+  try {
+    const res = await axios.get(`${BASE_URL}/debts/user/${user.uid}`);
+    setDebtsList(res.data);
+  } catch (err) {
+    console.error("Error fetching debts:", err);
+  }
+};
+
 
   const updateProduct = (index, field, value) => {
     const newProducts = [...products];
@@ -266,15 +270,15 @@ export default function Debts({ setPage }) {
     }
   };
 
-  const deleteDebt = async (id) => {
-    try {
-      await axios.delete(`${BASE_URL}/debts/${id}`);
-      fetchDebts();
-      setDebtsList(debtsList.filter((debt) => debt.id !== id));
-    } catch (err) {
-      console.error("Error deleting order:", err);
-    }
-  };
+const deleteDebt = async (id) => {
+  try {
+    await axios.delete(`${BASE_URL}/debts/${id}`);
+    await fetchDebts(); // fetch only current user's debts
+  } catch (err) {
+    console.error("Error deleting debt:", err);
+  }
+};
+
 
   const recordPayment = async () => {
     try {

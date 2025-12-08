@@ -6,6 +6,7 @@ export default function AddDebtModal({
   show,
   onClose,
   onSave,
+  onBackToProducts,
   isEditing,
   initialData = {},
 }) {
@@ -112,14 +113,22 @@ export default function AddDebtModal({
             <label>Note</label>
           </div>
 
-          <div className={styles["modal-actions"]}>
-            <button type="button" className={styles.Cancel} onClick={onClose}>
-              Cancel
-            </button>
-            <button type="submit" className={styles.Next}>
-              {isEditing ? "Save" : "Save"}
-            </button>
-          </div>
+<div className={styles["modal-actions"]}>
+  <button
+    type="button"
+    className={styles.Cancel}
+    onClick={() => {
+      if (onBackToProducts) onBackToProducts();
+      else onClose(); // fallback
+    }}
+  >
+    Back
+  </button>
+  <button type="submit" className={styles.Next}>
+    {isEditing ? "Save" : "Save"}
+  </button>
+</div>
+
         </form>
       </div>
     </div>
