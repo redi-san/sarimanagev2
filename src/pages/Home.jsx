@@ -112,40 +112,58 @@ const [orders, setOrders] = useState([]);
     return () => unsubscribe();
   }, [auth]);
 
-  useEffect(() => {
-    const unsubscribe = auth.onAuthStateChanged(async (user) => {
-      if (!user) return;
+useEffect(() => {
+  const unsubscribe = auth.onAuthStateChanged(async (user) => {
+    if (!user) return;
 
-      try {
-        const ordersRes = await axios.get(
-          `${BASE_URL}/orders/user/${user.uid}`
-        );
-        const allOrders = ordersRes.data;
+    try {
+      const ordersRes = await axios.get(`${BASE_URL}/orders/user/${user.uid}`);
+      const allOrders = ordersRes.data;
 
-        // Compute total sales per product
-        const productSales = {};
-        allOrders.forEach((order) => {
-          order.products.forEach((p) => {
-            if (!productSales[p.name]) productSales[p.name] = 0;
-            productSales[p.name] +=
-              parseFloat(p.quantity) * parseFloat(p.selling_price);
-          });
+      // ----- STEP 1: Get current month and last year -----
+      const now = new Date();
+      const currentMonth = now.getMonth() + 1; // 1–12
+      const lastYear = now.getFullYear() - 1;
+
+      // ----- STEP 2: Helper to extract date from order_number -----
+      const getOrderDateObj = (order) => {
+        const datePart = order.order_number.split("-")[0]; // MMDDYYYY
+        const mm = parseInt(datePart.slice(0, 2), 10);
+        const dd = parseInt(datePart.slice(2, 4), 10);
+        const yyyy = parseInt(datePart.slice(4), 10);
+        return { mm, dd, yyyy };
+      };
+
+      // ----- STEP 3: Filter orders from SAME MONTH last year -----
+      const lastYearOrders = allOrders.filter((order) => {
+        const { mm, yyyy } = getOrderDateObj(order);
+        return mm === currentMonth && yyyy === lastYear;
+      });
+
+      // ----- STEP 4: Compute product sales -----
+      const productSales = {};
+      lastYearOrders.forEach((order) => {
+        order.products.forEach((p) => {
+          if (!productSales[p.name]) productSales[p.name] = 0;
+          productSales[p.name] +=
+            (parseFloat(p.quantity) || 0) * (parseFloat(p.selling_price) || 0);
         });
+      });
 
-        // Convert to array and sort
-        const sortedProducts = Object.entries(productSales)
-          .map(([name, totalSales]) => ({ name, totalSales }))
-          .sort((a, b) => b.totalSales - a.totalSales);
+      // ----- STEP 5: Sort & store top 5 -----
+      const sortedProducts = Object.entries(productSales)
+        .map(([name, totalSales]) => ({ name, totalSales }))
+        .sort((a, b) => b.totalSales - a.totalSales);
 
-        // Take top 3
-        setRecommendedProducts(sortedProducts.slice(0, 5));
-      } catch (err) {
-        console.error("Error computing recommendations:", err);
-      }
-    });
+      setRecommendedProducts(sortedProducts.slice(0, 5));
+    } catch (err) {
+      console.error("Error computing recommendations:", err);
+    }
+  });
 
-    return () => unsubscribe();
-  }, [auth]);
+  return () => unsubscribe();
+}, [auth]);
+
 
   return (
     <div>
@@ -156,63 +174,52 @@ const [orders, setOrders] = useState([]);
 
       <div className={styles.main}>
         <h2 className={styles.sectionTitle}>Overview</h2>
-        <div className={styles.cards}>
-          <Link to="/reports" className={styles.card}>
-            <div className={styles.cardHeader}>
-              <img src={SalesIcon} alt="Sales Icon" className={styles.icon} />
-              <h3>Today's Sales</h3>
-            </div>
-            <div className={styles.cardValue}>
-              <b>₱{todaysSale.toFixed(2)}</b>
-            </div>
-          </Link>
+<div className={styles.cards}>
+  <div className={styles.card}>
+    <div className={styles.cardHeader}>
+      <img src={SalesIcon} alt="Sales Icon" className={styles.icon} />
+      <h3>Today's Sales</h3>
+    </div>
+    <div className={styles.cardValue}>
+      <b>₱{todaysSale.toFixed(2)}</b>
+    </div>
+  </div>
 
-          <Link to="/reports" className={styles.card}>
-            <div className={styles.cardHeader}>
-              <img
-                src={ProfitsIcon}
-                alt="Profits Icon"
-                className={styles.icon}
-              />
-              <h3>Today's Profits</h3>
-            </div>
-            <div className={styles.cardValue}>
-              <b>₱{todaysProfit.toFixed(2)}</b>
-            </div>
-          </Link>
+  <div className={styles.card}>
+    <div className={styles.cardHeader}>
+      <img src={ProfitsIcon} alt="Profits Icon" className={styles.icon} />
+      <h3>Today's Profits</h3>
+    </div>
+    <div className={styles.cardValue}>
+      <b>₱{todaysProfit.toFixed(2)}</b>
+    </div>
+  </div>
 
-          <Link to="/debts" className={styles.card}>
-            <div className={styles.cardHeader}>
-              <img
-                src={TotalDebtsIcon}
-                alt="Total Debts Icon"
-                className={styles.icon}
-              />
-              <h3>Total Debts</h3>
-            </div>
-            <div className={styles.cardValue}>
-              <b style={{ color: totalDebts > 0 ? "red" : "#66bb6a" }}>
-                ₱{totalDebts.toFixed(2)}
-              </b>
-            </div>
-          </Link>
+  <div className={styles.card}>
+    <div className={styles.cardHeader}>
+      <img src={TotalDebtsIcon} alt="Total Debts Icon" className={styles.icon} />
+      <h3>Total Debts</h3>
+    </div>
+    <div className={styles.cardValue}>
+      <b style={{ color: totalDebts > 0 ? "red" : "#66bb6a" }}>
+        ₱{totalDebts.toFixed(2)}
+      </b>
+    </div>
+  </div>
 
-          <Link to="/stocks" className={styles.card}>
-            <div className={styles.cardHeader}>
-              <img
-                src={LowStockIcon}
-                alt="Low Stock Icon"
-                className={styles.icon}
-              />
-              <h3>Low Stocks</h3>
-            </div>
-            <div className={styles.cardValue}>
-              <b style={{ color: lowStockCount > 0 ? "red" : "#66bb6a" }}>
-                {lowStockCount}
-              </b>
-            </div>
-          </Link>
-        </div>
+  <div className={styles.card}>
+    <div className={styles.cardHeader}>
+      <img src={LowStockIcon} alt="Low Stock Icon" className={styles.icon} />
+      <h3>Low Stocks</h3>
+    </div>
+    <div className={styles.cardValue}>
+      <b style={{ color: lowStockCount > 0 ? "red" : "#66bb6a" }}>
+        {lowStockCount}
+      </b>
+    </div>
+  </div>
+</div>
+
       </div>
 
         {/* Monthly Sales Chart */}
@@ -226,15 +233,14 @@ const [orders, setOrders] = useState([]);
     <ul className={styles.recommendationList}>
       {recommendedProducts.map((p, idx) => (
         <li key={idx} className={styles.recommendationItem}>
-          <Link to="/reports">
-            <span className={styles.productName}>{p.name}</span>
-            <span className={styles.productSales}>₱{p.totalSales.toFixed(2)}</span>
-          </Link>
+          <span className={styles.productName}>{p.name}</span>
+          <span className={styles.productSales}>₱{p.totalSales.toFixed(2)}</span>
         </li>
       ))}
     </ul>
   )}
 </div>
+
 
 
       <BottomNav />

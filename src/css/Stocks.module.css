@@ -14,12 +14,12 @@
   max-width: 90%;
   height: 20px;
   padding: 12px 16px;
-  border: 2px solid #ffcc00;
   border-radius: 8px;
   font-size: 16px;
   outline: none;
-  background: #fff;
-  color: #333;
+  background: var(--card-bg);
+  color: var(--text-color);
+  border: 2px solid var(--primary-color);
 }
 
 .page-header h1 {
@@ -59,7 +59,8 @@
   left: 0;
   width: 100%;
   height: 60px;
-  background: #fff;
+ background: var(--card-bg);        /* changes with theme */
+  color: var(--header-text-color);   /* also changes with theme */  
   display: flex;
   align-items: center;
   padding: 0 20px;
@@ -69,10 +70,9 @@
 
 .topbar h2 {
   margin: 0;
-  font-size: 32px;
+  font-size: 24px;
   font-weight: bold;
-  color: #ffcc00;
-}
+  color: var(--header-text-color);}
 
 .hamburger {
   font-size: 24px;
@@ -97,7 +97,8 @@
 }
 
 .modal-content {
-  background: #fff;
+  background: var(--card-bg);
+  color: var(--text-color);
   padding: 10px;
   border-radius: 12px;
   width: 90%;
@@ -109,11 +110,11 @@
 
 .modal-content h2 {
   margin-top: 0;
-  color: #333;
+  color: var(--text-color); /* was #333 */
 }
 
 .modal-content p {
-  color: #777;
+  color: var(--text-color); /* was #777 */
   margin-bottom: 20px;
   font-size: 14px;
 }
@@ -145,12 +146,12 @@
 }
 
 .Next {
-  background: #ffcc00;
-  color: #333;
+  background: var(--primary-color);
+  color: var(--text-color);
 }
 
 .Next:hover {
-  background: #daae00;
+  background: var(--secondary-color);
 }
 
 .form-row {
@@ -276,7 +277,7 @@
   margin-left: 9px;
 }
 
-.form-group-with-button input {
+/*.form-group-with-button input {
   flex: 1;
   width: 90%;
   height: 30px;
@@ -288,8 +289,8 @@
   background: #d9d9d9;
   color: #202124;
   transition: border 0.2s ease;
-  padding-right: 20px; /* keep space for button */
-}
+  padding-right: 20px; /* keep space for button 
+} */
 
 .barcodeBtn {
   position: absolute;
@@ -403,6 +404,7 @@ body {
   background: #fff;
   border-radius: 12px;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  background-color: var(--card-bg);
 }
 
 .stocksTable {
@@ -504,6 +506,8 @@ body {
   width: 100%;
   overflow-x: auto; 
   margin-top: 20px;
+    background-color: var(--card-bg);
+  box-shadow: 0 2px 10px var(--card-shadow);
 }
 
 .stocksTable th,
@@ -624,6 +628,7 @@ body {
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
   overflow: hidden;
   transition: all 0.3s ease;
+  
 }
 
 .categoryAccordion:hover {
@@ -681,11 +686,12 @@ body {
   border-collapse: collapse;
   text-align: left;
   font-size: 0.95rem;
+  background-color:var(--card-bg);
 }
 
 .stocksTable th {
-  background-color: #fff8e1;
-  color: #333;
+  background-color:var(--card-bg);
+  color: var(--text-color);
   font-weight: 600;
   padding: 0.8rem;
   border-bottom: 2px solid #f0e68c;
@@ -789,7 +795,7 @@ body {
 .categoryContent {
   max-height: 0;
   overflow: hidden;
-  background: #fafafa;
+  background: var(--card-bg);
   transition: max-height 0.35s ease, padding 0.35s ease;
   padding: 0; 
   box-sizing: border-box;
@@ -824,6 +830,9 @@ body {
   background: #fff !important;
   color: #333;
   margin-bottom: 8px;
+    background: var(--card-bg);
+  color: var(--text-color);
+  border: 2px solid var(--input-border);
 }
 
 .formGroupNew input:focus {
@@ -860,6 +869,9 @@ body {
   background: #fff;
   outline: none;
   margin-bottom: 8px;
+    background: var(--card-bg);
+  color: var(--text-color);
+  border: 2px solid var(--input-border);
 
 }
 
@@ -934,3 +946,18 @@ body {
   border-color: #daae00;
   box-shadow: 0 4px 8px rgba(0,0,0,0.15);
 }
+
+.formGroupNew input,
+.productIdInputWrapper input,
+textarea,
+select {
+  background: var(--card-bg) !important;
+  color: var(--text-color) !important;
+  border: 2px solid var(--input-border);
+}
+
+.formGroupNew label,
+.productIdGroup label {
+  color: var(--text-color);
+}
+

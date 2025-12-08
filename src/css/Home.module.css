@@ -1,4 +1,25 @@
 
+:root {
+  /* chart colors (light mode) */
+  --chart-bg: #ffffff;
+  --chart-axis: #999;
+  --chart-line: #4caf50;
+  --chart-point: #4caf50;
+  --chart-label: #444;
+}
+
+[data-theme="dark"] {
+  /* chart colors (dark mode) */
+  --chart-bg: #1b1b1b;
+  --chart-axis: #777;
+  --chart-line: #76ff8b;     /* lighter green for visibility */
+  --chart-point: #76ff8b;
+  --chart-label: #e0e0e0;
+}
+
+
+
+
 .sidebar {
   position: fixed;
   top: 30px;
@@ -38,7 +59,8 @@
   left: 0;
   width: 100%;
   height: 60px;
-  background: #fff;
+  background: var(--card-bg);
+  color: var(--header-text-color);
   display: flex;
   align-items: center;
   padding: 0 20px; 
@@ -50,18 +72,18 @@
   margin: 0;
   font-size: 32px;
   font-weight: bold;
-  color: #ffcc00;
+  color: var(--header-text-color);
 
 }
 
-.hamburger {
+/*.hamburger {
   font-size: 24px;
   cursor: pointer;
   border: none;
   background: transparent;
   color: #000000;
   margin-right: 12px;
-}
+} */
 
 .main {
   margin-top: 60px; /* enough to clear the fixed topbar */
@@ -90,13 +112,15 @@
   max-width: 1200px;
 }
 
-.card {
+/*.card {
   background: #fff;
   padding: 20px;
   border-radius: 12px;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
   text-align: left;
-}
+} */
+
+
 
 .cardHeader {
   display: flex;
@@ -107,7 +131,7 @@
 .cardHeader h3 {
   margin: 0 0 0 10px;
   font-size: 18px;
-  color: #333;
+  color: var(--text-color);
 }
 
 .icon {
@@ -137,7 +161,7 @@
   font-size: 24px;
   font-weight: bold;
   margin: 0 0 20px 0; 
-  color: #333;
+  color: var(--text-color);
 }
 
 .quickCard {
@@ -166,17 +190,17 @@
 
 
 .card {
-  background: #fff;
+  background: var(--card-bg);
   padding: 20px;
   border-radius: 12px;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 6px var(--card-shadow);
   text-align: left;
   display: flex;
   flex-direction: column;
   align-items: center; 
-
   justify-content: flex-start; 
   height: 100px; 
+  color: var(--text-color);  
 }
 
 .card b {
@@ -226,12 +250,12 @@
   border: 1px solid #eee;
   border-radius: 8px;
   margin-bottom: 10px;
-  background-color: #fff;
+  background-color: var(--card-bg);
   transition: background 0.2s ease;
 }
 
 .recommendationItem:hover {
-  background-color: #f9f9f9;
+  background-color: var(--bg-color);
 }
 
 .recommendationItem a {
@@ -305,8 +329,10 @@
   border: 1px solid #eee;
   border-radius: 8px;
   margin-bottom: 10px;
-  background-color: #fff;
+  background-color: var(--card-bg);
   transition: background 0.2s ease;
+    border: 1px solid var(--input-border);
+  color: var(--text-color);
 }
 
 /* Compact version for mobile */
@@ -331,7 +357,7 @@
 .recommendedTitle {
   font-size: 20px;       /* smaller than 24px default */
   font-weight: bold;
-  color: #333;
+  color: var(--text-color);   /* ✔ auto switches on dark mode */
   margin: 0 0 15px 10px; /* top 0, bottom 15px, left 10px for spacing */
 }
 
@@ -348,4 +374,12 @@
   display: flex;           /* make it a flex container */
   justify-content: center; /* center the list horizontally */
   margin-bottom: 50px;     /* space below */
+}
+
+.icon {
+  width: 30px;
+  height: 30px;
+  object-fit: contain;
+  margin-right: 10px;
+  filter: var(--icon-filter);
 }

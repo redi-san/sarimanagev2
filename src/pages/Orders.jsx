@@ -8,6 +8,8 @@ import BottomNav from "../components/BottomNav";
 import AddDebtModal from "../components/AddDebtModal";
 import Debts from "./Debts"; // reuse your component
 
+import { useLocation } from "react-router-dom";
+
 const BASE_URL = process.env.REACT_APP_API_URL || "http://localhost:5000";
 
 export default function Orders({ setPage }) {
@@ -35,8 +37,9 @@ export default function Orders({ setPage }) {
 
   const scannerRef = useRef(null);
 
-  //const [graphType, setGraphType] = useState("actual"); // "actual" | "forecast"
+  const location = useLocation();
 
+  //const [graphType, setGraphType] = useState("actual"); // "actual" | "forecast"
 
   useEffect(() => {
     const auth = getAuth();
@@ -99,13 +102,19 @@ export default function Orders({ setPage }) {
     [products]
   );
 
-  useEffect(() => {
+useEffect(() => {
   if (!showScanner) return;
 
   const elementId = "order-barcode-reader";
+  const el = document.getElementById(elementId);
+  if (!el) return;
 
-  // Make sure the element exists before initializing
-  if (!document.getElementById(elementId)) return;
+  // HARD RESET (prevents duplicate scanners)
+  if (scannerRef.current) {
+    scannerRef.current.clear().catch(() => {});
+    scannerRef.current = null;
+  }
+  el.innerHTML = ""; // IMPORTANT FIX
 
   const scanner = new Html5QrcodeScanner(elementId, {
     fps: 10,
@@ -134,20 +143,20 @@ export default function Orders({ setPage }) {
         return newProducts;
       });
 
-      // Clear scanner after successful scan
+      // Close scanner after scan
       scanner.clear().catch(() => {});
       scannerRef.current = null;
       setShowScanner(false);
     },
-    (error) => {
-      console.warn("Scan error:", error);
-    }
+    (error) => console.warn("Scan error:", error)
   );
 
-  // Cleanup if component unmounts or showScanner becomes false
   return () => {
-    scannerRef.current?.clear().catch(() => {});
-    scannerRef.current = null;
+    if (scannerRef.current) {
+      scannerRef.current.clear().catch(() => {});
+      scannerRef.current = null;
+      if (el) el.innerHTML = ""; // also clean on unmount
+    }
   };
 }, [showScanner, stocks]);
 
@@ -352,6 +361,16 @@ export default function Orders({ setPage }) {
       }
     }
   };
+
+  useEffect(() => {
+    if (location.state?.autoOpen) {
+      // Automatically open ADD PRODUCTS modal
+      setShowSecondModal(true);
+
+      // Automatically open scanner
+      setShowScanner(true);
+    }
+  }, [location.state]);
 
   return (
     <div>
@@ -755,6 +774,7 @@ export default function Orders({ setPage }) {
                     onClick={() => {
                       scannerRef.current?.clear().catch(() => {});
                       setShowScanner(false);
+                      setOrderNumber(generateOrderNumber()); // <--- ADD THIS
                     }}
                   >
                     Cancel
@@ -775,51 +795,58 @@ export default function Orders({ setPage }) {
                 />
               </div>
 
-              <div className={styles["modal-actions"]}>
-                <button
-                  className={styles.Cancel}
-                  onClick={() => {
-                    setShowSecondModal(false);
-                    resetForm();
-                    setIsEditing(false); // reset
-                  }}
-                >
-                  Cancel
-                </button>
+<div className={styles["modal-actions"]}>
+  <button
+    className={styles.Cancel}
+    onClick={() => {
+      // STOP SCANNER
+      scannerRef.current?.clear().catch(() => {});
+      scannerRef.current = null;
+      setShowScanner(false);
 
-                {isEditing ? (
-                  <button
-                    className={styles.Next}
-                    onClick={() => {
-                      saveOrder(); //
-                    }}
-                  >
-                    Save
-                  </button>
-                ) : (
-                  <>
-                    <button
-                      className={styles.Next}
-                      onClick={() => {
-                        setShowSecondModal(false);
-                        setShowModal(true);
-                      }}
-                    >
-                      Add Order
-                    </button>
+      // CLOSE MODAL
+      setShowSecondModal(false);
+      resetForm();
+      setIsEditing(false);
+    }}
+  >
+    {location.state?.autoOpen ? "View Table" : "Cancel"}
+  </button>
 
-                    <button
-                      className={styles.Next}
-                      onClick={() => {
-                        setShowSecondModal(false);
-                        setShowDebtModal(true);
-                      }}
-                    >
-                      Add Debt
-                    </button>
-                  </>
-                )}
-              </div>
+  {isEditing ? (
+    <button
+      className={styles.Next}
+      onClick={() => {
+        saveOrder(); //
+      }}
+    >
+      Save
+    </button>
+  ) : (
+    <>
+      <button
+        className={styles.Next}
+        onClick={() => {
+          setShowSecondModal(false);
+          setShowModal(true);
+        }}
+      >
+        Add Order
+      </button>
+
+      <button
+        className={styles.Next}
+        onClick={() => {
+          setShowSecondModal(false);
+          setShowDebtModal(true);
+        }}
+      >
+        Add Debt
+      </button>
+    </>
+  )}
+</div>
+
             </div>
           </div>
         )}

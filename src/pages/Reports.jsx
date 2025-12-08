@@ -656,7 +656,7 @@ const downloadPDF = async () => {
     width: "100%",
     maxWidth: "100%", // prevent overflow
     height: "auto",
-    background: "#fff",
+background: "var(--card-bg)",
     borderRadius: "12px",
     padding: "10px",
     boxSizing: "border-box", // ensure padding doesn't add to width
@@ -726,6 +726,8 @@ const downloadPDF = async () => {
                       y={height - padding + 15}
                       fontSize="14"
                       textAnchor="middle"
+                        fill="var(--chart-label)"
+
                     >
                       {p.label}
                     </text>
@@ -738,7 +740,7 @@ const downloadPDF = async () => {
                       y={p.y - 6}
                       fontSize="14"
                       textAnchor="middle"
-                      fill="#444"
+fill="var(--chart-text)"
                     >
                       {p.value.toLocaleString(undefined, {
                         maximumFractionDigits: 0,
@@ -885,7 +887,7 @@ const downloadPDF = async () => {
                     {activeTab === "sales" && (
                       <td
                         style={{
-                          color: p.totalSales > 0 ? "green" : "black",
+                          color: p.totalSales > 0 ? "green" : "var(--chart-text)",
                           fontWeight: p.totalSales > 0 ? "600" : "normal",
                         }}
                       >

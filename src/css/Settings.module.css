@@ -1,10 +1,42 @@
+:root {
+  --bg-color: #eeeeee;
+  --text-color: #000000;
+  --card-bg: #ffffff;
+  --card-shadow: rgba(0, 0, 0, 0.1);
+  --primary-color: #ffcc00;
+  --secondary-color: #e6b800;
+  --input-border: #ccc;
+  --input-focus: #ffcc00;
+  --logout-color: #ff4d4f;
+  --logout-hover: #d9363e;
+  --header-text-color: #000000; /* NEW: topbar & page header text */
+  
+}
+
+[data-theme="dark"] {
+  --bg-color: #282b30;
+  --text-color: #e0e0e0;
+  --card-bg: #171717;
+  --card-shadow: rgba(0, 0, 0, 0.5);
+  --primary-color: #ffcc00;
+  --secondary-color: #e6b800;
+  --input-border: #555;
+  --input-focus: #ffcc00;
+  --logout-color: #ff4d4f;
+  --logout-hover: #d9363e;
+  --header-text-color: #ffffff; /* topbar & page header white in dark mode */
+}
+
+
+
+
 .sidebar {
   position: fixed;
   top: 30px;
   left: 0;
   height: 100%;
   width: 220px;
-  background: #fff;
+  background: #000000;
   box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
   transition: transform 0.3s ease;
   z-index: 1200;
@@ -47,19 +79,12 @@
 
 .topbar h2 {
   margin: 0;
-  font-size: 32px;
+  font-size: 24px;
   font-weight: bold;
-  color: #ffcc00;
+  color: var(--header-text-color); /* use variable */
+
 }
 
-.hamburger {
-  font-size: 24px;
-  cursor: pointer;
-  border: none;
-  background: transparent;
-  color: #000000;
-  margin-right: 12px;
-}
 
 .main {
   margin-top: 60px;
@@ -202,6 +227,7 @@
   font-weight: 600;
   margin-bottom: 5px;
   color: #333;
+    color: var(--text-color); /* matches current theme */
 }
 
 .formGroup input {
@@ -211,6 +237,9 @@
   font-size: 15px;
   outline: none;
   transition: border-color 0.2s ease;
+    background: var(--card-bg); /* match card background */
+  color: var(--text-color);   /* match text color */
+  border: 1px solid var(--input-border);
 }
 
 .formGroup input:focus {
@@ -273,4 +302,88 @@
     padding: 16px;
     box-sizing: border-box; /* ensures padding doesn’t shrink card */
   }
+}
+
+
+.selectInput {
+  padding: 10px 12px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  font-size: 15px;
+  outline: none;
+}
+.selectInput:focus {
+  border-color: #ffcc00;
+}
+
+body {
+  background: var(--bg-color);
+  color: var(--text-color);
+}
+
+
+.main {
+  margin-top: 60px;
+  padding: 20px;
+  color: var(--text-color);
+}
+
+.card {
+  background: var(--card-bg);
+  box-shadow: 0 2px 6px var(--card-shadow);
+}
+
+.topbar {
+  background: var(--card-bg);
+  color: var(--primary-color);
+}
+
+.btn {
+  background: var(--primary-color);
+  color: var(--text-color);
+}
+
+.btn:hover {
+  background: var(--secondary-color);
+}
+
+.formGroup input {
+  border: 1px solid var(--input-border);
+}
+
+.formGroup input:focus {
+  border-color: var(--input-focus);
+  box-shadow: 0 0 3px rgba(255, 204, 0, 0.4);
+}
+
+.logoutBtn {
+  background: var(--logout-color);
+}
+
+.logoutBtn:hover {
+  background: var(--logout-hover);
+}
+
+
+.pageTitle {
+  margin-bottom: 20px;
+  font-size: 24px;
+  font-weight: bold;
+  color: var(--header-text-color); /* use variable for dark mode */
+}
+
+.editProfileBtn {
+  color: #2e2e2e; /* always dark text */
+}
+
+.formGroup input,
+.selectInput {
+  background: var(--card-bg);  /* match card background */
+  color: var(--text-color);    /* match text color */
+  border: 1px solid var(--input-border);
+}
+
+.selectInput option {
+  background: var(--card-bg);
+  color: var(--text-color);
 }

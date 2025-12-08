@@ -14,7 +14,7 @@ export default function BottomNav() {
 
   const navItems = [
     { path: "/home", icon: HomeIcon},
-    { path: "/orders", icon: OrdersIcon},
+{ path: "/orders", icon: OrdersIcon, openAddProductOnLoad: true },
     { path: "/stocks", icon: StocksIcon},
     //{ path: "/debts", icon: DebtsIcon},
     { path: "/reports", icon: ReportsIcon},
@@ -24,16 +24,19 @@ export default function BottomNav() {
   return (
     <nav className={styles.bottomNav}>
       {navItems.map((item) => (
-        <Link
-          key={item.path}
-          to={item.path}
-          className={`${styles.navItem} ${
-            currentPath === item.path ? styles.active : ""
-          }`}
-        >
-          <img src={item.icon} alt={item.label} className={styles.icon} />
-          <span>{item.label}</span>
-        </Link>
+<Link
+  key={item.path}
+  to={item.path}
+  state={
+    item.path === "/orders"
+      ? { autoOpen: true, autoOpenScanner: true }
+      : {}
+  }
+  className={`${styles.navItem} ${currentPath === item.path ? styles.active : ""}`}
+>
+  <img src={item.icon} className={styles.icon} />
+</Link>
+
       ))}
     </nav>
   );

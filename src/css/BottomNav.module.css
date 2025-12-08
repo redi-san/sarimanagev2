@@ -5,7 +5,7 @@
   width: 100%;
   height: 65px;
   background-color: #ffffff;
-  border-top: 1px solid #ddd;
+  /*border-top: 1px solid #ddd;*/
   display: flex;
   justify-content: space-around;
   align-items: center;
@@ -42,4 +42,49 @@
 .active img {
   opacity: 1;
   transform: scale(1.1);
+}
+
+.bottomNav {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 60px;
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  background: var(--card-bg);   /* same as topbar */
+  box-shadow: 0 -2px 4px var(--card-shadow);
+  z-index: 1300;
+}
+
+.navItem {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+}
+
+.icon {
+  width: 24px;
+  height: 24px;
+  transition: filter 0.2s ease;
+  filter: var(--icon-filter); /* use variable for theme */
+}
+
+.active .icon {
+  filter: var(--icon-active-filter); /* active icon style */
+}
+
+/* Light mode icon filters */
+:root {
+  --icon-filter: brightness(0) invert(0); /* default dark icon */
+  --icon-active-filter: brightness(0) invert(0.8); /* slightly lighter for active */
+}
+
+/* Dark mode icon filters */
+[data-theme="dark"] {
+  --icon-filter: brightness(0) invert(1); /* white icons */
+  --icon-active-filter: brightness(0) invert(1); /* active also white */
 }

@@ -24,7 +24,10 @@ export default function NotificationBell() {
         const stocks = res.data;
 
         // Low stock
-        setLowStockItems(stocks.filter((s) => Number(s.stock) <= Number(s.lowstock)));
+        const lowStock = stocks.filter(
+          (s) => Number(s.stock) <= Number(s.lowstock)
+        );
+        setLowStockItems(lowStock);
 
         // Expiring soon
         const today = new Date();
@@ -54,28 +57,48 @@ export default function NotificationBell() {
         <img
           src={totalAlerts > 0 ? bellAlertIcon : bellIcon}
           alt="Notifications"
-          className={`${styles.notifIcon} ${lowStockItems.length > 0 ? styles.alertBell : ""}`}
+          className={`${styles.notifIcon} ${
+            totalAlerts > 0 ? styles.alertBell : ""
+          }`}
         />
-        {totalAlerts > 0 && <span className={styles.notifCount}>{totalAlerts}</span>}
+        {totalAlerts > 0 && (
+          <span className={styles.notifCount}>{totalAlerts}</span>
+        )}
       </button>
 
       {showDropdown && (
         <div className={styles.notifDropdown}>
           {totalAlerts === 0 ? (
-            <p>No notifications</p>
+            <p className={styles.noNotif}>No notifications</p>
           ) : (
-            <ul>
-              {lowStockItems.map((item, i) => (
-                <li key={"low-" + i}>
-                  <strong>{item.name}</strong> - Low stock ({item.stock} left)
-                </li>
-              ))}
-              {expiringItems.map((item, i) => (
-                <li key={"exp-" + i}>
-                  <strong>{item.name}</strong> - Expires on {item.expiry_date}
-                </li>
-              ))}
-            </ul>
+            <div className={styles.notifSections}>
+              {lowStockItems.length > 0 && (
+                <div className={styles.notifSection}>
+                  <h4>Low Stock</h4>
+                  <ul>
+                    {lowStockItems.map((item) => (
+                      <li key={item.id}>
+                        <strong>{item.name}</strong> - {item.stock} left
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+
+              {expiringItems.length > 0 && (
+                <div className={styles.notifSection}>
+                  <h4>Expiring Soon</h4>
+                  <ul>
+                    {expiringItems.map((item) => (
+                      <li key={item.id}>
+                        <strong>{item.name}</strong> - Expires on{" "}
+                        {new Date(item.expiry_date).toLocaleDateString()}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+            </div>
           )}
         </div>
       )}

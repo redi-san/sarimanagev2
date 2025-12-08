@@ -105,15 +105,15 @@ const MonthlySalesChart = ({ orders }) => {
           width: "100%",
           maxWidth: "100%",
           height: "auto",
-          background: "#fff",
+background: "var(--chart-bg)",
           borderRadius: "12px",
           padding: "10px",
           boxSizing: "border-box",
         }}
       >
         {/* Axes */}
-        <line x1={padding} y1={padding} x2={padding} y2={height - padding} stroke="#999" />
-        <line x1={padding} y1={height - padding} x2={width - padding} y2={height - padding} stroke="#999" />
+        <line x1={padding} y1={padding} x2={padding} y2={height - padding} stroke="var(--chart-axis)" />
+        <line x1={padding} y1={height - padding} x2={width - padding} y2={height - padding} stroke="var(--chart-axis)" />
 
         {/* Line */}
         <path d={pathD} stroke="#4caf50" strokeWidth="2" fill="none" />
@@ -125,11 +125,12 @@ const MonthlySalesChart = ({ orders }) => {
 
         {/* Labels */}
         {points.map((p, i) => (
-          <text key={i} x={p.x} y={height - padding + 15} fontSize="14" textAnchor="middle">{p.label}</text>
+          <text key={i} x={p.x} y={height - padding + 15} fontSize="14" textAnchor="middle" fill="var(--chart-label)">{p.label}</text>
         ))}
 
         {points.map((p, i) => (
-          <text key={i} x={p.x} y={p.y - 6} fontSize="14" textAnchor="middle" fill="#444">
+          <text key={i} x={p.x} y={p.y - 6} fontSize="14" textAnchor="middle" fill="var(--chart-label)">
+            
             {p.value.toLocaleString(undefined, { maximumFractionDigits: 0 })}
           </text>
         ))}

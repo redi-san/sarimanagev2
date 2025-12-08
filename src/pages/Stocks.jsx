@@ -12,7 +12,6 @@ import BottomNav from "../components/BottomNav";
 
 import NotificationBell from "../components/NotificationBell";
 
-
 const BASE_URL = process.env.REACT_APP_API_URL; // e.g., https://sarimanage-render.onrender.com
 
 const EXPIRY_WARNING_DAYS = 14;
@@ -187,9 +186,22 @@ export default function Stocks({ setPage }) {
       formData.append("lowstock", selectedStock.lowstock);
       formData.append("buying_price", selectedStock.buying_price);
       formData.append("selling_price", selectedStock.selling_price);
-      if (manufacturing_date)
-        formData.append("manufacturing_date", manufacturing_date);
-      if (expiry_date) formData.append("expiry_date", expiry_date);
+      if (modalMode === "edit") {
+        // Use the date from selectedStock if local state is empty
+        formData.append(
+          "manufacturing_date",
+          manufacturing_date || selectedStock.manufacturing_date || ""
+        );
+        formData.append(
+          "expiry_date",
+          expiry_date || selectedStock.expiry_date || ""
+        );
+      } else {
+        if (manufacturing_date)
+          formData.append("manufacturing_date", manufacturing_date);
+        if (expiry_date) formData.append("expiry_date", expiry_date);
+      }
+
       if (selectedStock.newImageFile) {
         formData.append("image", selectedStock.newImageFile);
       }
@@ -280,13 +292,22 @@ export default function Stocks({ setPage }) {
     }
   };
 
+  const formatDateForInput = (dateStr) => {
+    if (!dateStr) return "";
+    const d = new Date(dateStr);
+    const month = (d.getMonth() + 1).toString().padStart(2, "0");
+    const day = d.getDate().toString().padStart(2, "0");
+    const year = d.getFullYear();
+    return `${year}-${month}-${day}`;
+  };
+
   return (
     <div>
       {/* Topbar */}
-    <div className={styles.topbar}>
-  <h2>Stocks</h2>
-  <NotificationBell />
-</div>
+      <div className={styles.topbar}>
+        <h2>Stocks</h2>
+        <NotificationBell />
+      </div>
 
       <main className={styles.main}>
         {/* Page Header + Search */}
@@ -315,8 +336,8 @@ export default function Stocks({ setPage }) {
                   top: "100%",
                   left: 0,
                   width: "100%",
-                  background: "#fff",
-                  border: "1px solid #ccc",
+    background: "var(--card-bg)",
+    border: "1px solid var(--input-border)",
                   borderRadius: "8px",
                   maxHeight: "150px",
                   overflowY: "auto",
@@ -641,8 +662,8 @@ export default function Stocks({ setPage }) {
                       top: "100%",
                       left: 0,
                       width: "100%",
-                      background: "#fff",
-                      border: "1px solid #ccc",
+    background: "var(--card-bg)",
+    border: "1px solid var(--input-border)",
                       borderRadius: "8px",
                       maxHeight: "150px",
                       overflowY: "auto",
@@ -795,7 +816,7 @@ export default function Stocks({ setPage }) {
                     value={
                       modalMode === "add"
                         ? manufacturing_date
-                        : selectedStock?.manufacturing_date || ""
+                        : formatDateForInput(selectedStock?.manufacturing_date)
                     }
                     onChange={(e) =>
                       modalMode === "add"
@@ -805,7 +826,6 @@ export default function Stocks({ setPage }) {
                             manufacturing_date: e.target.value,
                           })
                     }
-                    onKeyDown={handleEnterFocus}
                   />
                 </div>
                 <div className={styles.formGroupNew}>
@@ -815,7 +835,7 @@ export default function Stocks({ setPage }) {
                     value={
                       modalMode === "add"
                         ? expiry_date
-                        : selectedStock?.expiry_date || ""
+                        : formatDateForInput(selectedStock?.expiry_date)
                     }
                     onChange={(e) =>
                       modalMode === "add"
@@ -825,7 +845,6 @@ export default function Stocks({ setPage }) {
                             expiry_date: e.target.value,
                           })
                     }
-                    onKeyDown={handleEnterFocus}
                   />
                 </div>
               </div>

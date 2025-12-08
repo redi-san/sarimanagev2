@@ -11,6 +11,13 @@ const BASE_URL = process.env.REACT_APP_API_URL;
 export default function Settings() {
   const [editingProfile, setEditingProfile] = useState(false);
   const [userData, setUserData] = useState(null);
+
+  const [showAppSettings, setShowAppSettings] = useState(false);
+
+  const [theme, setTheme] = useState(() => {
+    return localStorage.getItem("theme") || "light";
+  });
+
   const [editedData, setEditedData] = useState({
     firstName: "",
     lastName: "",
@@ -97,6 +104,27 @@ export default function Settings() {
     }
   };
 
+  useEffect(() => {
+    if (theme === "system") {
+      const prefersDark = window.matchMedia(
+        "(prefers-color-scheme: dark)"
+      ).matches;
+      document.documentElement.setAttribute(
+        "data-theme",
+        prefersDark ? "dark" : "light"
+      );
+    } else {
+      document.documentElement.setAttribute("data-theme", theme);
+    }
+
+    // Save to localStorage
+    localStorage.setItem("theme", theme);
+  }, [theme]);
+
+  const handleThemeChange = (e) => {
+    setTheme(e.target.value);
+  };
+
   return (
     <div>
       {/* Topbar */}
@@ -106,22 +134,25 @@ export default function Settings() {
 
       {/* Main Content */}
       <div className={styles.main}>
-        <h1 className={styles.pageTitle}>Settings</h1>
+        {/* <h1 className={styles.pageTitle}>Settings</h1> */}
 
         {/* Profile Card */}
         <div className={styles.card}>
-          <img
-            src="https://via.placeholder.com/100"
-            alt="Profile"
-            className={styles.profilePic}
-          />
+          {/* Full Name */}
           <h3 className={styles.username}>
             {userData ? `${userData.name} ${userData.last_name}` : "Loading..."}
           </h3>
-          <p className={styles.email}>{userData?.email}</p>
+
+          {/* Store Name */}
+          <p className={styles.storeName}>
+            {userData ? userData.store_name : "Loading..."}
+          </p>
+
           <div className={styles.buttonRow}>
-            <button className={styles.btn}>Change Photo</button>
-            <button className={styles.btn} onClick={handleEditProfile}>
+            <button
+              className={`${styles.btn} ${styles.editProfileBtn}`}
+              onClick={handleEditProfile}
+            >
               Edit Profile
             </button>
           </div>
@@ -131,28 +162,59 @@ export default function Settings() {
         {!editingProfile ? (
           <>
             {/* App Settings Card */}
-            <div className={`${styles.card} ${styles.clickable}`}>
+            <div
+              className={`${styles.card} ${styles.clickable}`}
+              onClick={() => setShowAppSettings(!showAppSettings)}
+            >
               <div className={styles.cardHeader}>
                 <span>App Settings</span>
               </div>
               <p>Customize your app experience and notifications</p>
             </div>
 
-            {/* Help and Support Card */}
-            <div className={`${styles.card} ${styles.clickable}`}>
-              <div className={styles.cardHeader}>
-                <span>Help and Support</span>
-              </div>
-              <p>
-                Email: support@sarimanage.com <br />
-                Phone: +63 900 000 0000
-              </p>
-            </div>
+            {/* If NOT showing App Settings, show these */}
+            {!showAppSettings && (
+              <>
+                {/* Help and Support Card */}
+                <div className={`${styles.card} ${styles.clickable}`}>
+                  <div className={styles.cardHeader}>
+                    <span>Help and Support</span>
+                  </div>
+                  <p>
+                    Email: support@sarimanage.com <br />
+                    Phone: +63 900 000 0000
+                  </p>
+                </div>
 
-            {/* Logout Button */}
-            <button className={styles.logoutBtn} onClick={handleLogout}>
-              Log Out
-            </button>
+                {/* Logout Button */}
+                <button className={styles.logoutBtn} onClick={handleLogout}>
+                  Log Out
+                </button>
+              </>
+            )}
+
+            {/* If App Settings is opened, show ONLY Application Settings card */}
+            {showAppSettings && (
+              <div className={styles.card}>
+                <div className={styles.cardHeader}>
+                  <span>Application Settings</span>
+                </div>
+
+                <div className={styles.formGroup}>
+                  <label>Theme</label>
+                  <select
+                    id="theme"
+                    className={styles.selectInput}
+                    value={theme}
+                    onChange={handleThemeChange}
+                  >
+                    <option value="light">Light</option>
+                    <option value="dark">Dark</option>
+                    <option value="system">System Default</option>
+                  </select>
+                </div>
+              </div>
+            )}
           </>
         ) : (
           <>

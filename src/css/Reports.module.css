@@ -1,3 +1,27 @@
+:root {
+  --chart-bg: #ffffff;
+  --chart-axis: #999;
+  --chart-line: #4caf50;
+  --chart-point: #4caf50;
+  --chart-point-active: #ffcc00;
+  --chart-text: black;
+    --chart-label: #444; /* light mode label text */
+
+}
+
+[data-theme="dark"] {
+  --chart-bg: #1e1e1e;
+  --chart-axis: #777;
+  --chart-line: #8fff8f;
+  --chart-point: #8fff8f;
+  --chart-point-active: #ffd700;
+  --chart-text: #eaeaea;
+    --chart-label: #e0e0e0; /* light gray for dark mode */
+
+}
+
+
+
 
 .sidebar {
   position: fixed;
@@ -38,19 +62,21 @@
   left: 0;
   width: 100%;
   height: 60px;
-  background: #fff;
+ background: var(--card-bg);        /* changes with theme */
+  color: var(--header-text-color);   /* also changes with theme */  
   display: flex;
   align-items: center;
   padding: 0 20px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   z-index: 1300;
+
 }
 
 .topbar h2 {
   margin: 0;
-  font-size: 32px;
+  font-size: 24px;
   font-weight: bold;
-  color: #ffcc00;
+  color: var(--header-text-color);  /* uses your variable */
 }
 
 .hamburger {
@@ -594,4 +620,32 @@
 #report-section {
   width: 800px; /* better PDF width */
   margin: auto;
+}
+
+
+.reportTable {
+  background-color: var(--card-bg);
+}
+
+.reportTable th {
+  background-color: var(--table-header-bg);
+  color: var(--text-color);
+}
+
+.reportTable td {
+  background-color: var(--table-row-bg);
+  color: var(--text-color);
+  border-bottom: 1px solid var(--table-border);
+}
+
+.barBackground {
+  background: var(--chart-bar-bg);
+}
+
+.barFill {
+  background: var(--chart-bar-fill);
+}
+
+.dayCard h4, .dayCard p {
+  color: var(--text-color);
 }
