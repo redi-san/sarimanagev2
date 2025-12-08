@@ -383,6 +383,69 @@ export default function Orders({ setPage }) {
     }
   }, [location.state]);
 
+  const stopScanner = async () => {
+  if (scannerRef.current) {
+    try {
+      await scannerRef.current.clear();
+    } catch (err) {
+      console.warn("Failed to clear scanner:", err);
+    }
+    scannerRef.current = null;
+  }
+};
+
+// Cleanup scanner on unmount
+useEffect(() => {
+  return () => {
+    stopScanner();
+  };
+}, []);
+
+const handleScanSuccess = (decodedText) => {
+  const foundStock = stocks.find((s) => s.barcode?.toString() === decodedText);
+
+  setProducts((prev) => {
+    const newProducts = [
+      ...prev,
+      {
+        stock_id: decodedText,
+        name: foundStock?.name || "",
+        selling_price: foundStock?.selling_price || "",
+        buying_price: foundStock?.buying_price || "",
+        quantity: 1,
+      },
+    ];
+    calculateTotals(newProducts);
+    return newProducts;
+  });
+
+  stopScanner();
+  setShowScanner(false);
+  setOrderNumber(generateOrderNumber());
+};
+
+const handleScanError = (err) => {
+  console.warn("Scan error:", err);
+};
+
+
+
+const openScanner = () => {
+  setShowScanner(true);
+  setTimeout(() => {
+    if (!scannerRef.current) {
+      scannerRef.current = new Html5QrcodeScanner("order-barcode-reader", {
+        fps: 10,
+        qrbox: 180,
+        rememberLastUsedCamera: true,
+      });
+      scannerRef.current.render(handleScanSuccess, handleScanError);
+    }
+  }, 300); // 300ms delay
+};
+
+
+
   return (
     <div>
       {/* Topbar */}
@@ -753,7 +816,7 @@ export default function Orders({ setPage }) {
               <div className={styles.buttonRow}>
                 <button
                   className={styles["add-product-btn"]}
-                  onClick={() => setShowScanner(true)}
+onClick={openScanner}
                 >
                   Scan Product
                 </button>
@@ -773,7 +836,7 @@ export default function Orders({ setPage }) {
                     ])
                   }
                 >
-                  + Add Product
+                  Add Product
                 </button>
               </div>
 
@@ -783,16 +846,16 @@ export default function Orders({ setPage }) {
                     id="order-barcode-reader"
                     style={{ width: "100%" }}
                   ></div>
-                  <button
-                    onClick={() => {
-                      scannerRef.current?.clear().catch(() => {});
-                      scannerRef.current = null;
-                      setShowScanner(false);
-                      setOrderNumber(generateOrderNumber());
-                    }}
-                  >
-                    Cancel
-                  </button>
+<button
+  onClick={async () => {
+    await stopScanner();
+    setShowScanner(false);
+    setOrderNumber(generateOrderNumber());
+  }}
+>
+  Cancel
+</button>
+
                 </div>
               )}
 
