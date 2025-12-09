@@ -373,14 +373,15 @@ export default function Orders({ setPage }) {
     }
   };
 
-useEffect(() => {
-  if (location.state?.autoOpen) {
-    // Automatically open ADD PRODUCTS modal only
-    setShowSecondModal(true);
-    // do NOT auto-open scanner
-  }
-}, [location.state]);
+  useEffect(() => {
+    if (location.state?.autoOpen) {
+      // Automatically open ADD PRODUCTS modal
+      setShowSecondModal(true);
 
+      // Automatically open scanner
+      setShowScanner(true);
+    }
+  }, [location.state]);
 
   const stopScanner = async () => {
   if (scannerRef.current) {
