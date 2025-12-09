@@ -14,12 +14,7 @@ export default function BottomNav() {
 
   const navItems = [
     { path: "/home", icon: HomeIcon },
-{
-  path: "/orders",
-  icon: OrdersIcon,
-  state: { autoOpen: true }, // only auto-open modal
-},
-
+    { path: "/orders", icon: OrdersIcon, state: { autoOpen: true, autoOpenScanner: true } },
     { path: "/stocks", icon: StocksIcon },
     { path: "/reports", icon: ReportsIcon },
     { path: "/settings", icon: SettingsIcon },
@@ -30,9 +25,7 @@ export default function BottomNav() {
       {navItems.map((item) => (
         <div
           key={item.path}
-          className={`${styles.navItem} ${
-            currentPath === item.path ? styles.active : ""
-          }`}
+          className={`${styles.navItem} ${currentPath === item.path ? styles.active : ""}`}
           onClick={() => navigate(item.path, { state: item.state || {} })}
         >
           <img src={item.icon} className={styles.icon} alt={item.path} />
