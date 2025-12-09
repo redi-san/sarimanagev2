@@ -117,7 +117,7 @@ export default function Orders({ setPage }) {
     return `${dateStr}-${nextNumber}`;
   }, [ordersList]);
 
-  useEffect(() => {
+  /* useEffect(() => {
     if (!showScanner) return;
 
     const elementId = "order-barcode-reader";
@@ -185,7 +185,7 @@ export default function Orders({ setPage }) {
       const el = document.getElementById(elementId);
       if (el) el.innerHTML = "";
     };
-  }, [showScanner, stocks, generateOrderNumber]);
+  }, [showScanner, stocks, generateOrderNumber]); */
 
   const fetchOrders = async () => {
     const user = auth.currentUser;
@@ -383,16 +383,22 @@ export default function Orders({ setPage }) {
     }
   }, [location.state]);
 
-  const stopScanner = async () => {
-  if (scannerRef.current) {
-    try {
-      await scannerRef.current.clear();
-    } catch (err) {
-      console.warn("Failed to clear scanner:", err);
-    }
-    scannerRef.current = null;
+const stopScanner = async () => {
+  if (!scannerRef.current) return;
+
+  try {
+    await scannerRef.current.clear();
+  } catch (err) {
+    console.warn("Failed to clear scanner:", err);
   }
+
+  scannerRef.current = null;
+
+  // Extra safety: remove leftover UI
+  const el = document.getElementById("order-barcode-reader");
+  if (el) el.innerHTML = "";
 };
+
 
 // Cleanup scanner on unmount
 useEffect(() => {
@@ -432,17 +438,27 @@ const handleScanError = (err) => {
 
 const openScanner = () => {
   setShowScanner(true);
+
   setTimeout(() => {
-    if (!scannerRef.current) {
-      scannerRef.current = new Html5QrcodeScanner("order-barcode-reader", {
-        fps: 10,
-        qrbox: 180,
-        rememberLastUsedCamera: true,
-      });
-      scannerRef.current.render(handleScanSuccess, handleScanError);
-    }
-  }, 300); // 300ms delay
+    // Prevent duplicate scanners
+    if (scannerRef.current) return;
+
+    scannerRef.current = new Html5QrcodeScanner("order-barcode-reader", {
+      fps: 10,
+      qrbox: 180,
+      rememberLastUsedCamera: true,
+    });
+
+    scannerRef.current.render(handleScanSuccess, handleScanError);
+  }, 300);
 };
+
+useEffect(() => {
+  if (showScanner) {
+    openScanner();
+  }
+}, [showScanner]);
+
 
 
 
