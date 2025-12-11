@@ -1,51 +1,60 @@
 import React, { useState } from "react";
-import styles from "../css/login.module.css"; // ✅ import as module
+import styles from "../css/login.module.css";
 import { useNavigate } from "react-router-dom";
-import { getAuth, signInWithEmailAndPassword } from "firebase/auth"; // ✅ Firebase auth
+import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
+import axios from "axios"; // ✅ added import
 import logo from "../assets/sarimanagelogo.png";
 import hidePasswordIcon from "../assets/hidePassword.png";
 import showPasswordIcon from "../assets/showPassword.png";
 
-
+const BASE_URL = process.env.REACT_APP_API_URL || "http://localhost:5000"; // ✅ defined
 
 function LogIn() {
-  const [email, setEmail] = useState("");
+  const [identifier, setIdentifier] = useState(""); // email OR username
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
+  const [loggedInEmail, setLoggedInEmail] = useState(""); // ✅ to display email in modal
+
   const navigate = useNavigate();
-  const auth = getAuth(); // ✅ init Firebase auth
+  const auth = getAuth();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
-    setSuccess(false);
+
+    let emailToUse = identifier;
+
+    // If username was entered — get email from backend
+    if (!identifier.includes("@")) {
+      try {
+        const res = await axios.get(`${BASE_URL}/users/username/${identifier}`);
+        emailToUse = res.data.email;
+      } catch (err) {
+        return setError("Username not found.");
+      }
+    }
 
     try {
-      // ✅ Firebase login
-      await signInWithEmailAndPassword(auth, email, password);
+      await signInWithEmailAndPassword(auth, emailToUse, password);
+      setLoggedInEmail(emailToUse); // ✅ store for modal
       setSuccess(true);
-
-      // Redirect to dashboard after a short delay
-      setTimeout(() => {
-        navigate("/home");
-      }, 1500);
+      navigate("/home");
     } catch (err) {
-      console.error("Login error:", err.message);
-      setError("Invalid email or password. Please try again.");
+      setError("Invalid email/username or password.");
     }
   };
 
   const forgotPassword = () => {
-    navigate("/forgotpassword"); // you can also trigger Firebase reset email
+    navigate("/forgotpassword"); // can trigger Firebase reset email
   };
 
   return (
     <div className={styles.container}>
       <div className={styles.card}>
         <div className={styles.logo}>
-           <img src={logo} alt="Sari Manage Logo" />
+          <img src={logo} alt="Sari Manage Logo" />
           <h2>Sari Manage</h2>
         </div>
 
@@ -54,13 +63,13 @@ function LogIn() {
 
         <form onSubmit={handleSubmit}>
           <div className={styles.inputGroup}>
-            <label htmlFor="email">Email Address</label>
+            <label htmlFor="identifier">Email or Username</label>
             <input
-              type="email"
-              id="email"
-              placeholder="Enter your email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              type="text"
+              id="identifier"
+              placeholder="Email or Username"
+              value={identifier}
+              onChange={(e) => setIdentifier(e.target.value)}
               required
             />
           </div>
@@ -77,12 +86,11 @@ function LogIn() {
                 required
               />
               <img
-  src={showPassword ? hidePasswordIcon : showPasswordIcon}
-  alt={showPassword ? "Hide password" : "Show password"}
-  className={styles.togglePassword}
-  onClick={() => setShowPassword(!showPassword)}
-/>
-
+                src={showPassword ? hidePasswordIcon : showPasswordIcon}
+                alt={showPassword ? "Hide password" : "Show password"}
+                className={styles.togglePassword}
+                onClick={() => setShowPassword(!showPassword)}
+              />
             </div>
           </div>
 
@@ -102,7 +110,11 @@ function LogIn() {
         </p>
 
         <p className={styles.forgot}>
-          <button type="button" onClick={forgotPassword} className={styles.linkBtn}>
+          <button
+            type="button"
+            onClick={forgotPassword}
+            className={styles.linkBtn}
+          >
             Forgot Password?
           </button>
         </p>
@@ -112,7 +124,7 @@ function LogIn() {
       {success && (
         <div id="successModal" className={styles.modal}>
           <div className={styles.modalContent}>
-            <h3>Welcome, {email}</h3>
+            <h3>Welcome, {loggedInEmail}</h3>
             <p>Login successful!</p>
           </div>
         </div>

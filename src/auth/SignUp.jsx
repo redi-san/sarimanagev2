@@ -16,6 +16,7 @@ function SignUp() {
     firstName: "",
     lastName: "",
     storeName: "",
+    username: "",
     email: "",
     mobileNumber: "",
     password: "",
@@ -79,6 +80,7 @@ function SignUp() {
         name: formData.firstName,
         last_name: formData.lastName,
         email: user.email,
+        username: formData.username,
         store_name: formData.storeName,
         mobile_number: formData.mobileNumber,
       });
@@ -147,6 +149,19 @@ function SignUp() {
               required
             />
           </div>
+
+          <div className={styles.inputGroup}>
+  <label htmlFor="username">Username</label>
+  <input
+    type="text"
+    id="username"
+    placeholder="Enter your username"
+    value={formData.username}
+    onChange={handleChange}
+    required
+  />
+</div>
+
 
           <div className={styles.inputGroup}>
             <label htmlFor="storeName">Store Name</label>

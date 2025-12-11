@@ -22,6 +22,7 @@ export default function Settings() {
     firstName: "",
     lastName: "",
     email: "",
+    username: "",
     storeName: "",
     mobileNumber: "",
   });
@@ -51,6 +52,8 @@ export default function Settings() {
           firstName: res.data.name || "",
           lastName: res.data.last_name || "",
           email: res.data.email || "",
+  username: res.data.username,
+
           storeName: res.data.store_name || "",
           mobileNumber: res.data.mobile_number || "",
         });
@@ -84,6 +87,7 @@ export default function Settings() {
         name: editedData.firstName,
         last_name: editedData.lastName,
         email: editedData.email,
+          username: editedData.username,
         store_name: editedData.storeName,
         mobile_number: editedData.mobileNumber,
       });
@@ -94,6 +98,7 @@ export default function Settings() {
         name: editedData.firstName,
         last_name: editedData.lastName,
         email: editedData.email,
+         username: editedData.username,
         store_name: editedData.storeName,
         mobile_number: editedData.mobileNumber,
       });
@@ -256,6 +261,17 @@ export default function Settings() {
                   placeholder="Enter email address"
                 />
               </div>
+
+              <div className={styles.formGroup}>
+  <label>Username</label>
+  <input
+    id="username"
+    type="text"
+    value={editedData.username}
+    onChange={handleChange}
+  />
+</div>
+
 
               <div className={styles.formGroup}>
                 <label>Store Name</label>
