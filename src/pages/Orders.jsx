@@ -612,30 +612,35 @@ useEffect(() => {
             <div className={styles["modal-content"]}>
               <h2>Add Order</h2>
               <p>Enter order details</p>
-              <div className={styles["form-group"]}>
-                <input
-                  type="text"
-                  id="orderNumber"
-                  value={order_number}
-                  onChange={(e) => setOrderNumber(e.target.value)}
-                  onKeyDown={handleEnterFocus}
-                  required
-                  placeholder=" "
-                />
-                <label htmlFor="orderNumber">Order Number</label>
-              </div>
-              <div className={styles["form-group"]}>
-                <input
-                  type="text"
-                  id="customerName"
-                  value={customer_name}
-                  onChange={(e) => setCustomerName(e.target.value)}
-                  onKeyDown={handleEnterFocus}
-                  required
-                  placeholder=" "
-                />
-                <label htmlFor="customerName">Customer Name</label>
-              </div>
+<div className={styles["form-group"]}>
+  <label htmlFor="orderNumber" className={styles.inputLabel}>
+    Order Number
+  </label>
+  <input
+    type="text"
+    id="orderNumber"
+    value={order_number}
+    onChange={(e) => setOrderNumber(e.target.value)}
+    onKeyDown={handleEnterFocus}
+    required
+  />
+</div>
+
+<div className={styles["form-group"]}>
+  <label htmlFor="customerName" className={styles.inputLabel}>
+    Customer Name
+  </label>
+  <input
+    type="text"
+    id="customerName"
+    value={customer_name}
+    onChange={(e) => setCustomerName(e.target.value)}
+    onKeyDown={handleEnterFocus}
+    required
+  />
+</div>
+
+
               <div className={styles["modal-actions"]}>
                 <button
                   className={styles.Cancel}
@@ -701,7 +706,7 @@ useEffect(() => {
                             top: "100%",
                             left: 0,
                             width: "100%",
-                            background: "white",
+                            background: "var(--card-bg)",
                             border: "1px solid #ccc",
                             borderRadius: "8px",
                             maxHeight: "150px",

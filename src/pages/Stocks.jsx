@@ -649,7 +649,7 @@ export default function Stocks({ setPage }) {
                   onBlur={() =>
                     setTimeout(() => setShowCategoryDropdown(false), 150)
                   } // slight delay to allow click
-                  placeholder="Select or type category"
+                  placeholder="Select or create category"
                   required
                 />
 
@@ -778,7 +778,7 @@ export default function Stocks({ setPage }) {
                           })
                     }
                     onKeyDown={handleEnterFocus}
-                    placeholder="Selling Price"
+                    placeholder="How much are you selling this product for?"
                     required
                   />
                 </div>
@@ -802,7 +802,7 @@ export default function Stocks({ setPage }) {
                           })
                     }
                     onKeyDown={handleEnterFocus}
-                    placeholder="Buying Price"
+                    placeholder="How much did you buy this product?"
                     required
                   />
                 </div>

@@ -27,13 +27,14 @@
   position: absolute;
   top: 40px;
   right: 0;
-  background: white;
-  border: 1px solid #ddd;
+  background: var(--card-bg);
+  border: 1px solid var(--input-border);
   border-radius: 8px;
   width: 220px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 4px 12px var(--card-shadow);
   z-index: 2000;
   padding: 10px;
+  color: var(--text-color);
 }
 
 .notifDropdown ul {
@@ -44,9 +45,9 @@
 
 .notifDropdown li {
   padding: 8px;
-  border-bottom: 1px solid #eee;
+  border-bottom: 1px solid var(--input-border);
   font-size: 14px;
-  color: #333;
+  color: var(--text-color);
 }
 
 .notifDropdown li:last-child {
@@ -54,8 +55,8 @@
 }
 
 .notifIcon {
-  width: 40px; /* smaller width */
-  height: 40px; /* smaller height */
+  width: 40px;
+  height: 40px;
   object-fit: contain;
 }
 
@@ -71,4 +72,14 @@
   40% { transform: rotate(-5deg); }
   50% { transform: rotate(0); }
   100% { transform: rotate(0); }
+}
+
+.notifSection h4 {
+  margin: 8px 0;
+  color: var(--primary-color);
+}
+
+.noNotif {
+  text-align: center;
+  color: var(--text-color);
 }

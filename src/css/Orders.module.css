@@ -14,7 +14,7 @@
 .tabBar {
   display: flex;
   justify-content: center;
-  background: #f0f0a0;
+  background-color: var(--card-bg);
   border-bottom: 2px solid #ddd;
   position: sticky; 
   top: 60px; 
@@ -28,13 +28,12 @@
   border: none;
   font-size: 16px;
   font-weight: 600;
-  color: #444;
-  cursor: pointer;
+color: var(--text-color);  cursor: pointer;
   transition: background 0.3s, color 0.3s;
 }
 
 .tabButton:hover {
-  background: #fdf6c2;
+  background-color: var(--secondary-color);
 }
 
 .active {
@@ -53,8 +52,9 @@
   border-radius: 8px;
   font-size: 16px;
   outline: none;
-  background: #fff;
-  color: #333;
+  background-color: var(--card-bg);
+  color: var(--text-color);
+  border: 2px solid var(--primary-color);
 }
 
 .page-header h1 {
@@ -62,6 +62,11 @@
   font-size: 32px;
   font-weight: bold;
   margin: 0;
+}
+
+.page-header h1,
+.topbar h2 {
+  color: var(--header-text-color);
 }
 
 
@@ -83,8 +88,9 @@
   height: 90px;
   border-radius: 50%;
   border: none;
-  background-color: #ffcc00;
-  color: white;
+  background-color: var(--primary-color);
+  color: var(--text-color);
+  box-shadow: 0 4px 8px var(--card-shadow);
   font-size: 32px;
   font-weight: bold;
   cursor: pointer;
@@ -96,8 +102,7 @@
 }
 
 .create-button:hover {
-  background-color: #daae00;
-}
+  background-color: var(--secondary-color);}
 
 .topbar {
   position: fixed;
@@ -105,7 +110,8 @@
   left: 0;
   width: 100%;
   height: 60px;
-  background: #fff;
+  background-color: var(--card-bg);
+  /*border-bottom: 2px solid var(--input-border);*/
   display: flex;
   align-items: center;
   padding: 0 20px;
@@ -121,34 +127,34 @@
 }
 
 .form-group {
-  position: relative;
-  margin-bottom: 8px;
+  margin-bottom: 12px;
+  display: flex;
+  flex-direction: column;
   width: 100%;
+}
+
+.form-group label,
+.inputLabel {
+  font-size: 14px;
+  font-weight: bold;
+  color: #222; /* black shade */
+  margin-bottom: 4px;
+  text-align: left; /* align label to upper left */
 }
 
 .form-group input {
-  width: 100%;
-  padding: 12px 10px;
-  border: 1px solid #ccc;
-  outline: none;
-  font-size: 32px;
-  background: #d9d9d9;
-  color: #202124;
-  border-radius: 0;
-}
-
-.form-group label {
-  position: absolute;
-  left: 12px;
-  top: 50%;
-  transform: translateY(-50%);
-  color: #5f6368;
+  padding: 10px 12px;
   font-size: 16px;
-  pointer-events: none;
-  transition: 0.2s ease all;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  background-color: var(--card-bg);
+  color: var(--text-color);
+  border: 1px solid var(--input-border);
+  outline: none;
+    border-color: var(--input-focus);
 }
 
-.form-group input:focus + label,
+/*.form-group input:focus + label,
 .form-group input:not(:placeholder-shown) + label {
   top: -8px;
   left: 8px;
@@ -156,7 +162,7 @@
   background: transparent;
   padding: 0 4px;
   color: #ffc107;
-}
+} */
 
 .modal {
   position: fixed;
@@ -414,10 +420,20 @@
   max-height: 80vh;
   overflow-y: auto;
   text-align: left;
-  background: #fff;
+  background: var(--card-bg); /* was #fff */
   border-radius: 12px;
-  color: #000;
+  color: var(--text-color); /* add this */  border-radius: 12px;
+  
 }
+.receipt-modal p,
+.receipt-totals p {
+  color: var(--text-color); /* instead of #333 or #000 */
+}
+
+.receipt-header {
+  color: var(--text-color); /* instead of #444 */
+}
+
 
 .receipt-products {
   margin-top: 16px;
@@ -611,6 +627,8 @@
 .receipt-header,
 .receipt-row {
   display: table-row;
+  background-color: var(--card-bg);
+  color: var(--text-color);
 }
 
 .receipt-header span,
@@ -624,6 +642,11 @@
 .receipt-header span,
 .receipt-row span {
   border: none !important;
+}
+
+.receipt-row span,
+.receipt-header span {
+  color: var(--text-color);
 }
 
 .receipt-header {
@@ -698,8 +721,8 @@
   overflow-x: auto;
   width: 100%;
   border-radius: 12px;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
-  background: white;
+  background-color: var(--card-bg);
+  box-shadow: 0 4px 10px var(--card-shadow);
 }
 
 .orders-table {
@@ -720,6 +743,8 @@
   padding: 14px 16px;
   text-align: left;
 }
+
+
 
 .orders-table tbody tr {
   border-bottom: 1px solid #e5e7eb;
@@ -820,3 +845,56 @@
   margin-bottom: 20px;
   justify-content: center;   /* optional: center them */
 }
+
+.modal-content,
+.modal-second,
+.receipt-modal,
+.product-entry {
+  background-color: var(--card-bg);
+  color: var(--text-color);
+  box-shadow: 0 4px 12px var(--card-shadow);  
+}
+
+
+.totals input,
+.product-entry input,
+.product-row input {
+  background-color: var(--card-bg);
+  color: var(--text-color);
+  border: 1px solid var(--input-border);
+}
+
+
+.orders-table tbody tr:hover {
+  background-color: var(--secondary-color);
+}
+
+/* Inputs inside Add Products modal */
+.product-entry input,
+.product-row input,
+.input-group input,
+.totals input {
+  background-color: var(--card-bg) !important;
+  color: var(--text-color) !important;
+  border: 1px solid var(--input-border) !important;
+}
+
+/* Labels inside the Add Products modal */
+.product-entry label,
+.inputLabel,
+.input-group label {
+  color: var(--text-color) !important;
+}
+
+/* Autocomplete dropdown should match dark mode */
+.suggestions-dropdown {
+  background-color: var(--card-bg) !important;
+  color: var(--text-color) !important;
+  border: 1px solid var(--input-border) !important;
+}
+
+.suggestions-dropdown li:hover {
+  background-color: var(--secondary-color) !important;
+}
+
+
