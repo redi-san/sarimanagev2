@@ -59,7 +59,7 @@ color: var(--text-color);  cursor: pointer;
 
 .page-header h1 {
   color: #ffcc00;
-  font-size: 32px;
+  font-size: px;
   font-weight: bold;
   margin: 0;
 }
@@ -121,9 +121,9 @@ color: var(--text-color);  cursor: pointer;
 
 .topbar h2 {
   margin: 0;
-  font-size: 32px;
+  font-size: 24px;
   font-weight: bold;
-  color: #ffcc00;
+  color: var(--header-text-color);
 }
 
 .form-group {

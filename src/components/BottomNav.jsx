@@ -14,8 +14,8 @@ export default function BottomNav() {
 
   const navItems = [
     { path: "/home", icon: HomeIcon },
-    { path: "/orders", icon: OrdersIcon, state: { autoOpen: true, autoOpenScanner: true } },
     { path: "/stocks", icon: StocksIcon },
+    { path: "/orders", icon: OrdersIcon, state: { autoOpen: true, autoOpenScanner: true } },
     { path: "/reports", icon: ReportsIcon },
     { path: "/settings", icon: SettingsIcon },
   ];

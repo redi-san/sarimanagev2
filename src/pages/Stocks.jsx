@@ -7,6 +7,7 @@ import { getAuth } from "firebase/auth";
 
 import barcodeIcon from "../assets/barcode.png";
 import { Html5QrcodeScanner } from "html5-qrcode";
+import deleteIcon from "../assets/deleteIcon.png";
 
 import BottomNav from "../components/BottomNav";
 
@@ -179,29 +180,23 @@ export default function Stocks({ setPage }) {
   const updateStock = async () => {
     try {
       const formData = new FormData();
-      formData.append("name", selectedStock.name);
-      formData.append("barcode", selectedStock.barcode);
-      formData.append("category", selectedStock.category);
-      formData.append("stock", selectedStock.stock);
-      formData.append("lowstock", selectedStock.lowstock);
-      formData.append("buying_price", selectedStock.buying_price);
-      formData.append("selling_price", selectedStock.selling_price);
-      if (modalMode === "edit") {
-        // Use the date from selectedStock if local state is empty
-        formData.append(
-          "manufacturing_date",
-          manufacturing_date || selectedStock.manufacturing_date || ""
-        );
-        formData.append(
-          "expiry_date",
-          expiry_date || selectedStock.expiry_date || ""
-        );
-      } else {
-        if (manufacturing_date)
-          formData.append("manufacturing_date", manufacturing_date);
-        if (expiry_date) formData.append("expiry_date", expiry_date);
-      }
 
+      // append only valid fields
+      Object.entries(selectedStock).forEach(([key, value]) => {
+        if (
+          value !== null &&
+          value !== undefined &&
+          value !== "" &&
+          key !== "id" &&
+          key !== "image" &&
+          key !== "previewImage" &&
+          key !== "newImageFile"
+        ) {
+          formData.append(key, value);
+        }
+      });
+
+      // append image separately
       if (selectedStock.newImageFile) {
         formData.append("image", selectedStock.newImageFile);
       }
@@ -210,11 +205,11 @@ export default function Stocks({ setPage }) {
         headers: { "Content-Type": "multipart/form-data" },
       });
 
-      setStocks(
-        stocks.map((s) => (s.id === selectedStock.id ? selectedStock : s))
+      // update local state
+      setStocks((prev) =>
+        prev.map((s) => (s.id === selectedStock.id ? selectedStock : s))
       );
 
-      // Only close modal after successful update
       setShowModal(false);
     } catch (err) {
       console.error("Error updating stock:", err);
@@ -327,7 +322,7 @@ export default function Stocks({ setPage }) {
                 setTimeout(() => setShowCategoryDropdown(false), 150)
               } // slight delay to allow click
             />
-
+{/*
             {showCategoryDropdown && categories.length > 0 && (
               <ul
                 className={styles["category-dropdown"]}
@@ -336,8 +331,8 @@ export default function Stocks({ setPage }) {
                   top: "100%",
                   left: 0,
                   width: "100%",
-    background: "var(--card-bg)",
-    border: "1px solid var(--input-border)",
+                  background: "var(--card-bg)",
+                  border: "1px solid var(--input-border)",
                   borderRadius: "8px",
                   maxHeight: "150px",
                   overflowY: "auto",
@@ -362,7 +357,7 @@ export default function Stocks({ setPage }) {
                   </li>
                 ))}
               </ul>
-            )}
+            )} */}
           </div>
 
           {/*<h1>Stocks</h1>*/}
@@ -441,7 +436,15 @@ export default function Stocks({ setPage }) {
                             <tr
                               key={stock.id}
                               onClick={() => {
-                                setSelectedStock(stock);
+                                setSelectedStock({
+                                  ...stock,
+                                  manufacturing_date: formatDateForInput(
+                                    stock.manufacturing_date
+                                  ),
+                                  expiry_date: formatDateForInput(
+                                    stock.expiry_date
+                                  ),
+                                });
                                 setModalMode("edit");
                                 setShowModal(true);
                               }}
@@ -483,7 +486,11 @@ export default function Stocks({ setPage }) {
                                     deleteStock(stock.id);
                                   }}
                                 >
-                                  ✖
+                                  <img
+                                    src={deleteIcon}
+                                    alt="Delete"
+                                    className={styles.deleteIcon}
+                                  />
                                 </button>
                               </td>
                             </tr>
@@ -662,8 +669,8 @@ export default function Stocks({ setPage }) {
                       top: "100%",
                       left: 0,
                       width: "100%",
-    background: "var(--card-bg)",
-    border: "1px solid var(--input-border)",
+                      background: "var(--card-bg)",
+                      border: "1px solid var(--input-border)",
                       borderRadius: "8px",
                       maxHeight: "150px",
                       overflowY: "auto",
@@ -816,7 +823,7 @@ export default function Stocks({ setPage }) {
                     value={
                       modalMode === "add"
                         ? manufacturing_date
-                        : formatDateForInput(selectedStock?.manufacturing_date)
+                        : selectedStock?.manufacturing_date || ""
                     }
                     onChange={(e) =>
                       modalMode === "add"
@@ -828,6 +835,7 @@ export default function Stocks({ setPage }) {
                     }
                   />
                 </div>
+
                 <div className={styles.formGroupNew}>
                   <label>Expiry Date</label>
                   <input
@@ -835,7 +843,7 @@ export default function Stocks({ setPage }) {
                     value={
                       modalMode === "add"
                         ? expiry_date
-                        : formatDateForInput(selectedStock?.expiry_date)
+                        : selectedStock?.expiry_date || ""
                     }
                     onChange={(e) =>
                       modalMode === "add"

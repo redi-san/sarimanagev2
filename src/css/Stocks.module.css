@@ -83,6 +83,13 @@
   margin-right: 12px;
 }
 
+.deleteIcon {
+  width: 18px;
+  height: 18px;
+  pointer-events: none; /* prevents click issues */
+}
+
+
 .modal {
   position: fixed;
   top: 0;

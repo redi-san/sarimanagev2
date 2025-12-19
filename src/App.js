@@ -1,4 +1,5 @@
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
+import { useEffect } from "react";
 import LogIn from "./auth/LogIn";
 import ForgotPassword from "./auth/ForgotPassword";
 import SignUp from "./auth/SignUp";
@@ -8,10 +9,20 @@ import Debts from "./pages/Debts";
 import Home from "./pages/Home";
 import Reports from "./pages/Reports";
 import Settings from "./pages/Settings";
-import { Navigate } from "react-router-dom"; //Added for login page
-
 
 function App() {
+  // ✅ Apply theme on app load
+  useEffect(() => {
+    const theme = localStorage.getItem("theme") || "light";
+
+    if (theme === "system") {
+      const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+      document.documentElement.setAttribute("data-theme", prefersDark ? "dark" : "light");
+    } else {
+      document.documentElement.setAttribute("data-theme", theme);
+    }
+  }, []);
+
   return (
     <div>
       <Router>
