@@ -146,15 +146,6 @@ export default function Reports() {
   const totalSales = reportData.reduce((sum, p) => sum + p.totalSales, 0);
   const totalProfit = reportData.reduce((sum, p) => sum + p.profit, 0);
 
-  // Compute 3-month sales average for forecasting
-
-
-  //const forecastSales = getThreeMonthForecast();
-
-  // =========================
-  // RECURSIVE 3-MONTH FORECAST
-  // =========================
-  // Put this function *above* where you call it (or call it only after it's defined)
   const getThreeMonthMovingAverage = (year) => {
     if (typeof year === "undefined") {
       // defensive: if no year passed, use current year
@@ -263,55 +254,54 @@ export default function Reports() {
   }, [activeTab]);
 
   useEffect(() => {
-  if (orders.length > 0) {
-    setFilterDate(new Date());
-  }
-}, [orders]);
+    if (orders.length > 0) {
+      setFilterDate(new Date());
+    }
+  }, [orders]);
 
-// <- Add this right after
-useEffect(() => {
-  setShowForecast(false);
-}, [showAll, setShowForecast]);
+  // <- Add this right after
+  useEffect(() => {
+    setShowForecast(false);
+  }, [showAll, setShowForecast]);
 
+  const downloadPDF = async () => {
+    const report = document.getElementById("report-section");
+    if (!report) return;
 
-const downloadPDF = async () => {
-  const report = document.getElementById("report-section");
-  if (!report) return;
+    // Save original styles
+    const originalWidth = report.style.width;
+    const originalTransform = report.style.transform;
 
-  // Save original styles
-  const originalWidth = report.style.width;
-  const originalTransform = report.style.transform;
+    // Force desktop width (e.g., 1000px or whatever your PC width is)
+    report.style.width = "1000px";
+    report.style.transform = "scale(1)"; // prevent scaling issues
 
-  // Force desktop width (e.g., 1000px or whatever your PC width is)
-  report.style.width = "1000px"; 
-  report.style.transform = "scale(1)"; // prevent scaling issues
+    const canvas = await html2canvas(report, { scale: 2 });
+    const imgData = canvas.toDataURL("image/png");
+    const pdf = new jsPDF("p", "mm", "a4");
+    const pdfWidth = pdf.internal.pageSize.getWidth();
+    const pageHeight = pdf.internal.pageSize.getHeight();
+    const imgHeight = (canvas.height * pdfWidth) / canvas.width;
 
-  const canvas = await html2canvas(report, { scale: 2 });
-  const imgData = canvas.toDataURL("image/png");
-  const pdf = new jsPDF("p", "mm", "a4");
-  const pdfWidth = pdf.internal.pageSize.getWidth();
-  const pageHeight = pdf.internal.pageSize.getHeight();
-  const imgHeight = (canvas.height * pdfWidth) / canvas.width;
+    let heightLeft = imgHeight;
+    let position = 0;
 
-  let heightLeft = imgHeight;
-  let position = 0;
-
-  pdf.addImage(imgData, "PNG", 0, position, pdfWidth, imgHeight);
-  heightLeft -= pageHeight;
-
-  while (heightLeft > 0) {
-    position = heightLeft - imgHeight;
-    pdf.addPage();
     pdf.addImage(imgData, "PNG", 0, position, pdfWidth, imgHeight);
     heightLeft -= pageHeight;
-  }
 
-  pdf.save("report.pdf");
+    while (heightLeft > 0) {
+      position = heightLeft - imgHeight;
+      pdf.addPage();
+      pdf.addImage(imgData, "PNG", 0, position, pdfWidth, imgHeight);
+      heightLeft -= pageHeight;
+    }
 
-  // Restore original styles
-  report.style.width = originalWidth;
-  report.style.transform = originalTransform;
-};
+    pdf.save("report.pdf");
+
+    // Restore original styles
+    report.style.width = originalWidth;
+    report.style.transform = originalTransform;
+  };
 
   return (
     <div>
@@ -409,510 +399,588 @@ const downloadPDF = async () => {
         </div>
 
         <button onClick={downloadPDF} className={styles.pdfButton}>
-  Download as PDF
-</button>
+          Download as PDF
+        </button>
 
-<div id="report-section">
+        <div id="report-section">
+          <div className={styles.summaryCards}>
+            <div className={styles.card}>
+              <h3>Total Sales</h3>
+              <p>
+                ₱
+                {totalSales.toLocaleString(undefined, {
+                  minimumFractionDigits: 2,
+                  maximumFractionDigits: 2,
+                })}
+              </p>
+            </div>
 
-        <div className={styles.summaryCards}>
-          <div className={styles.card}>
-            <h3>Total Sales</h3>
-            <p>
-              ₱
-              {totalSales.toLocaleString(undefined, {
-                minimumFractionDigits: 2,
-                maximumFractionDigits: 2,
-              })}
-            </p>
+            <div className={styles.card}>
+              <h3>Total Profit</h3>
+              <p>
+                ₱
+                {totalProfit.toLocaleString(undefined, {
+                  minimumFractionDigits: 2,
+                  maximumFractionDigits: 2,
+                })}
+              </p>
+            </div>
           </div>
 
-          <div className={styles.card}>
-            <h3>Total Profit</h3>
-            <p>
-              ₱
-              {totalProfit.toLocaleString(undefined, {
-                minimumFractionDigits: 2,
-                maximumFractionDigits: 2,
-              })}
-            </p>
-          </div>
-        </div>
+          {/* Sales Overview */}
+          <div className={styles.weeklyContainer}>
+            {(() => {
+              const isMonthly = showAll;
+              const labels = isMonthly
+                ? [
+                    "Jan",
+                    "Feb",
+                    "Mar",
+                    "Apr",
+                    "May",
+                    "Jun",
+                    "Jul",
+                    "Aug",
+                    "Sep",
+                    "Oct",
+                    "Nov",
+                    "Dec",
+                  ]
+                : ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
-        {/* Only show Sales/Forecast toggle when in monthly view */}
-        {/* Only show Sales/Forecast toggle when in monthly view AND on Sales tab */}
-        {activeTab === "sales" && showAll && (
-          <div className={styles.salesForecastToggle}>
-            <button
-              className={`${styles.toggleButton} ${
-                !showForecast ? styles.activeToggle : ""
-              }`}
-              onClick={() => setShowForecast(false)}
-            >
-              Actual
-            </button>
+              let dataPoints = [];
+              let actualPoints = [];
+              let forecastPoints = [];
 
-            <button
-              className={`${styles.toggleButton} ${
-                showForecast ? styles.activeToggle : ""
-              }`}
-              onClick={() => setShowForecast(true)}
-            >
-              Forecast
-            </button>
-          </div>
-        )}
+              if (activeTab === "debt") {
+                // Debt tab shows lines too
+                actualPoints = labels.map((month, i) => {
+                  let value = 0;
+                  debts.forEach((debt) => {
+                    const date = new Date(debt.date);
+                    if (
+                      date.getFullYear() === filterDate.getFullYear() &&
+                      date.getMonth() === i
+                    ) {
+                      value += parseFloat(debt.total || 0);
+                    }
+                  });
+                  return { label: month, value };
+                });
+                dataPoints = actualPoints;
+              } else if (activeTab === "inventory" && selectedProduct) {
+                // Inventory tab shows lines for selected product
+                if (isMonthly) {
+                  actualPoints = labels.map((month, i) => {
+                    let value = 0;
+                    orders.forEach((order) => {
+                      const date = getOrderDate(order);
+                      if (
+                        date.getFullYear() === filterDate.getFullYear() &&
+                        date.getMonth() === i
+                      ) {
+                        const product = order.products.find(
+                          (p) => p.name === selectedProduct
+                        );
+                        if (product) value += parseFloat(product.quantity);
+                      }
+                    });
+                    return { label: month, value };
+                  });
+                } else {
+                  const startOfWeek = new Date(filterDate);
+                  startOfWeek.setDate(
+                    filterDate.getDate() - filterDate.getDay()
+                  );
+                  const weekDates = Array.from({ length: 7 }, (_, i) => {
+                    const d = new Date(startOfWeek);
+                    d.setDate(startOfWeek.getDate() + i);
+                    return d;
+                  });
 
-        {/* Sales Overview */}
-        <div className={styles.weeklyContainer}>
-          {(() => {
-            const isMonthly = showAll;
-            const labels = isMonthly
-              ? [
-                  "Jan",
-                  "Feb",
-                  "Mar",
-                  "Apr",
-                  "May",
-                  "Jun",
-                  "Jul",
-                  "Aug",
-                  "Sep",
-                  "Oct",
-                  "Nov",
-                  "Dec",
-                ]
-              : ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+                  actualPoints = weekDates.map((date, i) => {
+                    let value = 0;
+                    orders.forEach((order) => {
+                      const orderDate = getOrderDate(order);
+                      if (orderDate.toDateString() === date.toDateString()) {
+                        const product = order.products.find(
+                          (p) => p.name === selectedProduct
+                        );
+                        if (product) value += parseFloat(product.quantity);
+                      }
+                    });
+                    return { label: labels[i], value, date };
+                  });
+                }
+                dataPoints = actualPoints;
+              } else {
+                // Sales / Profit
+                if (isMonthly) {
+                  actualPoints = labels.map((month, i) => {
+                    let value = 0;
+                    orders.forEach((order) => {
+                      const date = getOrderDate(order);
+                      if (
+                        date.getFullYear() === filterDate.getFullYear() &&
+                        date.getMonth() === i
+                      ) {
+                        value += order.products.reduce((sum, p) => {
+                          const qty = parseFloat(p.quantity) || 0;
+                          const sell = parseFloat(p.selling_price) || 0;
+                          const buy = parseFloat(p.buying_price) || 0;
+                          return (
+                            sum +
+                            (activeTab === "sales"
+                              ? qty * sell
+                              : qty * (sell - buy))
+                          );
+                        }, 0);
+                      }
+                    });
+                    return { label: month, value };
+                  });
 
-            let dataPoints = [];
-
-            if (activeTab === "debt") {
-              dataPoints = labels.map((month, i) => {
-                let value = 0;
-                debts.forEach((debt) => {
-                  const date = new Date(debt.date); // ← use debt creation date
-                  if (
-                    date.getFullYear() === filterDate.getFullYear() &&
-                    date.getMonth() === i
-                  ) {
-                    value += parseFloat(debt.total || 0);
+                  if (activeTab === "sales") {
+                    forecastPoints = getThreeMonthMovingAverage(
+                      filterDate.getFullYear()
+                    ).map((v, i) => ({
+                      label: labels[i],
+                      value: v || 0,
+                    }));
+                  } else {
+                    forecastPoints = []; // No forecast for profit
                   }
-                });
-                return { label: month, value };
-              });
-            } else if (activeTab === "inventory" && selectedProduct) {
-              // Show chart for selected product only
-              if (isMonthly) {
-                // Monthly
-                dataPoints = labels.map((month, i) => {
-                  let value = 0;
-                  orders.forEach((order) => {
-                    const date = getOrderDate(order);
-                    if (
-                      date.getFullYear() === filterDate.getFullYear() &&
-                      date.getMonth() === i
-                    ) {
-                      const product = order.products.find(
-                        (p) => p.name === selectedProduct
-                      );
-                      if (product) value += parseFloat(product.quantity);
-                    }
+                } else {
+                  const startOfWeek = new Date(filterDate);
+                  startOfWeek.setDate(
+                    filterDate.getDate() - filterDate.getDay()
+                  );
+                  const weekDates = Array.from({ length: 7 }, (_, i) => {
+                    const d = new Date(startOfWeek);
+                    d.setDate(startOfWeek.getDate() + i);
+                    return d;
                   });
-                  return { label: month, value };
-                });
-              } else {
-                // Daily / Weekly
-                const startOfWeek = new Date(filterDate);
-                startOfWeek.setDate(filterDate.getDate() - filterDate.getDay()); // Sunday
-                const weekDates = Array.from({ length: 7 }, (_, i) => {
-                  const d = new Date(startOfWeek);
-                  d.setDate(startOfWeek.getDate() + i);
-                  return d;
-                });
 
-                dataPoints = weekDates.map((date, i) => {
-                  let value = 0;
-                  orders.forEach((order) => {
-                    const orderDate = getOrderDate(order);
-                    if (orderDate.toDateString() === date.toDateString()) {
-                      const product = order.products.find(
-                        (p) => p.name === selectedProduct
-                      );
-                      if (product) value += parseFloat(product.quantity);
-                    }
-                  });
-                  return { label: labels[i], value, date };
-                });
-              }
-            } else {
-              // Sales/Profit tab logic (original)
-              if (isMonthly) {
-                const forecastArray = showForecast
-                  ? getThreeMonthMovingAverage(filterDate.getFullYear())
-                  : [];
-                dataPoints = labels.map((month, i) => {
-                  let value = 0;
-                  orders.forEach((order) => {
-                    const date = getOrderDate(order);
-                    if (
-                      date.getFullYear() === filterDate.getFullYear() &&
-                      date.getMonth() === i
-                    ) {
-                      const orderValue = order.products.reduce((sum, p) => {
-                        const qty = parseFloat(p.quantity) || 0;
-                        const sell = parseFloat(p.selling_price) || 0;
-                        const buy = parseFloat(p.buying_price) || 0;
-                        return (
-                          sum +
-                          (activeTab === "sales"
-                            ? qty * sell
-                            : activeTab === "profit"
-                            ? qty * (sell - buy)
-                            : 0)
-                        );
-                      }, 0);
-                      value += orderValue;
-                    }
-                  });
-                  if (showForecast) value = forecastArray[i] || 0;
-                  return { label: month, value };
-                });
-              } else {
-                // Daily/Weekly
-                const startOfWeek = new Date(filterDate);
-                startOfWeek.setDate(filterDate.getDate() - filterDate.getDay());
-                const weekDates = Array.from({ length: 7 }, (_, i) => {
-                  const d = new Date(startOfWeek);
-                  d.setDate(startOfWeek.getDate() + i);
-                  return d;
-                });
-
-                dataPoints = weekDates.map((date, i) => {
-                  let value = 0;
-                  orders.forEach((order) => {
-                    const orderDate = getOrderDate(order);
-                    if (orderDate.toDateString() === date.toDateString()) {
-                      const orderValue = order.products.reduce((sum, p) => {
-                        const qty = parseFloat(p.quantity) || 0;
-                        const sell = parseFloat(p.selling_price) || 0;
-                        const buy = parseFloat(p.buying_price) || 0;
-                        return (
-                          sum +
-                          (activeTab === "sales"
-                            ? qty * sell
-                            : activeTab === "profit"
-                            ? qty * (sell - buy)
-                            : 0)
-                        );
-                      }, 0);
-                      value += orderValue;
-                    }
-                  });
-                  return { label: labels[i], value, date };
-                });
-              }
-            }
-
-            const maxValue = Math.max(...dataPoints.map((d) => d.value)) || 1;
-            const width = 550;
-            const height = 180;
-            const padding = 30;
-
-            const points = dataPoints.map((d, i) => ({
-              x: padding + (i / (labels.length - 1)) * (width - 2 * padding),
-              y:
-                height -
-                padding -
-                (d.value / maxValue) * (height - 2 * padding),
-              label: d.label,
-              value: d.value,
-              date: d.date,
-            }));
-
-            const pathD = points
-              .map((p, i) => (i === 0 ? `M ${p.x} ${p.y}` : `L ${p.x} ${p.y}`))
-              .join(" ");
-
-            return (
-              <div>
-                <h3 style={{ marginBottom: "10px", marginLeft: "10px" }}>
-                  {activeTab === "inventory" && selectedProduct
-                    ? `${
-                        showAll ? "Sold This Month" : "Sold Today"
-                      } - ${selectedProduct}`
-                    : activeTab === "sales"
-                    ? showForecast
-                      ? "Sales Forecast"
-                      : `${showAll ? "Sales of the Month" : "Sales of the Day"}`
-                    : activeTab === "profit"
-                    ? `${
-                        showAll ? "Profits of the Month" : "Profits of the Day"
-                      }`
-                    : ""}
-                </h3>
-
-<svg
-  viewBox={`0 0 ${width} ${height}`}
-  style={{
-    width: "100%",
-    maxWidth: "100%", // prevent overflow
-    height: "auto",
-background: "var(--card-bg)",
-    borderRadius: "12px",
-    padding: "10px",
-    boxSizing: "border-box", // ensure padding doesn't add to width
-  }}
->
-
-                  <line
-                    x1={padding}
-                    y1={padding}
-                    x2={padding}
-                    y2={height - padding}
-                    stroke="#999"
-                  />
-                  <line
-                    x1={padding}
-                    y1={height - padding}
-                    x2={width - padding}
-                    y2={height - padding}
-                    stroke="#999"
-                  />
-                  <path
-                    d={pathD}
-                    stroke="#4caf50"
-                    strokeWidth="2"
-                    fill="none"
-                    className={styles.lineAnimation}
-                  />
-
-                  {points.map((p, i) => (
-                    <circle
-                      key={i}
-                      cx={p.x}
-                      cy={p.y}
-                      r={
-                        (!isMonthly &&
-                          p.date?.toDateString() ===
-                            filterDate.toDateString()) ||
-                        (isMonthly && i === filterDate.getMonth())
-                          ? 6
-                          : 5
+                  actualPoints = weekDates.map((date, i) => {
+                    let value = 0;
+                    orders.forEach((order) => {
+                      const orderDate = getOrderDate(order);
+                      if (orderDate.toDateString() === date.toDateString()) {
+                        value += order.products.reduce((sum, p) => {
+                          const qty = parseFloat(p.quantity) || 0;
+                          const sell = parseFloat(p.selling_price) || 0;
+                          const buy = parseFloat(p.buying_price) || 0;
+                          return (
+                            sum +
+                            (activeTab === "sales"
+                              ? qty * sell
+                              : qty * (sell - buy))
+                          );
+                        }, 0);
                       }
-                      fill={
-                        (!isMonthly &&
-                          p.date?.toDateString() ===
-                            filterDate.toDateString()) ||
-                        (isMonthly && i === filterDate.getMonth())
-                          ? "#ffcc00"
-                          : "#4caf50"
-                      }
-                      style={{ cursor: "pointer" }}
-                      onClick={() => {
-                        if (isMonthly) {
-                          const newDate = new Date(filterDate);
-                          newDate.setMonth(i);
-                          setFilterDate(newDate);
-                        } else {
-                          setFilterDate(p.date);
-                        }
-                      }}
-                    />
-                  ))}
+                    });
+                    return { label: labels[i], value, date };
+                  });
 
-                  {points.map((p, i) => (
-                    <text
-                      key={i}
-                      x={p.x}
-                      y={height - padding + 15}
-                      fontSize="14"
-                      textAnchor="middle"
-                        fill="var(--chart-label)"
+                  forecastPoints = []; // No forecast for profit or daily
+                }
+                dataPoints = actualPoints;
+              }
 
-                    >
-                      {p.label}
-                    </text>
-                  ))}
+              const maxValue = Math.max(...dataPoints.map((d) => d.value)) || 1;
+              const width = 550;
+              const height = 180;
+              const padding = 30;
 
-                  {points.map((p, i) => (
-                    <text
-                      key={i}
-                      x={p.x}
-                      y={p.y - 6}
-                      fontSize="14"
-                      textAnchor="middle"
-fill="var(--chart-text)"
-                    >
-                      {p.value.toLocaleString(undefined, {
-                        maximumFractionDigits: 0,
-                      })}
-                    </text>
-                  ))}
-                </svg>
-              </div>
-            );
-          })()}
-        </div>
+              const points = dataPoints.map((d, i) => ({
+                x: padding + (i / (labels.length - 1)) * (width - 2 * padding),
+                y:
+                  height -
+                  padding -
+                  (d.value / maxValue) * (height - 2 * padding),
+                label: d.label,
+                value: d.value,
+                date: d.date,
+              }));
 
-        {/* Table */}
-        <div className={styles.tableContainer}>
-          {activeTab === "inventory" ? (
-            <table className={styles.reportTable}>
-              <thead>
-                <tr>
-                  <th></th>
-                  <th>Product</th>
-                  <th>Sold {showAll ? "This Month" : "Today"}</th>
-                  <th>Stock</th>
-                  <th>Status</th>
-                </tr>
-              </thead>
-              <tbody>
-                {inventoryData.map((p, idx) => (
-                  <tr
-                    key={idx}
+              return (
+                <div>
+                  <h3 style={{ marginBottom: "10px", marginLeft: "10px" }}>
+                    {activeTab === "inventory" && selectedProduct
+                      ? `${
+                          showAll ? "Sold This Month" : "Sold Today"
+                        } - ${selectedProduct}`
+                      : activeTab === "sales"
+                      ? showForecast
+                        ? "Sales Forecast"
+                        : `${
+                            showAll ? "Sales of the Month" : "Sales of the Day"
+                          }`
+                      : activeTab === "profit"
+                      ? `${
+                          showAll
+                            ? "Profits of the Month"
+                            : "Profits of the Day"
+                        }`
+                      : activeTab === "debt"
+                      ? "Debt Overview"
+                      : ""}
+                  </h3>
+
+                  <svg
+                    viewBox={`0 0 ${width} ${height}`}
                     style={{
-                      cursor: "pointer",
-                      backgroundColor:
-                        selectedProduct === p.name ? "#f0f0f0" : "transparent",
+                      width: "100%",
+                      maxWidth: "100%",
+                      height: "auto",
+                      background: "var(--card-bg)",
+                      borderRadius: "12px",
+                      padding: "10px",
+                      boxSizing: "border-box",
                     }}
-                    onClick={() => setSelectedProduct(p.name)}
                   >
-                    <td>{idx + 1}</td>
-                    <td>{p.name}</td>
-                    <td>{p.soldToday}</td>
-                    <td>{p.remaining}</td>
-                    <td
-                      style={{
-                        color: p.status === "Low" ? "red" : "green",
-                        fontWeight: "600",
-                      }}
-                    >
-                      {p.status}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          ) : activeTab === "debt" ? (
-            <table className={styles.reportTable}>
-              <thead>
-                <tr>
-                  <th></th>
-                  <th>Customer</th>
-                  <th>Amount</th>
-                  <th>Balance</th>
-                  <th>Due Date</th>
-                  <th>Status</th>
-                </tr>
-              </thead>
-              <tbody>
-                {debts
-                  .filter((debt) => {
-                    const debtDate = new Date(debt.date); // debt creation date
-                    return (
-                      debtDate.getMonth() === filterDate.getMonth() &&
-                      debtDate.getFullYear() === filterDate.getFullYear()
-                    );
-                  })
-                  .map((debt, idx) => {
-                    const paidAmount =
-                      debt.payments?.reduce(
-                        (sum, p) => sum + parseFloat(p.amount),
-                        0
-                      ) || 0;
-                    const balance = (parseFloat(debt.total) || 0) - paidAmount;
+                    <line
+                      x1={padding}
+                      y1={padding}
+                      x2={padding}
+                      y2={height - padding}
+                      stroke="#999"
+                    />
+                    <line
+                      x1={padding}
+                      y1={height - padding}
+                      x2={width - padding}
+                      y2={height - padding}
+                      stroke="#999"
+                    />
 
-                    return (
-                      <tr key={debt.id}>
-                        <td>{idx + 1}</td>
-                        <td>{debt.customer_name}</td>
-                        <td>
-                          ₱
-                          {parseFloat(debt.total || 0).toLocaleString(
-                            undefined,
-                            {
+                    {/* Actual Line */}
+                    <path
+                      d={actualPoints
+                        .map((p, i) =>
+                          i === 0
+                            ? `M ${
+                                padding +
+                                (i / (labels.length - 1)) *
+                                  (width - 2 * padding)
+                              } ${
+                                height -
+                                padding -
+                                (p.value / maxValue) * (height - 2 * padding)
+                              }`
+                            : `L ${
+                                padding +
+                                (i / (labels.length - 1)) *
+                                  (width - 2 * padding)
+                              } ${
+                                height -
+                                padding -
+                                (p.value / maxValue) * (height - 2 * padding)
+                              }`
+                        )
+                        .join(" ")}
+                      stroke="#4caf50"
+                      strokeWidth="2"
+                      fill="none"
+                    />
+
+                    {/* Forecast Line only for Sales */}
+                    {forecastPoints.length > 0 && (
+                      <path
+                        d={forecastPoints
+                          .map((p, i) =>
+                            i === 0
+                              ? `M ${
+                                  padding +
+                                  (i / (labels.length - 1)) *
+                                    (width - 2 * padding)
+                                } ${
+                                  height -
+                                  padding -
+                                  (p.value / maxValue) * (height - 2 * padding)
+                                }`
+                              : `L ${
+                                  padding +
+                                  (i / (labels.length - 1)) *
+                                    (width - 2 * padding)
+                                } ${
+                                  height -
+                                  padding -
+                                  (p.value / maxValue) * (height - 2 * padding)
+                                }`
+                          )
+                          .join(" ")}
+                        stroke="#007BFF"
+                        strokeWidth="2"
+                        fill="none"
+                      />
+                    )}
+
+                    {/* Forecast Dots */}
+                    {forecastPoints.map((p, i) => {
+                      const x =
+                        padding +
+                        (i / (labels.length - 1)) * (width - 2 * padding);
+                      const y =
+                        height -
+                        padding -
+                        (p.value / maxValue) * (height - 2 * padding);
+
+                      return (
+                        <g key={i}>
+                          <circle
+                            cx={x}
+                            cy={y}
+                            r={5}
+                            fill="#007BFF"
+                            style={{ cursor: "pointer" }}
+                          />
+                          <text
+                            x={x}
+                            y={y - 6}
+                            fontSize="14"
+                            textAnchor="middle"
+                            fill="#007BFF"
+                          >
+                            {p.value.toLocaleString(undefined, {
+                              maximumFractionDigits: 0,
+                            })}
+                          </text>
+                        </g>
+                      );
+                    })}
+
+                    {points.map((p, i) => (
+                      <circle
+                        key={i}
+                        cx={p.x}
+                        cy={p.y}
+                        r={
+                          (!isMonthly &&
+                            p.date?.toDateString() ===
+                              filterDate.toDateString()) ||
+                          (isMonthly && i === filterDate.getMonth())
+                            ? 6
+                            : 5
+                        }
+                        fill={
+                          (!isMonthly &&
+                            p.date?.toDateString() ===
+                              filterDate.toDateString()) ||
+                          (isMonthly && i === filterDate.getMonth())
+                            ? "#ffcc00"
+                            : "rgba(76, 175, 80, 0.5)"
+                        }
+                        style={{ cursor: "pointer" }}
+                        onClick={() => {
+                          if (isMonthly) {
+                            const newDate = new Date(filterDate);
+                            newDate.setMonth(i);
+                            setFilterDate(newDate);
+                          } else {
+                            setFilterDate(p.date);
+                          }
+                        }}
+                      />
+                    ))}
+
+                    {points.map((p, i) => (
+                      <text
+                        key={i}
+                        x={p.x}
+                        y={height - padding + 15}
+                        fontSize="14"
+                        textAnchor="middle"
+                        fill="var(--chart-label)"
+                      >
+                        {p.label}
+                      </text>
+                    ))}
+
+                    {points.map((p, i) => (
+                      <text
+                        key={i}
+                        x={p.x}
+                        y={p.y - 6}
+                        fontSize="14"
+                        textAnchor="middle"
+                        fill="var(--chart-text)"
+                      >
+                        {p.value.toLocaleString(undefined, {
+                          maximumFractionDigits: 0,
+                        })}
+                      </text>
+                    ))}
+                  </svg>
+                </div>
+              );
+            })()}
+          </div>
+
+          {/* Table */}
+          <div className={styles.tableContainer}>
+            {activeTab === "inventory" ? (
+              <table className={styles.reportTable}>
+                <thead>
+                  <tr>
+                    <th></th>
+                    <th>Product</th>
+                    <th>Sold {showAll ? "This Month" : "Today"}</th>
+                    <th>Stock</th>
+                    <th>Status</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {inventoryData.map((p, idx) => (
+                    <tr
+                      key={idx}
+                      style={{
+                        cursor: "pointer",
+                        backgroundColor:
+                          selectedProduct === p.name
+                            ? "#f0f0f0"
+                            : "transparent",
+                      }}
+                      onClick={() => setSelectedProduct(p.name)}
+                    >
+                      <td>{idx + 1}</td>
+                      <td>{p.name}</td>
+                      <td>{p.soldToday}</td>
+                      <td>{p.remaining}</td>
+                      <td
+                        style={{
+                          color: p.status === "Low" ? "red" : "green",
+                          fontWeight: "600",
+                        }}
+                      >
+                        {p.status}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            ) : activeTab === "debt" ? (
+              <table className={styles.reportTable}>
+                <thead>
+                  <tr>
+                    <th></th>
+                    <th>Customer</th>
+                    <th>Amount</th>
+                    <th>Balance</th>
+                    <th>Due Date</th>
+                    <th>Status</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {debts
+                    .filter((debt) => {
+                      const debtDate = new Date(debt.date); // debt creation date
+                      return (
+                        debtDate.getMonth() === filterDate.getMonth() &&
+                        debtDate.getFullYear() === filterDate.getFullYear()
+                      );
+                    })
+                    .map((debt, idx) => {
+                      const paidAmount =
+                        debt.payments?.reduce(
+                          (sum, p) => sum + parseFloat(p.amount),
+                          0
+                        ) || 0;
+                      const balance =
+                        (parseFloat(debt.total) || 0) - paidAmount;
+
+                      return (
+                        <tr key={debt.id}>
+                          <td>{idx + 1}</td>
+                          <td>{debt.customer_name}</td>
+                          <td>
+                            ₱
+                            {parseFloat(debt.total || 0).toLocaleString(
+                              undefined,
+                              {
+                                minimumFractionDigits: 2,
+                                maximumFractionDigits: 2,
+                              }
+                            )}
+                          </td>
+                          <td>
+                            ₱
+                            {balance.toLocaleString(undefined, {
                               minimumFractionDigits: 2,
                               maximumFractionDigits: 2,
-                            }
-                          )}
-                        </td>
-                        <td>
-                          ₱
-                          {balance.toLocaleString(undefined, {
-                            minimumFractionDigits: 2,
-                            maximumFractionDigits: 2,
-                          })}
-                        </td>
-                        <td>{debt.due_date}</td>
+                            })}
+                          </td>
+                          <td>{debt.due_date}</td>
+                          <td
+                            style={{
+                              color: debt.status === "Unpaid" ? "red" : "green",
+                              fontWeight: "600",
+                            }}
+                          >
+                            {debt.status}
+                          </td>
+                        </tr>
+                      );
+                    })}
+                </tbody>
+              </table>
+            ) : (
+              <table className={styles.reportTable}>
+                <thead>
+                  <tr>
+                    <th></th>
+                    <th>Products</th>
+                    <th>Price</th>
+                    <th>Buy Price</th>
+                    <th>Quantity</th>
+                    {activeTab === "sales" && <th>Sales</th>}
+                    {activeTab === "profit" && <th>Profit</th>}
+                  </tr>
+                </thead>
+                <tbody>
+                  {reportData.map((p, idx) => (
+                    <tr key={idx}>
+                      <td>{idx + 1}</td>
+                      <td>{p.name}</td>
+                      <td>₱{p.unitPrice.toFixed(2)}</td>
+                      <td>
+                        ₱
+                        {Number(
+                          stocks.find((s) => s.name === p.name)?.buying_price ||
+                            0
+                        ).toFixed(2)}
+                      </td>
+                      <td>{p.totalQty}</td>
+
+                      {activeTab === "sales" && (
                         <td
                           style={{
-                            color: debt.status === "Unpaid" ? "red" : "green",
-                            fontWeight: "600",
+                            color:
+                              p.totalSales > 0 ? "green" : "var(--chart-text)",
+                            fontWeight: p.totalSales > 0 ? "600" : "normal",
                           }}
                         >
-                          {debt.status}
+                          ₱{p.totalSales.toFixed(2)}
                         </td>
-                      </tr>
-                    );
-                  })}
-              </tbody>
-            </table>
-          ) : (
-            <table className={styles.reportTable}>
-              <thead>
-                <tr>
-                  <th></th>
-                  <th>Products</th>
-                  <th>Price</th>
-                  <th>Buy Price</th>
-                  <th>Quantity</th>
-                  {activeTab === "sales" && <th>Sales</th>}
-                  {activeTab === "profit" && <th>Profit</th>}
-                </tr>
-              </thead>
-              <tbody>
-                {reportData.map((p, idx) => (
-                  <tr key={idx}>
-                    <td>{idx + 1}</td>
-                    <td>{p.name}</td>
-                    <td>₱{p.unitPrice.toFixed(2)}</td>
-                    <td>
-                      ₱
-                      {Number(
-                        stocks.find((s) => s.name === p.name)?.buying_price || 0
-                      ).toFixed(2)}
-                    </td>
-                    <td>{p.totalQty}</td>
+                      )}
 
-                    {activeTab === "sales" && (
-                      <td
-                        style={{
-                          color: p.totalSales > 0 ? "green" : "var(--chart-text)",
-                          fontWeight: p.totalSales > 0 ? "600" : "normal",
-                        }}
-                      >
-                        ₱{p.totalSales.toFixed(2)}
-                      </td>
-                    )}
-
-                    {activeTab === "profit" && (
-                      <td
-                        style={{
-                          color: p.profit > 0 ? "green" : "black",
-                          fontWeight: p.profit !== 0 ? "600" : "normal",
-                        }}
-                      >
-                        ₱{p.profit.toFixed(2)}
-                      </td>
-                    )}
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          )}
+                      {activeTab === "profit" && (
+                        <td
+                          style={{
+                            color: p.profit > 0 ? "green" : "black",
+                            fontWeight: p.profit !== 0 ? "600" : "normal",
+                          }}
+                        >
+                          ₱{p.profit.toFixed(2)}
+                        </td>
+                      )}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            )}
+          </div>
         </div>
-        </div>
-
 
         <BottomNav />
       </div>

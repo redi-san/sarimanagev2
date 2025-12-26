@@ -10,6 +10,7 @@
   --logout-color: #ff4d4f;
   --logout-hover: #d9363e;
   --header-text-color: #000000; /* NEW: topbar & page header text */
+    --font-scale: 1;
   
 }
 
@@ -27,8 +28,9 @@
   --header-text-color: #ffffff; /* topbar & page header white in dark mode */
 }
 
-
-
+html {
+  font-size: calc(16px * var(--font-scale));
+}
 
 .sidebar {
   position: fixed;
@@ -79,7 +81,7 @@
 
 .topbar h2 {
   margin: 0;
-  font-size: 24px;
+  font-size: 1.5rem;
   font-weight: bold;
   color: var(--header-text-color); /* use variable */
 
@@ -129,7 +131,7 @@
   display: flex;
   justify-content: flex-start;
   font-weight: bold;
-  font-size: 16px;
+  font-size: 1rem;
   margin-bottom: 8px;
   color: #ffcc00;
 }
@@ -143,7 +145,7 @@
 }
 
 .username {
-  font-size: 18px;
+  font-size: 1.125rem;
   font-weight: 600;
   margin-bottom: 15px;
 }
@@ -234,7 +236,7 @@
   padding: 10px 12px;
   border: 1px solid #ccc;
   border-radius: 8px;
-  font-size: 15px;
+  font-size: 1rem;
   outline: none;
   transition: border-color 0.2s ease;
     background: var(--card-bg); /* match card background */
@@ -309,7 +311,7 @@
   padding: 10px 12px;
   border: 1px solid #ccc;
   border-radius: 8px;
-  font-size: 15px;
+  font-size: 1rem;
   outline: none;
 }
 .selectInput:focus {

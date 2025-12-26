@@ -2,6 +2,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-d
 import { useEffect } from "react";
 import LogIn from "./auth/LogIn";
 import ForgotPassword from "./auth/ForgotPassword";
+import ResetPassword from "./auth/ResetPassword"; // ✅ Import new component
 import SignUp from "./auth/SignUp";
 import Orders from "./pages/Orders";
 import Stocks from "./pages/Stocks";
@@ -30,6 +31,7 @@ function App() {
           <Route path="/" element={<Navigate to="/login" replace />} />
           <Route path="/login" element={<LogIn />} />
           <Route path="/forgotpassword" element={<ForgotPassword />} />
+          <Route path="/reset-password" element={<ResetPassword />} /> {/* ✅ New route */}
           <Route path="/signup" element={<SignUp />} />
           <Route path="/orders" element={<Orders />} />
           <Route path="/stocks" element={<Stocks />} />

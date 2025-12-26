@@ -9,6 +9,17 @@
 
 }
 
+:root {
+  /* Base font sizes (scale automatically) */
+  --text-xs: 0.75rem;   /* 12px */
+  --text-sm: 0.875rem; /* 14px */
+  --text-md: 1rem;     /* 16px */
+  --text-lg: 1.125rem; /* 18px */
+  --text-xl: 1.5rem;   /* 24px */
+  --text-xxl: 2rem;    /* 32px */
+}
+
+
 [data-theme="dark"] {
   --chart-bg: #1e1e1e;
   --chart-axis: #777;
@@ -19,9 +30,6 @@
     --chart-label: #e0e0e0; /* light gray for dark mode */
 
 }
-
-
-
 
 .sidebar {
   position: fixed;
@@ -74,7 +82,7 @@
 
 .topbar h2 {
   margin: 0;
-  font-size: 24px;
+  font-size: var(--text-xl);
   font-weight: bold;
   color: var(--header-text-color);  /* uses your variable */
 }
@@ -122,6 +130,8 @@
 .reportTable th {
   background-color: #f0f0f0;
   font-weight: bold;
+    font-size: var(--text-sm);
+
 }
 
 
@@ -215,7 +225,7 @@
 
 .card h3 {
   margin: 0;
-  font-size: 14px;             
+  font-size: var(--text-sm);
   font-weight: 600;
 }
 
@@ -267,7 +277,9 @@
     width: 100%;
     border-collapse: collapse;
     table-layout: auto;
-    font-size: 9px;
+    /*font-size: 9px;*/
+      font-size: var(--text-sm);
+
   }
 
   .reportTable th,
@@ -297,7 +309,8 @@
   padding: 8px 14px;
   font-weight: 600;
   cursor: pointer;
-  font-size: 14px;
+  /*font-size: 14px;*/
+  font-size: var(--text-sm);
   transition: all 0.2s ease;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
 }
@@ -512,7 +525,8 @@
   padding: 12px 0;
   background: transparent;
   border: none;
-  font-size: 16px;
+  /*font-size: 16px;*/
+  font-size: var(--text-md);
   font-weight: 600;
   color: #444;
   cursor: pointer;
@@ -593,11 +607,11 @@
 }
 
 .card h3 {
-  font-size: 14px; 
+  font-size: var(--text-sm);
 }
 
 .card p {
-  font-size: 16px; 
+  font-size: var(--text-lg);
   font-weight: 600;
   margin-top: 4px;
 }
@@ -636,6 +650,8 @@
   background-color: var(--table-row-bg);
   color: var(--text-color);
   border-bottom: 1px solid var(--table-border);
+    font-size: var(--text-sm);
+
 }
 
 .barBackground {

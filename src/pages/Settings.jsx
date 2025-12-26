@@ -18,6 +18,10 @@ export default function Settings() {
     return localStorage.getItem("theme") || "light";
   });
 
+  const [fontScale, setFontScale] = useState(() => {
+    return localStorage.getItem("fontScale") || "1";
+  });
+
   const [editedData, setEditedData] = useState({
     firstName: "",
     lastName: "",
@@ -52,7 +56,7 @@ export default function Settings() {
           firstName: res.data.name || "",
           lastName: res.data.last_name || "",
           email: res.data.email || "",
-  username: res.data.username,
+          username: res.data.username,
 
           storeName: res.data.store_name || "",
           mobileNumber: res.data.mobile_number || "",
@@ -87,7 +91,7 @@ export default function Settings() {
         name: editedData.firstName,
         last_name: editedData.lastName,
         email: editedData.email,
-          username: editedData.username,
+        username: editedData.username,
         store_name: editedData.storeName,
         mobile_number: editedData.mobileNumber,
       });
@@ -98,7 +102,7 @@ export default function Settings() {
         name: editedData.firstName,
         last_name: editedData.lastName,
         email: editedData.email,
-         username: editedData.username,
+        username: editedData.username,
         store_name: editedData.storeName,
         mobile_number: editedData.mobileNumber,
       });
@@ -128,6 +132,16 @@ export default function Settings() {
 
   const handleThemeChange = (e) => {
     setTheme(e.target.value);
+  };
+
+  useEffect(() => {
+    document.documentElement.style.setProperty("--font-scale", fontScale);
+
+    localStorage.setItem("fontScale", fontScale);
+  }, [fontScale]);
+
+  const handleFontScaleChange = (e) => {
+    setFontScale(e.target.value);
   };
 
   return (
@@ -218,6 +232,20 @@ export default function Settings() {
                     <option value="system">System Default</option>
                   </select>
                 </div>
+
+                <div className={styles.formGroup}>
+                  <label>Font Size</label>
+                  <select
+                    className={styles.selectInput}
+                    value={fontScale}
+                    onChange={handleFontScaleChange}
+                  >
+                    <option value="0.9">Small</option>
+                    <option value="1">Default</option>
+                    <option value="1.1">Large</option>
+                    <option value="1.2">Extra Large</option>
+                  </select>
+                </div>
               </div>
             )}
           </>
@@ -263,15 +291,14 @@ export default function Settings() {
               </div>
 
               <div className={styles.formGroup}>
-  <label>Username</label>
-  <input
-    id="username"
-    type="text"
-    value={editedData.username}
-    onChange={handleChange}
-  />
-</div>
-
+                <label>Username</label>
+                <input
+                  id="username"
+                  type="text"
+                  value={editedData.username}
+                  onChange={handleChange}
+                />
+              </div>
 
               <div className={styles.formGroup}>
                 <label>Store Name</label>
