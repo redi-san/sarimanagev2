@@ -70,7 +70,7 @@
 
 .topbar h2 {
   margin: 0;
-  font-size: 24px;
+  font-size: 1.5rem; /* 24px */
   font-weight: bold;
   color: var(--header-text-color);
 
@@ -130,7 +130,7 @@
 
 .cardHeader h3 {
   margin: 0 0 0 10px;
-  font-size: 18px;
+  font-size: 1.125rem; /* 18px */
   color: var(--text-color);
 }
 
@@ -158,7 +158,8 @@
   width: 100%;
   max-width: 1200px;  
   text-align: left;   
-  font-size: 24px;
+  /*font-size: 24px;*/
+  font-size: 1.5rem;
   font-weight: bold;
   margin: 0 0 20px 0; 
   color: var(--text-color);
@@ -212,7 +213,7 @@
 
 .cardValue {
   margin-top: 10px; 
-  font-size: 18px;
+  font-size: 1.125rem; /*18px;*/
   font-weight: bold;
   color: #333;
 }
@@ -349,13 +350,13 @@
   }
 
   .productName, .productSales {
-    font-size: 14px;
+    font-size: 1 rem; /*14px;*/
   }
 }
 
 /* Recommended Products heading smaller and more spaced */
 .recommendedTitle {
-  font-size: 20px;       /* smaller than 24px default */
+  font-size: 1.25rem; /* 20px */
   font-weight: bold;
   color: var(--text-color);   /* ✔ auto switches on dark mode */
   margin: 0 0 15px 10px; /* top 0, bottom 15px, left 10px for spacing */

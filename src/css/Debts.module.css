@@ -966,3 +966,62 @@ input:checked + .slider:before {
   color: var(--text-color);
 }
 
+.page-header h1 {
+  font-size: 2rem; /* was 32px */
+}
+
+.search-input,
+.form-group input,
+.product-group input,
+.modal-content input,
+.enter-payment-input,
+.status-select {
+  font-size: 1rem; /* was 16px */
+}
+
+.form-group label,
+.form-group textarea + label {
+  font-size: 1rem; /* was 16px */
+}
+
+.form-group input:focus + label,
+.form-group input:not(:placeholder-shown) + label,
+.form-group textarea:focus + label,
+.form-group textarea:not(:placeholder-shown) + label {
+  font-size: 0.75rem; /* was 12px */
+}
+
+.textarea {
+  font-size: 0.875rem; /* was 14px */
+}
+
+.required {
+  font-size: 0.75rem; /* was 12px */
+}
+
+.modal-content p,
+.receipt-row span,
+.receipt-header,
+.receipt-header span,
+.receipt-totals p {
+  font-size: 0.875rem; /* was 14px */
+}
+
+.create-button {
+  font-size: 2rem; /* was 32px */
+}
+
+.topbar h2 {
+  font-size: 1.5rem; /* was 24px */
+}
+
+.tabButton {
+  font-size: 0.875rem; /* was 14px */
+}
+
+.debts-table th,
+.debts-table td,
+.orders-table th,
+.orders-table td {
+  font-size: 0.875rem; /* was ~14px */
+}

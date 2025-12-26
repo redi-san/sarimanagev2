@@ -15,19 +15,20 @@
   height: 20px;
   padding: 12px 16px;
   border-radius: 8px;
-  font-size: 16px;
+  /*font-size: 16px;*/
+  font-size: 1rem;
   outline: none;
   background: var(--card-bg);
   color: var(--text-color);
   border: 2px solid var(--primary-color);
 }
 
-.page-header h1 {
+/*.page-header h1 {
   color: #ffcc00;
   font-size: 32px;
   font-weight: bold;
   margin: 0;
-}
+} */
 
 .create-button {
   position: fixed;
@@ -70,7 +71,8 @@
 
 .topbar h2 {
   margin: 0;
-  font-size: 24px;
+  /*font-size: 24px;*/
+  font-size: 1.5rem;
   font-weight: bold;
   color: var(--header-text-color);}
 
@@ -123,7 +125,8 @@
 .modal-content p {
   color: var(--text-color); /* was #777 */
   margin-bottom: 20px;
-  font-size: 14px;
+  /*font-size: 14px; */
+  font-size: 0.875rem;
 }
 
 .modal-actions {
