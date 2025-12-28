@@ -1025,3 +1025,41 @@ input:checked + .slider:before {
 .orders-table td {
   font-size: 0.875rem; /* was ~14px */
 }
+
+
+.payment-history {
+  margin-bottom: 20px;
+  text-align: left;
+}
+
+.payment-history h4 {
+  font-size: 1rem;
+  font-weight: bold;
+  color: var(--primary-color);
+  margin-bottom: 12px;
+}
+
+.payment-row {
+  display: flex;
+  justify-content: space-between;
+  background: var(--card-bg); /* match modal background */
+  padding: 10px 12px;
+  border-radius: 8px;
+  margin-bottom: 8px;
+  font-size: 0.875rem;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05); /* subtle shadow */
+}
+
+.payment-row:hover {
+  background: var(--card-bg); /* no hover color change */
+}
+
+.payment-date {
+  font-weight: 600;
+  color: #555;
+}
+
+.payment-amount {
+  font-weight: bold;
+  color: #333;
+}

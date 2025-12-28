@@ -43,6 +43,8 @@ export default function Debts({ setPage }) {
   const productsRef = useRef(products);
   const scanningIndexRef = useRef(scanningIndex);
 
+  const [paymentHistory, setPaymentHistory] = useState([]);
+
   useEffect(() => {
     productsRef.current = products;
   }, [products]);
@@ -131,18 +133,17 @@ export default function Debts({ setPage }) {
     };
   }, [showScanner]);
 
-const fetchDebts = async () => {
-  const user = auth.currentUser;
-  if (!user) return;
+  const fetchDebts = async () => {
+    const user = auth.currentUser;
+    if (!user) return;
 
-  try {
-    const res = await axios.get(`${BASE_URL}/debts/user/${user.uid}`);
-    setDebtsList(res.data);
-  } catch (err) {
-    console.error("Error fetching debts:", err);
-  }
-};
-
+    try {
+      const res = await axios.get(`${BASE_URL}/debts/user/${user.uid}`);
+      setDebtsList(res.data);
+    } catch (err) {
+      console.error("Error fetching debts:", err);
+    }
+  };
 
   const updateProduct = (index, field, value) => {
     const newProducts = [...products];
@@ -270,15 +271,25 @@ const fetchDebts = async () => {
     }
   };
 
-const deleteDebt = async (id) => {
-  try {
-    await axios.delete(`${BASE_URL}/debts/${id}`);
-    await fetchDebts(); // fetch only current user's debts
-  } catch (err) {
-    console.error("Error deleting debt:", err);
-  }
-};
+  const deleteDebt = async (id) => {
+    try {
+      await axios.delete(`${BASE_URL}/debts/${id}`);
+      await fetchDebts(); // fetch only current user's debts
+    } catch (err) {
+      console.error("Error deleting debt:", err);
+    }
+  };
 
+  const getPaymentKey = (debtId) => `payment_history_${debtId}`;
+
+  const loadPaymentHistory = (debtId) => {
+    const stored = localStorage.getItem(getPaymentKey(debtId));
+    return stored ? JSON.parse(stored) : [];
+  };
+
+  const savePaymentHistory = (debtId, history) => {
+    localStorage.setItem(getPaymentKey(debtId), JSON.stringify(history));
+  };
 
   const recordPayment = async () => {
     try {
@@ -287,13 +298,26 @@ const deleteDebt = async (id) => {
         return;
       }
 
+      const amount = parseFloat(paymentAmount);
+
       const res = await axios.post(
         `${BASE_URL}/debts/${paymentDebtId}/payment`,
-        { amount: parseFloat(paymentAmount) }
+        { amount }
       );
 
-      alert(res.data.message || "Payment recorded successfully!");
+      // 🔽 ADD THIS BLOCK
+      const newEntry = {
+        amount,
+        date: new Date().toLocaleString("en-PH"),
+      };
 
+      const updatedHistory = [newEntry, ...loadPaymentHistory(paymentDebtId)];
+
+      savePaymentHistory(paymentDebtId, updatedHistory);
+      setPaymentHistory(updatedHistory);
+      // 🔼 END ADD
+
+      alert(res.data.message || "Payment recorded successfully!");
       await fetchDebts();
 
       setShowPaymentModal(false);
@@ -307,6 +331,10 @@ const deleteDebt = async (id) => {
   const openPaymentModal = (debtId) => {
     setPaymentDebtId(debtId);
     setPaymentAmount("");
+
+    const history = loadPaymentHistory(debtId);
+    setPaymentHistory(history);
+
     setShowPaymentModal(true);
   };
 
@@ -997,6 +1025,11 @@ const deleteDebt = async (id) => {
                 </p>
 
                 <p>
+                  <strong>Payment:</strong>{" "}
+                  {formatPeso(selectedDebt.total_paid || 0)}
+                </p>
+
+                <p>
                   <strong>Current Balance:</strong>{" "}
                   {formatPeso(
                     selectedDebt.total - (selectedDebt.total_paid || 0)
@@ -1004,80 +1037,96 @@ const deleteDebt = async (id) => {
                 </p>
               </div>
 
-              {/* Action buttons */}
-              {selectedDebt.status !== "Paid" && (
-                <div className={styles["modal-actions"]}>
-                  <button
-                    className={styles.Edit}
-                    onClick={() => {
-                      setEditingDebtIndex(debtsList.indexOf(selectedDebt));
-                      setCustomerName(selectedDebt.customer_name);
-                      setContactNumber(selectedDebt.contact_number);
-                      setDate(selectedDebt.date);
-                      setDueDate(selectedDebt.due_date);
-                      setNote(selectedDebt.note || "");
-                      setStatus(selectedDebt.status || "Unpaid");
-                      setProducts(
-                        (selectedDebt.products || []).map((p) => ({
-                          ...p,
-                          productId: p.productId || p.stock_id || p.id || "",
-                          name: p.name || "",
-                          quantity: p.quantity || "",
-                          sellingPrice: p.selling_price ?? p.sellingPrice ?? 0,
-                          buyingPrice: p.buying_price ?? p.buyingPrice ?? 0,
-                          dateAdded: p.dateAdded || p.date_added || "",
-                          stock_id: p.stock_id ?? null,
-                        }))
-                      );
-                      setTotals({
-                        total: selectedDebt.total || 0,
-                        profit: selectedDebt.profit || 0,
-                      });
-                      setSelectedDebt(null);
-                      setShowModal(false);
-                      setShowSecondModal(true);
-                    }}
-                  >
-                    Edit
-                  </button>
+{/* Action buttons */}
+<div className={styles["modal-actions"]}>
+  <button
+    className={styles.Edit}
+    onClick={() => {
+      setEditingDebtIndex(debtsList.indexOf(selectedDebt));
+      setCustomerName(selectedDebt.customer_name);
+      setContactNumber(selectedDebt.contact_number);
+      setDate(selectedDebt.date);
+      setDueDate(selectedDebt.due_date);
+      setNote(selectedDebt.note || "");
+      setStatus(selectedDebt.status || "Unpaid");
+      setProducts(
+        (selectedDebt.products || []).map((p) => ({
+          ...p,
+          productId: p.productId || p.stock_id || p.id || "",
+          name: p.name || "",
+          quantity: p.quantity || "",
+          sellingPrice: p.selling_price ?? p.sellingPrice ?? 0,
+          buyingPrice: p.buying_price ?? p.buyingPrice ?? 0,
+          dateAdded: p.dateAdded || p.date_added || "",
+          stock_id: p.stock_id ?? null,
+        }))
+      );
+      setTotals({
+        total: selectedDebt.total || 0,
+        profit: selectedDebt.profit || 0,
+      });
+      setSelectedDebt(null);
+      setShowModal(false);
+      setShowSecondModal(true);
+    }}
+  >
+    Edit
+  </button>
 
-                  <button
-                    className={styles.Full}
-                    onClick={() => openPaymentModal(selectedDebt.id)}
-                  >
-                    Payment
-                  </button>
-                </div>
-              )}
+  <button
+    className={styles.Full}
+    onClick={() => openPaymentModal(selectedDebt.id)}
+  >
+    Payment
+  </button>
+</div>
 
-              {showPaymentModal && (
-                <div className={styles.modal}>
-                  <div
-                    className={styles["modal-content"]}
-                    onClick={(e) => e.stopPropagation()}
-                  >
-                    <h2>Enter Payment Amount</h2>
-                    <input
-                      type="text"
-                      class="enter-payment-input"
-                      placeholder="Enter Payment Amount"
-                      value={paymentAmount}
-                      onChange={(e) => setPaymentAmount(e.target.value)}
-                    />
-                    <div className={styles["modal-actions"]}>
-                      <button
-                        className={styles.Cancel}
-                        onClick={() => setShowPaymentModal(false)}
-                      >
-                        Cancel
-                      </button>
-                      <button className={styles.Next} onClick={recordPayment}>
-                        Submit
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              )}
+
+{showPaymentModal && (
+  <div className={styles.modal}>
+    <div
+      className={styles["modal-content"]}
+      onClick={(e) => e.stopPropagation()}
+    >
+      {/* 🔽 Payment History */}
+      {paymentHistory.length > 0 && (
+        <div className={styles["payment-history"]}>
+          <h4>Payment History</h4>
+          {paymentHistory.map((p, i) => {
+            const formattedDate = new Date(p.date).toLocaleDateString(); // Date only
+            return (
+              <div key={i} className={styles["payment-row"]}>
+                <span className={styles["payment-date"]}>{formattedDate}</span>
+                <span className={styles["payment-amount"]}>{formatPeso(p.amount)}</span>
+              </div>
+            );
+          })}
+        </div>
+      )}
+
+      <h2>Enter Payment Amount</h2>
+      <input
+        type="text"
+        className="enter-payment-input"
+        placeholder="Enter Payment Amount"
+        value={paymentAmount}
+        onChange={(e) => setPaymentAmount(e.target.value)}
+      />
+      <div className={styles["modal-actions"]}>
+        <button
+          className={styles.Cancel}
+          onClick={() => setShowPaymentModal(false)}
+        >
+          Cancel
+        </button>
+        <button className={styles.Next} onClick={recordPayment}>
+          Submit
+        </button>
+      </div>
+    </div>
+  </div>
+)}
+
             </div>
           </div>
         )}
