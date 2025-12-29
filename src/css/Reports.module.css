@@ -5,20 +5,18 @@
   --chart-point: #4caf50;
   --chart-point-active: #ffcc00;
   --chart-text: black;
-    --chart-label: #444; /* light mode label text */
-
+  --chart-label: #444; /* light mode label text */
 }
 
 :root {
   /* Base font sizes (scale automatically) */
-  --text-xs: 0.75rem;   /* 12px */
+  --text-xs: 0.75rem; /* 12px */
   --text-sm: 0.875rem; /* 14px */
-  --text-md: 1rem;     /* 16px */
+  --text-md: 1rem; /* 16px */
   --text-lg: 1.125rem; /* 18px */
-  --text-xl: 1.5rem;   /* 24px */
-  --text-xxl: 2rem;    /* 32px */
+  --text-xl: 1.5rem; /* 24px */
+  --text-xxl: 2rem; /* 32px */
 }
-
 
 [data-theme="dark"] {
   --chart-bg: #1e1e1e;
@@ -27,8 +25,7 @@
   --chart-point: #8fff8f;
   --chart-point-active: #ffd700;
   --chart-text: #eaeaea;
-    --chart-label: #e0e0e0; /* light gray for dark mode */
-
+  --chart-label: #e0e0e0; /* light gray for dark mode */
 }
 
 .sidebar {
@@ -70,21 +67,20 @@
   left: 0;
   width: 100%;
   height: 60px;
- background: var(--card-bg);        /* changes with theme */
-  color: var(--header-text-color);   /* also changes with theme */  
+  background: var(--card-bg); /* changes with theme */
+  color: var(--header-text-color); /* also changes with theme */
   display: flex;
   align-items: center;
   padding: 0 20px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   z-index: 1300;
-
 }
 
 .topbar h2 {
   margin: 0;
   font-size: var(--text-xl);
   font-weight: bold;
-  color: var(--header-text-color);  /* uses your variable */
+  color: var(--header-text-color); /* uses your variable */
 }
 
 .hamburger {
@@ -97,14 +93,14 @@
 }
 
 .main {
-  margin-top: 60px; 
+  margin-top: 60px;
   /* margin-left: 220px; beside sidebar */
   padding: 20px;
   transition: margin-left 0.3s ease;
 
   display: flex;
   flex-direction: column;
-  align-items: stretch; 
+  align-items: stretch;
 }
 
 .reportTable {
@@ -113,10 +109,16 @@
   margin-top: 20px;
   background-color: #ffffff;
   border-radius: 10px;
-  overflow: hidden; 
+  overflow: hidden;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-}
+  border: none;
+  table-layout: auto;
+  /*font-size: 9px;*/
+  font-size: var(--text-sm);
+  background-color: var(--card-bg);
 
+  table-layout: fixed;
+}
 
 .reportTable th,
 .reportTable td {
@@ -126,22 +128,18 @@
   background-color: #ffffff;
 }
 
-
 .reportTable th {
   background-color: #f0f0f0;
   font-weight: bold;
-    font-size: var(--text-sm);
-
+  font-size: var(--text-sm);
 }
-
-
 
 .filter-controls {
   display: flex;
-  flex-direction: column; 
+  flex-direction: column;
   justify-content: center;
   align-items: center;
-  gap: 10px; 
+  gap: 10px;
   margin: 20px 0;
 }
 
@@ -158,9 +156,9 @@
 
 .reportTable th,
 .reportTable td {
-  border-bottom: 1px solid #ddd; 
-  border-right: none;           
-  border-left: none;             
+  border-bottom: 1px solid #ddd;
+  border-right: none;
+  border-left: none;
   padding: 8px;
   text-align: center;
   background-color: #ffffff;
@@ -169,7 +167,7 @@
 .reportTable td:first-child,
 .reportTable td:nth-child(2) {
   text-align: left;
-  padding-left: 15px; 
+  padding-left: 15px;
 }
 
 .summaryCards {
@@ -187,34 +185,33 @@
   padding: 12px 20px;
   border-radius: 12px;
   box-shadow: 0 3px 8px rgba(0, 0, 0, 0.1);
-  flex: 1;              
-  min-width: 140px;     
-  max-width: 250px;        
+  flex: 1;
+  min-width: 140px;
+  max-width: 250px;
   text-align: center;
   transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
-
 @media (max-width: 768px) {
   .summaryCards {
-    flex-wrap: nowrap;           
-    justify-content: center;     
-    gap: 10px;                 
+    flex-wrap: nowrap;
+    justify-content: center;
+    gap: 10px;
   }
 
   .card {
-    flex: 1;                    
-    min-width: unset;            
-    max-width: none;             
-    padding: 10px 12px;        
+    flex: 1;
+    min-width: unset;
+    max-width: none;
+    padding: 10px 12px;
   }
 
   .card h3 {
-    font-size: 12px;             
+    font-size: 12px;
   }
 
   .card p {
-    font-size: 14px;        
+    font-size: 14px;
   }
 }
 
@@ -230,56 +227,37 @@
 }
 
 .card p {
-  font-size: 18px;              
+  font-size: 18px;
   font-weight: bold;
   margin-top: 6px;
 }
 
 .tableContainer {
-  width: 100%; 
-  overflow-x: auto; 
-  margin: 0 auto;
-   padding: 0 14px; 
-}
-
-.reportTable {
   width: 100%;
-  border-collapse: collapse;
-  border: none;
-  table-layout: auto;
-  background-color: #fff;
-  border-radius: 10px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  overflow-x: auto;
+  margin: 0 auto;
+  padding: 0 14px;
 }
 
 .reportTable th:first-child,
 .reportTable td:first-child {
-  width: 60px;         
-  text-align: center;  
-  padding: 6px 4px;    
+  width: 60px;
+  text-align: center;
+  padding: 6px 4px;
 }
 
 @media (max-width: 768px) {
   .main {
     margin-left: 0;
     margin-right: 0;
-    padding: 0; 
+    padding: 0;
   }
 
   .tableContainer {
     width: 100%;
     overflow-x: hidden;
-    padding: 0 4px; 
+    padding: 0 4px;
     box-sizing: border-box;
-  }
-
-  .reportTable {
-    width: 100%;
-    border-collapse: collapse;
-    table-layout: auto;
-    /*font-size: 9px;*/
-      font-size: var(--text-sm);
-
   }
 
   .reportTable th,
@@ -345,7 +323,7 @@
 .weeklyContainer {
   display: flex;
   flex-wrap: wrap;
-  justify-content: space-around; 
+  justify-content: space-around;
   gap: 12px;
 }
 
@@ -365,13 +343,13 @@
 }
 
 .barBackground {
-  width: 50px;               
-  height: 100px;              
+  width: 50px;
+  height: 100px;
   background: #eee;
   border-radius: 4px;
-  margin: 10px auto 0;         
+  margin: 10px auto 0;
   display: flex;
-  align-items: flex-end;      
+  align-items: flex-end;
   overflow: hidden;
 }
 
@@ -380,7 +358,7 @@
   height: 100%;
   background: #4caf50;
   transition: height 0.5s ease;
-  border-radius: 4px 4px 0 0;  
+  border-radius: 4px 4px 0 0;
 }
 
 .activeBar {
@@ -406,7 +384,8 @@
   padding: 0;
 }
 
-.dayCard h4, .dayCard p {
+.dayCard h4,
+.dayCard p {
   margin: 4px 0;
 }
 
@@ -420,9 +399,9 @@
 }
 
 .monthlyView .dayCard {
-  flex: 1 1 60px;       
-  min-width: 60px;      
-  padding: 4px;        
+  flex: 1 1 60px;
+  min-width: 60px;
+  padding: 4px;
 }
 
 .monthlyView .dayCard h4 {
@@ -433,19 +412,18 @@
   font-size: 12px;
 }
 
-
 @media (max-width: 768px) {
   .weeklyContainer {
-    flex-wrap: nowrap;      
-    overflow-x: auto;        
+    flex-wrap: nowrap;
+    overflow-x: auto;
     justify-content: space-between;
-    gap: 8px;                 
+    gap: 8px;
   }
 
   .dayCard {
-    flex: 0 0 auto;           
-    min-width: 0px;         
-    padding: 6px 4px;       
+    flex: 0 0 auto;
+    min-width: 0px;
+    padding: 6px 4px;
   }
 
   .dayCard h4 {
@@ -457,50 +435,50 @@
   }
 
   .barBackground {
-    width: 20px;              
-    height: 60px;             
+    width: 20px;
+    height: 60px;
   }
 }
 
 @media (max-width: 768px) {
   .monthlyView {
-    flex-wrap: nowrap;        
-    overflow-x: auto;         
+    flex-wrap: nowrap;
+    overflow-x: auto;
     justify-content: space-between;
-    gap: 1px;                 
-    padding-bottom: 6px;      
+    gap: 1px;
+    padding-bottom: 6px;
   }
 
   .monthlyView .dayCard {
-    flex: 0 0 auto;          
-    min-width: 5px;          
+    flex: 0 0 auto;
+    min-width: 5px;
     padding: 4px 2px;
   }
 
   .monthlyView .dayCard h4 {
-    font-size: 8px;          
+    font-size: 8px;
   }
 
   .monthlyView .dayCard p {
-    font-size: 8px;          
+    font-size: 8px;
   }
 
   .monthlyView .barBackground {
-    width: 20px;              
-    height: 60px;             
+    width: 20px;
+    height: 60px;
   }
 }
 
 .weeklySalesSection,
 .tableContainer {
-  max-width: 1100px;       
-  margin: 0 auto;       
-  width: 100%;            
-  box-sizing: border-box;  
+  max-width: 1100px;
+  margin: 0 auto;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .main {
-  margin-top: 60px; 
+  margin-top: 60px;
   padding: 20px;
   padding-bottom: 90px;
   transition: margin-left 0.3s ease;
@@ -514,10 +492,10 @@
   justify-content: space-around;
   background: #f7f7a0;
   border-bottom: 2px solid #ddd;
-  position: sticky; 
+  position: sticky;
   top: 60px; /* below topbar */
-  z-index: 1200; 
-  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+  z-index: 1200;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
 }
 
 .tabButton {
@@ -541,9 +519,8 @@
   background: #ffe14d;
   color: #222;
   border-bottom: 3px solid #d1a700;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
 }
-
 
 .lineAnimation {
   stroke-dasharray: 1000;
@@ -560,7 +537,7 @@
 .salesForecastToggle {
   display: flex;
   justify-content: flex-start; /* keep buttons aligned to the left */
-  gap: 12px; 
+  gap: 12px;
   margin: 20px 0;
 }
 
@@ -576,11 +553,10 @@
   min-width: 80px; /* smaller width */
 }
 
-
 .activeToggle {
   background: #ffcc00;
   color: #000;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
 }
 
 /* Desktop */
@@ -598,10 +574,10 @@
   color: #000;
   padding: 8px 8px; /* smaller padding */
   border-radius: 12px;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-  flex: 1 1 120px;   /* responsive flex */
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  flex: 1 1 120px; /* responsive flex */
   min-width: 120px;
-  max-width: 150px;  /* smaller max width */
+  max-width: 150px; /* smaller max width */
   text-align: center;
   transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
@@ -619,7 +595,7 @@
 .weeklyContainer {
   display: flex;
   flex-wrap: wrap;
-  justify-content: space-around; 
+  justify-content: space-around;
   gap: 12px;
 }
 
@@ -630,15 +606,9 @@
   }
 }
 
-
 #report-section {
   width: 800px; /* better PDF width */
   margin: auto;
-}
-
-
-.reportTable {
-  background-color: var(--card-bg);
 }
 
 .reportTable th {
@@ -650,8 +620,7 @@
   background-color: var(--table-row-bg);
   color: var(--text-color);
   border-bottom: 1px solid var(--table-border);
-    font-size: var(--text-sm);
-
+  font-size: var(--text-sm);
 }
 
 .barBackground {
@@ -662,6 +631,16 @@
   background: var(--chart-bar-fill);
 }
 
-.dayCard h4, .dayCard p {
+.dayCard h4,
+.dayCard p {
   color: var(--text-color);
 }
+
+@media (max-width: 768px) {
+  .reportTable th,
+  .reportTable td {
+    padding: 2px 0px; /* less padding for tight screens */
+    font-size: 13px; /* optional: slightly smaller font */
+  }
+}
+

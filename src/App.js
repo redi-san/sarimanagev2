@@ -11,6 +11,8 @@ import Home from "./pages/Home";
 import Reports from "./pages/Reports";
 import Settings from "./pages/Settings";
 
+import AuthRedirect from "./components/AuthRedirect";
+
 function App() {
   // ✅ Apply theme on app load
   useEffect(() => {
@@ -28,7 +30,9 @@ function App() {
     <div>
       <Router>
         <Routes>
-          <Route path="/" element={<Navigate to="/login" replace />} />
+          {/*<Route path="/" element={<Navigate to="/login" replace />} />*/}
+          <Route path="/" element={<AuthRedirect />} />
+
           <Route path="/login" element={<LogIn />} />
           <Route path="/forgotpassword" element={<ForgotPassword />} />
           <Route path="/reset-password" element={<ResetPassword />} /> {/* ✅ New route */}

@@ -682,7 +682,7 @@ body {
 }
 
 .categoryContent.open {
-  max-height: 1000px; 
+  max-height: none; 
   padding: 1rem; 
 }
 
@@ -811,10 +811,6 @@ body {
   box-sizing: border-box;
 }
 
-.categoryContent.open {
-  max-height: 1000px; 
-  padding: 1rem;
-}
 
 .formGroupNew {
   margin: 4px 0;
@@ -971,3 +967,4 @@ select {
   color: var(--text-color);
 }
 
+ 

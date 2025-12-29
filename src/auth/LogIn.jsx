@@ -7,6 +7,10 @@ import logo from "../assets/sarimanagelogo.png";
 import hidePasswordIcon from "../assets/hidePassword.png";
 import showPasswordIcon from "../assets/showPassword.png";
 
+import { useEffect } from "react";
+import { onAuthStateChanged } from "firebase/auth";
+
+
 const BASE_URL = process.env.REACT_APP_API_URL || "http://localhost:5000"; // ✅ defined
 
 function LogIn() {
@@ -49,6 +53,14 @@ function LogIn() {
   const forgotPassword = () => {
     navigate("/forgotpassword"); // can trigger Firebase reset email
   };
+
+  useEffect(() => {
+  const unsub = onAuthStateChanged(auth, (user) => {
+    if (user) navigate("/home", { replace: true });
+  });
+  return () => unsub();
+}, [auth, navigate]);
+
 
   return (
     <div className={styles.container}>
