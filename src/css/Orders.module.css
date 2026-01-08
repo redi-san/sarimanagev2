@@ -909,3 +909,15 @@ color: var(--text-color);  cursor: pointer;
 }
 
 
+.datePicker {
+  background: transparent;
+  border: none;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  color: inherit;
+}
+
+.datePicker::-webkit-calendar-picker-indicator {
+  cursor: pointer;
+}

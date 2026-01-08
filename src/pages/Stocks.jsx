@@ -322,7 +322,7 @@ export default function Stocks({ setPage }) {
                 setTimeout(() => setShowCategoryDropdown(false), 150)
               } // slight delay to allow click
             />
-{/*
+            {/*
             {showCategoryDropdown && categories.length > 0 && (
               <ul
                 className={styles["category-dropdown"]}
@@ -402,9 +402,12 @@ export default function Stocks({ setPage }) {
           ) : (
             <div className={styles.categoryAccordionContainer}>
               {categories.map((cat) => {
-                const categoryStocks = filteredStocks.filter(
-                  (stock) => stock.category === cat
-                );
+const categoryStocks = filteredStocks
+  .filter((stock) => stock.category === cat)
+  .sort((a, b) =>
+    (a.name || "").localeCompare(b.name || "")
+  );
+
 
                 if (categoryStocks.length === 0) return null;
 
@@ -426,8 +429,8 @@ export default function Stocks({ setPage }) {
                         <thead>
                           <tr>
                             <th>Product</th>
-                            <th>Stock</th>
                             <th>Price</th>
+                            <th>Stock</th>
                             <th>Actions</th>
                           </tr>
                         </thead>
@@ -476,8 +479,8 @@ export default function Stocks({ setPage }) {
                                   </span>
                                 </div>
                               </td>
-                              <td>{stock.stock}</td>
                               <td>₱{stock.selling_price}</td>
+                              <td>{stock.stock}</td>
                               <td>
                                 <button
                                   className={styles.deleteBtn}

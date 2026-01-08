@@ -303,6 +303,13 @@ export default function Reports() {
     report.style.transform = originalTransform;
   };
 
+  const formatDisplayDate = (date) =>
+    date.toLocaleDateString("en-US", {
+      month: "2-digit",
+      day: "2-digit",
+      year: "numeric",
+    });
+
   return (
     <div>
       {/* Topbar */}
@@ -376,14 +383,25 @@ export default function Reports() {
               ←
             </button>
 
-            <span>
-              {showAll
-                ? filterDate.toLocaleString("default", {
-                    month: "long",
-                    year: "numeric",
-                  })
-                : formatDate(filterDate)}
-            </span>
+            {showAll ? (
+              <span>
+                {filterDate.toLocaleString("default", {
+                  month: "long",
+                  year: "numeric",
+                })}
+              </span>
+            ) : (
+              <label className={styles.dateLabel}>
+                {formatDisplayDate(filterDate)}
+                <input
+                  type="date"
+                  value={formatDate(filterDate)} // YYYY-MM-DD
+                  onChange={(e) => setFilterDate(new Date(e.target.value))}
+                  className={styles.hiddenDateInput}
+                  max={formatDate(new Date())}
+                />
+              </label>
+            )}
 
             <button
               onClick={() => {
@@ -737,10 +755,11 @@ export default function Reports() {
                           />
                           <text
                             x={x}
-                            y={y - 6}
-                            fontSize="14"
+                            y={height - padding + 2}
+                            fontSize="13"
                             textAnchor="middle"
                             fill="#007BFF"
+                            fontWeight="600"
                           >
                             {p.value.toLocaleString(undefined, {
                               maximumFractionDigits: 0,

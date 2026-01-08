@@ -383,84 +383,80 @@ export default function Orders({ setPage }) {
     }
   }, [location.state]);
 
-const stopScanner = async () => {
-  if (!scannerRef.current) return;
+  const stopScanner = async () => {
+    if (!scannerRef.current) return;
 
-  try {
-    await scannerRef.current.clear();
-  } catch (err) {
-    console.warn("Failed to clear scanner:", err);
-  }
+    try {
+      await scannerRef.current.clear();
+    } catch (err) {
+      console.warn("Failed to clear scanner:", err);
+    }
 
-  scannerRef.current = null;
+    scannerRef.current = null;
 
-  // Extra safety: remove leftover UI
-  const el = document.getElementById("order-barcode-reader");
-  if (el) el.innerHTML = "";
-};
-
-
-// Cleanup scanner on unmount
-useEffect(() => {
-  return () => {
-    stopScanner();
+    // Extra safety: remove leftover UI
+    const el = document.getElementById("order-barcode-reader");
+    if (el) el.innerHTML = "";
   };
-}, []);
 
-const handleScanSuccess = (decodedText) => {
-  const foundStock = stocks.find((s) => s.barcode?.toString() === decodedText);
+  // Cleanup scanner on unmount
+  useEffect(() => {
+    return () => {
+      stopScanner();
+    };
+  }, []);
 
-  setProducts((prev) => {
-    const newProducts = [
-      ...prev,
-      {
-        stock_id: decodedText,
-        name: foundStock?.name || "",
-        selling_price: foundStock?.selling_price || "",
-        buying_price: foundStock?.buying_price || "",
-        quantity: 1,
-      },
-    ];
-    calculateTotals(newProducts);
-    return newProducts;
-  });
+  const handleScanSuccess = (decodedText) => {
+    const foundStock = stocks.find(
+      (s) => s.barcode?.toString() === decodedText
+    );
 
-  stopScanner();
-  setShowScanner(false);
-  setOrderNumber(generateOrderNumber());
-};
-
-const handleScanError = (err) => {
-  console.warn("Scan error:", err);
-};
-
-
-
-const openScanner = () => {
-  setShowScanner(true);
-
-  setTimeout(() => {
-    // Prevent duplicate scanners
-    if (scannerRef.current) return;
-
-    scannerRef.current = new Html5QrcodeScanner("order-barcode-reader", {
-      fps: 10,
-      qrbox: 180,
-      rememberLastUsedCamera: true,
+    setProducts((prev) => {
+      const newProducts = [
+        ...prev,
+        {
+          stock_id: decodedText,
+          name: foundStock?.name || "",
+          selling_price: foundStock?.selling_price || "",
+          buying_price: foundStock?.buying_price || "",
+          quantity: 1,
+        },
+      ];
+      calculateTotals(newProducts);
+      return newProducts;
     });
 
-    scannerRef.current.render(handleScanSuccess, handleScanError);
-  }, 300);
-};
+    stopScanner();
+    setShowScanner(false);
+    setOrderNumber(generateOrderNumber());
+  };
 
-useEffect(() => {
-  if (showScanner) {
-    openScanner();
-  }
-}, [showScanner]);
+  const handleScanError = (err) => {
+    console.warn("Scan error:", err);
+  };
 
+  const openScanner = () => {
+    setShowScanner(true);
 
+    setTimeout(() => {
+      // Prevent duplicate scanners
+      if (scannerRef.current) return;
 
+      scannerRef.current = new Html5QrcodeScanner("order-barcode-reader", {
+        fps: 10,
+        qrbox: 180,
+        rememberLastUsedCamera: true,
+      });
+
+      scannerRef.current.render(handleScanSuccess, handleScanError);
+    }, 300);
+  };
+
+  useEffect(() => {
+    if (showScanner) {
+      openScanner();
+    }
+  }, [showScanner]);
 
   return (
     <div>
@@ -526,9 +522,19 @@ useEffect(() => {
                     >
                       ←
                     </button>
-                    <span>
-                      {showAll ? "All Orders" : formatDate(filterDate)}
-                    </span>
+                    {showAll ? (
+                      <span>All Orders</span>
+                    ) : (
+                      <input
+                        type="date"
+                        value={formatDate(filterDate)}
+                        onChange={(e) =>
+                          setFilterDate(new Date(e.target.value))
+                        }
+                        className={styles.datePicker}
+                      />
+                    )}
+
                     <button
                       onClick={() =>
                         setFilterDate(
@@ -612,34 +618,33 @@ useEffect(() => {
             <div className={styles["modal-content"]}>
               <h2>Add Order</h2>
               <p>Enter order details</p>
-<div className={styles["form-group"]}>
-  <label htmlFor="orderNumber" className={styles.inputLabel}>
-    Order Number
-  </label>
-  <input
-    type="text"
-    id="orderNumber"
-    value={order_number}
-    onChange={(e) => setOrderNumber(e.target.value)}
-    onKeyDown={handleEnterFocus}
-    required
-  />
-</div>
+              <div className={styles["form-group"]}>
+                <label htmlFor="orderNumber" className={styles.inputLabel}>
+                  Order Number
+                </label>
+                <input
+                  type="text"
+                  id="orderNumber"
+                  value={order_number}
+                  onChange={(e) => setOrderNumber(e.target.value)}
+                  onKeyDown={handleEnterFocus}
+                  required
+                />
+              </div>
 
-<div className={styles["form-group"]}>
-  <label htmlFor="customerName" className={styles.inputLabel}>
-    Customer Name
-  </label>
-  <input
-    type="text"
-    id="customerName"
-    value={customer_name}
-    onChange={(e) => setCustomerName(e.target.value)}
-    onKeyDown={handleEnterFocus}
-    required
-  />
-</div>
-
+              <div className={styles["form-group"]}>
+                <label htmlFor="customerName" className={styles.inputLabel}>
+                  Customer Name
+                </label>
+                <input
+                  type="text"
+                  id="customerName"
+                  value={customer_name}
+                  onChange={(e) => setCustomerName(e.target.value)}
+                  onKeyDown={handleEnterFocus}
+                  required
+                />
+              </div>
 
               <div className={styles["modal-actions"]}>
                 <button
@@ -685,7 +690,18 @@ useEffect(() => {
                       value={product.name}
                       onChange={(e) => {
                         const name = e.target.value;
+
                         updateProduct(index, "name", name);
+
+                        // 🔥 ALWAYS keep suggestions active while typing
+                        setActiveSuggestionIndex(index);
+
+                        // If name is erased, clear auto-filled fields
+                        if (name.trim() === "") {
+                          updateProduct(index, "selling_price", "");
+                          updateProduct(index, "buying_price", "");
+                          updateProduct(index, "stock_id", "");
+                        }
                       }}
                       onFocus={() => setActiveSuggestionIndex(index)}
                       onBlur={() =>
@@ -837,7 +853,7 @@ useEffect(() => {
               <div className={styles.buttonRow}>
                 <button
                   className={styles["add-product-btn"]}
-onClick={openScanner}
+                  onClick={openScanner}
                 >
                   Scan Product
                 </button>
@@ -867,16 +883,15 @@ onClick={openScanner}
                     id="order-barcode-reader"
                     style={{ width: "100%" }}
                   ></div>
-<button
-  onClick={async () => {
-    await stopScanner();
-    setShowScanner(false);
-    setOrderNumber(generateOrderNumber());
-  }}
->
-  Cancel
-</button>
-
+                  <button
+                    onClick={async () => {
+                      await stopScanner();
+                      setShowScanner(false);
+                      setOrderNumber(generateOrderNumber());
+                    }}
+                  >
+                    Cancel
+                  </button>
                 </div>
               )}
 
