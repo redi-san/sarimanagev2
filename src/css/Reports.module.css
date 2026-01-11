@@ -6,6 +6,8 @@
   --chart-point-active: #ffcc00;
   --chart-text: black;
   --chart-label: #444; /* light mode label text */
+    --selected-bg: #f0f0f0; /* light mode */
+
 }
 
 :root {
@@ -26,6 +28,8 @@
   --chart-point-active: #ffd700;
   --chart-text: #eaeaea;
   --chart-label: #e0e0e0; /* light gray for dark mode */
+  --selected-bg: #333333; /* dark mode */
+
 }
 
 .sidebar {
@@ -487,16 +491,32 @@
   align-items: stretch;
 }
 
-.tabBar {
+/*.tabBar {
   display: flex;
   justify-content: space-around;
   background: #f7f7a0;
   border-bottom: 2px solid #ddd;
   position: sticky;
-  top: 60px; /* below topbar */
+  top: 60px; /* below topbar 
+  z-index: 1200;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+} */
+
+.tabBar {
+  display: flex;
+  width: 100vw;          /* full viewport width */
+  max-width: 100%;       /* prevent overflow */
+  margin: 0;             /* remove any margin */
+  padding: 0;            /* remove any padding */
+  justify-content: space-between; /* or space-evenly */
+  background: #f7f7a0;
+  border-bottom: 2px solid #ddd;
+  position: sticky;
+  top: 60px; 
   z-index: 1200;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
 }
+
 
 .tabButton {
   flex: 1;

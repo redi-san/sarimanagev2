@@ -97,7 +97,7 @@ export default function Reports() {
       startStock,
       soldToday,
       remaining,
-      status: remaining <= stock.lowstock ? "Low" : "OK",
+      status: remaining <= stock.lowstock ? "Low" : "In Stock",
     };
   });
 
@@ -310,6 +310,12 @@ export default function Reports() {
       year: "numeric",
     });
 
+  useEffect(() => {
+    if (stocks.length > 0 && !selectedProduct) {
+      setSelectedProduct(stocks[0].name);
+    }
+  }, [stocks, selectedProduct]);
+
   return (
     <div>
       {/* Topbar */}
@@ -395,10 +401,14 @@ export default function Reports() {
                 {formatDisplayDate(filterDate)}
                 <input
                   type="date"
-                  value={formatDate(filterDate)} // YYYY-MM-DD
-                  onChange={(e) => setFilterDate(new Date(e.target.value))}
+                  value={formatDate(filterDate)}
+                  onChange={(e) => {
+                    if (!e.target.value) return; // 👈 ignore clear button
+                    setFilterDate(new Date(e.target.value));
+                  }}
                   className={styles.hiddenDateInput}
                   max={formatDate(new Date())}
+                  required
                 />
               </label>
             )}
@@ -852,12 +862,11 @@ export default function Reports() {
                 <tbody>
                   {inventoryData.map((p, idx) => (
                     <tr
-                      key={idx}
                       style={{
                         cursor: "pointer",
                         backgroundColor:
                           selectedProduct === p.name
-                            ? "#f0f0f0"
+                            ? "var(--selected-bg)"
                             : "transparent",
                       }}
                       onClick={() => setSelectedProduct(p.name)}
@@ -868,7 +877,7 @@ export default function Reports() {
                       <td>{p.remaining}</td>
                       <td
                         style={{
-                          color: p.status === "Low" ? "red" : "green",
+                          color: p.status === "Low" ? "tomato" : "green",
                           fontWeight: "600",
                         }}
                       >

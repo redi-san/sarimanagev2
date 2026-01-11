@@ -279,16 +279,17 @@ export default function Settings() {
                 />
               </div>
 
-              <div className={styles.formGroup}>
-                <label>Email</label>
-                <input
-                  id="email"
-                  type="email"
-                  value={editedData.email}
-                  onChange={handleChange}
-                  placeholder="Enter email address"
-                />
-              </div>
+<div className={styles.formGroup}>
+  <label>Email</label>
+  <input
+    id="email"
+    type="email"
+    value={editedData.email}
+    readOnly
+    placeholder="Enter email address"
+  />
+</div>
+
 
               <div className={styles.formGroup}>
                 <label>Username</label>

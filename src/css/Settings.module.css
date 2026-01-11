@@ -133,7 +133,7 @@ html {
   font-weight: bold;
   font-size: 1rem;
   margin-bottom: 8px;
-  color: #ffcc00;
+  color:  var(--header-text-color);
 }
 
 .profilePic {

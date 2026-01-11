@@ -34,6 +34,8 @@ export default function Orders({ setPage }) {
   const [editingOrderId, setEditingOrderId] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
   const [showDebtModal, setShowDebtModal] = useState(false);
+  const [paymentAmount, setPaymentAmount] = useState("");
+  const [changeAmount, setChangeAmount] = useState(0);
 
   const scannerRef = useRef(null);
 
@@ -235,6 +237,8 @@ export default function Orders({ setPage }) {
       customer_name,
       total: totals.total,
       profit: totals.profit,
+      payment_amount: paymentAmount,
+      change_amount: changeAmount,
       products: products.map((p) => ({
         stock_id: p.stock_id,
         name: p.name,
@@ -321,6 +325,8 @@ export default function Orders({ setPage }) {
     setTotals({ total: 0, profit: 0 });
     setOrderNumber("");
     setCustomerName("");
+    setPaymentAmount("");
+    setChangeAmount(0);
   };
 
   const formatDate = (date) => {
@@ -458,6 +464,12 @@ export default function Orders({ setPage }) {
     }
   }, [showScanner]);
 
+  useEffect(() => {
+    const pay = parseFloat(paymentAmount) || 0;
+    const total = parseFloat(totals.total) || 0;
+    setChangeAmount(pay - total);
+  }, [paymentAmount, totals.total]);
+
   return (
     <div>
       {/* Topbar */}
@@ -528,9 +540,10 @@ export default function Orders({ setPage }) {
                       <input
                         type="date"
                         value={formatDate(filterDate)}
-                        onChange={(e) =>
-                          setFilterDate(new Date(e.target.value))
-                        }
+                        onChange={(e) => {
+                          if (!e.target.value) return; // 👈 ignore clear (❌) button
+                          setFilterDate(new Date(e.target.value));
+                        }}
                         className={styles.datePicker}
                       />
                     )}
@@ -645,6 +658,26 @@ export default function Orders({ setPage }) {
                   required
                 />
               </div>
+
+              <div className={styles["form-group"]}>
+                <label className={styles.inputLabel}>Payment Amount</label>
+                <input
+                  type="number"
+                  placeholder="₱0.00"
+                  value={paymentAmount}
+                  onChange={(e) => setPaymentAmount(e.target.value)}
+                />
+              </div>
+
+<div className={styles.totals}>
+  <div className={styles.totalBox}>
+    <span>Total: {formatCurrency(totals.total)}</span>
+  </div>
+  <div className={styles.totalBox}>
+    <span>Change: {formatCurrency(changeAmount)}</span>
+  </div>
+</div>
+
 
               <div className={styles["modal-actions"]}>
                 <button
@@ -1005,16 +1038,19 @@ export default function Orders({ setPage }) {
                     </div>
                   ))}
               </div>
+<div className={styles["receipt-totals"]}>
+  <div className={styles.leftColumn}>
+    <p><strong>Total:</strong> {formatCurrency(selectedOrder.total)}</p>
+    <p><strong>Profit:</strong> {formatCurrency(selectedOrder.profit)}</p>
+  </div>
+  <div className={styles.rightColumn}>
+    <p><strong>Payment:</strong> {formatCurrency(selectedOrder.payment_amount)}</p>
+    <p><strong>Change:</strong> {formatCurrency(selectedOrder.change_amount)}</p>
+  </div>
+</div>
 
-              <div className={styles["receipt-totals"]}>
-                <p>
-                  <strong>Total: </strong> {formatCurrency(selectedOrder.total)}
-                </p>
-                <p>
-                  <strong>Profit: </strong>
-                  {formatCurrency(selectedOrder.profit)}
-                </p>
-              </div>
+
+
 
               <div className={styles["receipt-actions"]}>
                 <button
@@ -1048,6 +1084,10 @@ export default function Orders({ setPage }) {
                       total: selectedOrder.total,
                       profit: selectedOrder.profit,
                     });
+
+                    setPaymentAmount(selectedOrder.payment_amount || "");
+                    setChangeAmount(selectedOrder.change_amount || 0);
+
                     setEditingOrderId(selectedOrder.id);
                     setIsEditing(true);
                     setSelectedOrder(null);

@@ -1,3 +1,6 @@
+
+
+
 .page-header {
   margin-top: 70px;
   display: flex;
@@ -21,7 +24,9 @@
   background: var(--card-bg);
   color: var(--text-color);
   border: 2px solid var(--primary-color);
-}
+} 
+
+
 
 /*.page-header h1 {
   color: #ffcc00;
@@ -69,21 +74,21 @@
   z-index: 1300;
 }
 
-.topbar h2 {
+ /*.topbar h2 {
   margin: 0;
-  /*font-size: 24px;*/
+  /*font-size: 24px;
   font-size: 1.5rem;
   font-weight: bold;
-  color: var(--header-text-color);}
+  color: var(--header-text-color);}*/
 
-.hamburger {
+/*.hamburger {
   font-size: 24px;
   cursor: pointer;
   border: none;
   background: transparent;
   color: #000000;
   margin-right: 12px;
-}
+} */
 
 .deleteIcon {
   width: 18px;
@@ -189,7 +194,7 @@
   justify-content: center;
   cursor: pointer;
   overflow: hidden;
-  background: #f9f9f9;
+  background: var(--card-bg);
   transition: border 0.2s ease;
 }
 
@@ -471,10 +476,6 @@ body {
   color: red;
 }
 
-.lowStockRow {
-  background-color: #fff3f3;
-}
-
 .productCell {
   display: flex;
   align-items: center;
@@ -509,7 +510,7 @@ body {
 
 .productName {
   font-weight: 500;
-  color: #333;
+  color: var(--text-color);
 }
 
 .stocks-table-container {
@@ -565,6 +566,7 @@ body {
     width: 20px;
     background: linear-gradient(to left, rgba(255, 255, 255, 0.9), transparent);
     pointer-events: none;
+  display: none;
   }
 
   .productThumb,
@@ -617,6 +619,7 @@ body {
     overflow: visible;
     text-overflow: unset;
     word-break: break-word;
+ font-weight: 500;
   }
 }
 
@@ -728,9 +731,7 @@ body {
   background: #f1f1f1;
 }
 
-.productName {
-  font-weight: 500;
-}
+
 
 .noImage {
   width: 40px;
@@ -745,8 +746,10 @@ body {
 }
 
 .lowStockRow {
-  background-color: #fff3e0 !important;
+  background-color: var(--low-stock-bg);
+  color: var(--text-color); /* optional if you want text color contrast */
 }
+
 
 .deleteBtn {
   background: none;
@@ -929,8 +932,8 @@ body {
   padding: 10px 20px;
   border: 2px solid #ffcc00;
   border-radius: 12px;
-  background-color: #fff;
-  color: #333;
+  background-color: var(--card-bg);
+  color:  var(--text-color);
   font-weight: 600;
   cursor: pointer;
   transition: all 0.3s ease;
@@ -938,17 +941,17 @@ body {
   text-align: center;
 }
 
-/* Hover effect */
+/* Hover effect 
 .filterBar button:hover {
   background-color: #ffcc00;
   color: #fff;
   transform: translateY(-2px);
-}
+}*/
 
 /* Active filter */
 .filterBar button.activeFilter {
   background-color: #ffcc00;
-  color: #fff;
+  color: #333;
   border-color: #daae00;
   box-shadow: 0 4px 8px rgba(0,0,0,0.15);
 }
