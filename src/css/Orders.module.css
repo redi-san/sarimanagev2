@@ -4,17 +4,16 @@
   }
 }
 
-
 .page-header {
-  margin: 70px auto 10px auto; 
+  margin: 70px auto 10px auto;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   text-align: center;
   width: 100%;
-  max-width: 1200px; 
-  padding: 0 20px; 
+  max-width: 1200px;
+  padding: 0 20px;
   box-sizing: border-box;
 }
 
@@ -23,9 +22,9 @@
   justify-content: center;
   background-color: var(--card-bg);
   border-bottom: 2px solid #ddd;
-  position: sticky; 
-  top: 60px; 
-  z-index: 1200; 
+  position: sticky;
+  top: 60px;
+  z-index: 1200;
 }
 
 .tabButton {
@@ -35,7 +34,8 @@
   border: none;
   font-size: 1rem; /*16px */
   font-weight: 600;
-color: var(--text-color);  cursor: pointer;
+  color: var(--text-color);
+  cursor: pointer;
   transition: background 0.3s, color 0.3s;
 }
 
@@ -77,11 +77,10 @@ color: var(--text-color);  cursor: pointer;
   color: var(--header-text-color);
 }
 
-
 .main {
-  margin-top: 5px; 
+  margin-top: 5px;
   padding: 20px;
-  padding-bottom: 90px; 
+  padding-bottom: 90px;
   transition: margin-left 0.3s ease;
   display: flex;
   flex-direction: column;
@@ -110,7 +109,8 @@ color: var(--text-color);  cursor: pointer;
 }
 
 .create-button:hover {
-  background-color: var(--secondary-color);}
+  background-color: var(--secondary-color);
+}
 
 .topbar {
   position: fixed;
@@ -143,7 +143,7 @@ color: var(--text-color);  cursor: pointer;
 
 .form-group label,
 .inputLabel {
-  font-size: 0.875rem; /* 14px */
+  font-size: 0.8rem; /* 14px */
   font-weight: bold;
   color: #222; /* black shade */
   margin-bottom: 4px;
@@ -159,7 +159,7 @@ color: var(--text-color);  cursor: pointer;
   color: var(--text-color);
   border: 1px solid var(--input-border);
   outline: none;
-    border-color: var(--input-focus);
+  border-color: var(--input-focus);
 }
 
 /*.form-group input:focus + label,
@@ -201,13 +201,11 @@ color: var(--text-color);  cursor: pointer;
   width: 90%;
   max-width: 1000px;
 
-  /* ✅ proper sizing */
-  min-height: 40px;          /* touch-friendly */
+  min-height: 40px;
   padding: 10px 12px;
   font-size: 1rem;
   line-height: 1.2;
 
-  /* ✅ center horizontally */
   display: block;
   margin: 8px auto;
 
@@ -216,11 +214,10 @@ color: var(--text-color);  cursor: pointer;
   box-sizing: border-box;
 }
 
-
 .modal-content h2 {
   margin-top: 0px;
   margin-bottom: 0px;
-  color: #ffc107;
+  color: var(--text-color);
 }
 
 /*.modal-content input {
@@ -280,36 +277,14 @@ color: var(--text-color);  cursor: pointer;
   padding: 12px;
   border-top: 1px solid #ddd;
   text-align: left;
+  display: flex;
+  justify-content: center;
+  gap: 10px;
 }
 
 .totals p {
   margin: 4px 0;
   font-weight: bold;
-}
-
-@media (max-width: 768px) {
-  .sidebar {
-    transform: translateX(-220px);
-  }
-  .sidebar.active {
-    transform: translateX(0);
-  }
-
-  .page-header {
-    margin-top: 70px;
-    max-width: 100%;
-    padding: 0 10px;
-  }
-
-  .search-input {
-    width: 100%;
-    max-width: 100%;
-  }
-
-  .orders-list {
-    margin-top: 100px;
-    padding: 10px;
-  }
 }
 
 .modal-second {
@@ -360,16 +335,16 @@ color: var(--text-color);  cursor: pointer;
 }
 
 .totals input {
-  width: 48%;
+  width: 120px;
+  height: 40px;
   margin: 8px 1%;
   padding: 8px;
   border-radius: 6px;
   border: 1px solid #ccc;
   background: #d9d9d9;
   font-weight: bold;
-  text-align: right;
+  text-align: center;
 }
-
 
 .product-entry input,
 .product-row input {
@@ -388,20 +363,6 @@ color: var(--text-color);  cursor: pointer;
 .product-row input {
   flex: 1;
   height: 40px;
-}
-
-.totals {
-  display: flex;
-  justify-content: center;
-  gap: 10px;
-}
-
-.totals input {
-  width: 120px;
-  text-align: center;
-  height: 40px;
-  font-weight: bold;
-  border-radius: 6px;
 }
 
 .modal-second .product-entry > input {
@@ -440,8 +401,8 @@ color: var(--text-color);  cursor: pointer;
   text-align: left;
   background: var(--card-bg); /* was #fff */
   border-radius: 12px;
-  color: var(--text-color); /* add this */  border-radius: 12px;
-  
+  color: var(--text-color); /* add this */
+  border-radius: 12px;
 }
 .receipt-modal p,
 .receipt-totals p {
@@ -451,7 +412,6 @@ color: var(--text-color);  cursor: pointer;
 .receipt-header {
   color: var(--text-color); /* instead of #444 */
 }
-
 
 .receipt-products {
   margin-top: 16px;
@@ -473,6 +433,8 @@ color: var(--text-color);  cursor: pointer;
   padding-top: 10px;
   font-weight: bold;
   font-size: 16px;
+  display: flex;
+  justify-content: space-between; /* left vs right */
 }
 
 .receipt-modal button {
@@ -485,11 +447,10 @@ color: var(--text-color);  cursor: pointer;
   cursor: pointer;
 }
 
-
 .receipt-actions {
   display: flex;
   justify-content: flex-end;
-  gap: 12px; 
+  gap: 12px;
   margin-top: 20px;
 }
 
@@ -532,7 +493,7 @@ color: var(--text-color);  cursor: pointer;
   cursor: pointer;
 }
 
-.product-actions {
+/*.product-actions {
   display: flex;
   gap: 50px;
   margin-top: 10px;
@@ -550,7 +511,7 @@ color: var(--text-color);  cursor: pointer;
 
 .scan-product-btn:hover {
   background-color: #45a049;
-}
+} */
 
 .filter-top button {
   padding: 8px 18px;
@@ -561,7 +522,7 @@ color: var(--text-color);  cursor: pointer;
   font-weight: 600;
   font-size: 0.875rem; /*14px*/
   cursor: pointer;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
   transition: all 0.2s ease;
 }
 
@@ -590,7 +551,7 @@ color: var(--text-color);  cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
   transition: all 0.2s ease;
 }
 
@@ -608,31 +569,24 @@ color: var(--text-color);  cursor: pointer;
   padding: 6px 12px;
   background: #fff3c4;
   border-radius: 12px;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
 .inputLabel {
-  display: block;
-  font-size: 14px;
-  font-weight: 600;
+  /*font-size: 14px;*/
   color: #333;
-  margin-bottom: 4px;
+  display: block;
+  text-align: left;
+  margin-bottom: 2px;
+  font-weight: bold;
+  font-size: 10px;
+  padding-left: 4px;
 }
 
 .input-group {
   flex: 1;
   display: flex;
   flex-direction: column;
-}
-
-.inputLabel {
-  display: block;
-  text-align: left;
-  margin-bottom: 2px;
-  font-weight: bold;
-  color: #333;
-  font-size: 10px;
-  padding-left: 4px;
 }
 
 .receipt-table {
@@ -725,14 +679,13 @@ color: var(--text-color);  cursor: pointer;
 }
 
 .product-entry input[type="text"] {
-  height: 40px; 
-  padding: 10px 12px; 
-  font-size: 16px; 
+  height: 40px;
+  padding: 10px 12px;
+  font-size: 16px;
   border: 1px solid #ccc;
   border-radius: 6px;
   box-sizing: border-box;
 }
-
 
 .orders-table-container {
   margin-top: 20px;
@@ -762,8 +715,6 @@ color: var(--text-color);  cursor: pointer;
   text-align: left;
 }
 
-
-
 .orders-table tbody tr {
   border-bottom: 1px solid #e5e7eb;
   transition: background 0.2s ease;
@@ -783,12 +734,10 @@ color: var(--text-color);  cursor: pointer;
   font-size: 0.85rem;
 }
 
-
 .delete-btn {
-  background:  transparent;
+  background: transparent;
   color: white;
 }
-
 
 .delete-btn:hover {
   background: tomato;
@@ -796,37 +745,9 @@ color: var(--text-color);  cursor: pointer;
 
 
 
-@media (max-width: 600px) {
-  .orders-table th,
-  .orders-table td {
-    padding: 8px;
-    /*font-size: 14px;*/
-  }
-
-  
-
-  .orders-table-container {
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch; 
-  }
-
-  .orders-table {
-     /*min-width: 350px; */
-     min-width: unset;
-     min-width: 380px;
-    font-size: 14px;
-  }
-
-  .orders-table th,
-  .orders-table td {
-    padding: 10px 8px;
-    white-space: nowrap; 
-  }
-}
-
 .orders-table th,
 .orders-table td {
-  white-space: normal; 
+  white-space: normal;
   /*word-break: break-word; /* break long words if needed */
 }
 
@@ -845,25 +766,18 @@ color: var(--text-color);  cursor: pointer;
 
 .tabInner {
   width: 100%;
-  max-width: 1200px; 
+  max-width: 1200px;
   margin: 0 auto;
   box-sizing: border-box;
-}
-
-@media (max-width: 768px) {
-  .tabInner {
-    max-width: 380px;
-    min-width: 380px;
-  }
 }
 
 
 .buttonRow {
   display: flex;
-  gap: 20px;        /* space between buttons */
+  gap: 20px; /* space between buttons */
   margin-top: 10px;
   margin-bottom: 20px;
-  justify-content: center;   /* optional: center them */
+  justify-content: center; /* optional: center them */
 }
 
 .modal-content,
@@ -872,9 +786,8 @@ color: var(--text-color);  cursor: pointer;
 .product-entry {
   background-color: var(--card-bg);
   color: var(--text-color);
-  box-shadow: 0 4px 12px var(--card-shadow);  
+  box-shadow: 0 4px 12px var(--card-shadow);
 }
-
 
 .totals input,
 .product-entry input,
@@ -883,7 +796,6 @@ color: var(--text-color);  cursor: pointer;
   color: var(--text-color);
   border: 1px solid var(--input-border);
 }
-
 
 .orders-table tbody tr:hover {
   background-color: var(--secondary-color);
@@ -917,7 +829,6 @@ color: var(--text-color);  cursor: pointer;
   background-color: var(--secondary-color) !important;
 }
 
-
 .datePicker {
   background: transparent;
   border: none;
@@ -931,12 +842,6 @@ color: var(--text-color);  cursor: pointer;
   cursor: pointer;
 }
 
-.totals {
-  display: flex;
-  gap: 10px;
-  margin-top: 20px;
-}
-
 .totalBox {
   background: var(--card-bg);
   border-radius: 8px;
@@ -944,17 +849,7 @@ color: var(--text-color);  cursor: pointer;
   font-weight: bold;
   flex: 1;
   text-align: center;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-}
-
-.receipt-totals {
-  display: flex;
-  justify-content: space-between; /* left vs right */
-  margin-top: 16px;
-  border-top: 2px solid #000;
-  padding-top: 10px;
-  font-weight: bold;
-  font-size: 16px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
 .receipt-totals .leftColumn,
@@ -966,4 +861,89 @@ color: var(--text-color);  cursor: pointer;
 
 .receipt-totals .rightColumn {
   text-align: right;
+}
+
+.toast {
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: #333;
+  color: #fff;
+  padding: 12px 20px;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  z-index: 10000;
+  font-weight: 500;
+  opacity: 0.95;
+  animation: slideUp 0.3s ease;
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateX(-50%) translateY(20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(-50%) translateY(0);
+    opacity: 0.95;
+  }
+}
+
+@media (max-width: 768px) {
+  .sidebar {
+    transform: translateX(-220px);
+  }
+  .sidebar.active {
+    transform: translateX(0);
+  }
+
+  .page-header {
+    margin-top: 70px;
+    max-width: 100%;
+    padding: 0 10px;
+  }
+
+  .search-input {
+    width: 100%;
+    max-width: 100%;
+  }
+
+  .orders-list {
+    margin-top: 100px;
+    padding: 10px;
+  }
+} 
+
+@media (max-width: 600px) {
+  .orders-table th,
+  .orders-table td {
+    padding: 8px;
+    /*font-size: 14px;*/
+  }
+
+  .orders-table-container {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .orders-table {
+    /*min-width: 350px; */
+    min-width: unset;
+    min-width: 380px;
+    font-size: 14px;
+  }
+
+  .orders-table th,
+  .orders-table td {
+    padding: 10px 8px;
+    white-space: nowrap;
+  }
+} 
+
+@media (max-width: 768px) {
+  .tabInner {
+    max-width: 380px;
+    min-width: 380px;
+  }
 }

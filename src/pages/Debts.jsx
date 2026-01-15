@@ -545,7 +545,7 @@ export default function Debts({ setPage }) {
                     value={customer_name}
                     onChange={(e) => setCustomerName(e.target.value)}
                     onKeyDown={handleEnterKey}
-                    placeholder=" "
+                    placeholder=""
                     required
                   />
                   <label>Customer Name</label>

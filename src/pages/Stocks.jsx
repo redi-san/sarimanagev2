@@ -402,12 +402,9 @@ export default function Stocks({ setPage }) {
           ) : (
             <div className={styles.categoryAccordionContainer}>
               {categories.map((cat) => {
-const categoryStocks = filteredStocks
-  .filter((stock) => stock.category === cat)
-  .sort((a, b) =>
-    (a.name || "").localeCompare(b.name || "")
-  );
-
+                const categoryStocks = filteredStocks
+                  .filter((stock) => stock.category === cat)
+                  .sort((a, b) => (a.name || "").localeCompare(b.name || ""));
 
                 if (categoryStocks.length === 0) return null;
 
@@ -594,7 +591,7 @@ const categoryStocks = filteredStocks
                         })
                   }
                   onKeyDown={handleEnterFocus}
-                  placeholder="Product Name"
+                  placeholder="e.g. Coca-Cola 500ml"
                   required
                 />
               </div>
@@ -618,7 +615,7 @@ const categoryStocks = filteredStocks
                           })
                     }
                     onKeyDown={handleEnterFocus}
-                    placeholder="Product ID"
+                    placeholder="Scan or enter barcode"
                     required
                   />
                   <button
@@ -739,7 +736,7 @@ const categoryStocks = filteredStocks
                           })
                     }
                     onKeyDown={handleEnterFocus}
-                    placeholder="Stock"
+                    placeholder="Current Stock (e.g. 24)"
                     required
                   />
                 </div>
@@ -761,37 +758,13 @@ const categoryStocks = filteredStocks
                           })
                     }
                     onKeyDown={handleEnterFocus}
-                    placeholder="Low Stock Limit"
+                    placeholder="Alert level (e.g. 5)"
                     required
                   />
                 </div>
               </div>
 
               <div className={styles["form-row"]}>
-                <div className={styles.formGroupNew}>
-                  <label>Suggested Retail Price</label>
-                  <input
-                    type="text"
-                    inputMode="decimal"
-                    pattern="^\d*\.?\d{0,2}$"
-                    value={
-                      modalMode === "add"
-                        ? selling_price
-                        : selectedStock?.selling_price || ""
-                    }
-                    onChange={(e) =>
-                      modalMode === "add"
-                        ? setSellingPrice(e.target.value)
-                        : setSelectedStock({
-                            ...selectedStock,
-                            selling_price: e.target.value,
-                          })
-                    }
-                    onKeyDown={handleEnterFocus}
-                    placeholder="How much are you selling this product for?"
-                    required
-                  />
-                </div>
                 <div className={styles.formGroupNew}>
                   <label>Buying Price</label>
                   <input
@@ -812,7 +785,32 @@ const categoryStocks = filteredStocks
                           })
                     }
                     onKeyDown={handleEnterFocus}
-                    placeholder="How much did you buy this product?"
+                    placeholder="Cost price (e.g. 25.00)"
+                    required
+                  />
+                </div>
+
+                <div className={styles.formGroupNew}>
+                  <label>Suggested Retail Price</label>
+                  <input
+                    type="text"
+                    inputMode="decimal"
+                    pattern="^\d*\.?\d{0,2}$"
+                    value={
+                      modalMode === "add"
+                        ? selling_price
+                        : selectedStock?.selling_price || ""
+                    }
+                    onChange={(e) =>
+                      modalMode === "add"
+                        ? setSellingPrice(e.target.value)
+                        : setSelectedStock({
+                            ...selectedStock,
+                            selling_price: e.target.value,
+                          })
+                    }
+                    onKeyDown={handleEnterFocus}
+                    placeholder="Selling price (e.g. 30.00)"
                     required
                   />
                 </div>

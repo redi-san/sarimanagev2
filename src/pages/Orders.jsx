@@ -228,8 +228,9 @@ export default function Orders({ setPage }) {
   const saveOrder = async () => {
     const user = auth.currentUser;
 
-    if (!user) return alert("You must be logged in to save orders.");
-    if (products.length === 0) return alert("Please add at least one product.");
+if (!user) return showToast("You must be logged in to save orders.");
+if (products.length === 0) return showToast("Please add at least one product.");
+
 
     const orderData = {
       firebase_uid: user.uid,
@@ -256,7 +257,7 @@ export default function Orders({ setPage }) {
         setIsEditing(false);
       } else {
         await axios.post(`${BASE_URL}/orders`, orderData); // use BASE_URL
-        alert("Order created successfully!");
+showToast("Order created successfully!");
       }
 
       fetchOrders();
@@ -412,30 +413,40 @@ export default function Orders({ setPage }) {
     };
   }, []);
 
-  const handleScanSuccess = (decodedText) => {
-    const foundStock = stocks.find(
-      (s) => s.barcode?.toString() === decodedText
+const handleScanSuccess = (decodedText) => {
+  const foundStock = stocks.find(
+    (s) => s.barcode?.toString() === decodedText
+  );
+
+  // Prevent duplicate rapid scans of the SAME barcode
+  setProducts((prev) => {
+    const alreadyAdded = prev.some(
+      (p) => p.stock_id?.toString() === decodedText
     );
 
-    setProducts((prev) => {
-      const newProducts = [
-        ...prev,
-        {
-          stock_id: decodedText,
-          name: foundStock?.name || "",
-          selling_price: foundStock?.selling_price || "",
-          buying_price: foundStock?.buying_price || "",
-          quantity: 1,
-        },
-      ];
-      calculateTotals(newProducts);
-      return newProducts;
-    });
+    if (alreadyAdded) return prev;
 
-    stopScanner();
-    setShowScanner(false);
-    setOrderNumber(generateOrderNumber());
-  };
+    const newProducts = [
+      ...prev,
+      {
+        stock_id: decodedText,
+        name: foundStock?.name || "",
+        selling_price: foundStock?.selling_price || "",
+        buying_price: foundStock?.buying_price || "",
+        quantity: 1,
+      },
+    ];
+
+    calculateTotals(newProducts);
+    return newProducts;
+  });
+
+  setOrderNumber(generateOrderNumber());
+
+  // ✅ DO NOTHING ELSE
+  // Scanner stays open
+};
+
 
   const handleScanError = (err) => {
     console.warn("Scan error:", err);
@@ -464,14 +475,44 @@ export default function Orders({ setPage }) {
     }
   }, [showScanner]);
 
-  useEffect(() => {
-    const pay = parseFloat(paymentAmount) || 0;
-    const total = parseFloat(totals.total) || 0;
-    setChangeAmount(pay - total);
-  }, [paymentAmount, totals.total]);
+useEffect(() => {
+  // If no payment entered yet, show 0 instead of negative
+  if (!paymentAmount) {
+    setChangeAmount(0);
+    return;
+  }
+
+  const pay = parseFloat(paymentAmount) || 0;
+  const total = parseFloat(totals.total) || 0;
+  setChangeAmount(pay - total);
+}, [paymentAmount, totals.total]);
+
+  
+const [toasts, setToasts] = useState([]);
+
+// Function to show toast
+const showToast = (message, duration = 3000) => {
+  const id = Date.now(); // unique id
+  setToasts((prev) => [...prev, { id, message }]);
+
+  setTimeout(() => {
+    setToasts((prev) => prev.filter((t) => t.id !== id));
+  }, duration);
+};
+
 
   return (
     <div>
+
+      {/* Toast container */}
+<div className={styles.toastContainer}>
+  {toasts.map((t) => (
+    <div key={t.id} className={styles.toast}>
+      {t.message}
+    </div>
+  ))}
+</div>
+
       {/* Topbar */}
       <div className={styles.topbar}>
         <h2>Transactions</h2>
@@ -655,6 +696,7 @@ export default function Orders({ setPage }) {
                   value={customer_name}
                   onChange={(e) => setCustomerName(e.target.value)}
                   onKeyDown={handleEnterFocus}
+                  placeholder="e.g. Juan Dela Cruz"
                   required
                 />
               </div>
@@ -663,21 +705,20 @@ export default function Orders({ setPage }) {
                 <label className={styles.inputLabel}>Payment Amount</label>
                 <input
                   type="number"
-                  placeholder="₱0.00"
+                  placeholder="0.00"
                   value={paymentAmount}
                   onChange={(e) => setPaymentAmount(e.target.value)}
                 />
               </div>
 
-<div className={styles.totals}>
-  <div className={styles.totalBox}>
-    <span>Total: {formatCurrency(totals.total)}</span>
-  </div>
-  <div className={styles.totalBox}>
-    <span>Change: {formatCurrency(changeAmount)}</span>
-  </div>
-</div>
-
+              <div className={styles.totals}>
+                <div className={styles.totalBox}>
+                  <span>Total: {formatCurrency(totals.total)}</span>
+                </div>
+                <div className={styles.totalBox}>
+                  <span>Change: {formatCurrency(changeAmount)}</span>
+                </div>
+              </div>
 
               <div className={styles["modal-actions"]}>
                 <button
@@ -1038,19 +1079,28 @@ export default function Orders({ setPage }) {
                     </div>
                   ))}
               </div>
-<div className={styles["receipt-totals"]}>
-  <div className={styles.leftColumn}>
-    <p><strong>Total:</strong> {formatCurrency(selectedOrder.total)}</p>
-    <p><strong>Profit:</strong> {formatCurrency(selectedOrder.profit)}</p>
-  </div>
-  <div className={styles.rightColumn}>
-    <p><strong>Payment:</strong> {formatCurrency(selectedOrder.payment_amount)}</p>
-    <p><strong>Change:</strong> {formatCurrency(selectedOrder.change_amount)}</p>
-  </div>
-</div>
-
-
-
+              <div className={styles["receipt-totals"]}>
+                <div className={styles.leftColumn}>
+                  <p>
+                    <strong>Total:</strong>{" "}
+                    {formatCurrency(selectedOrder.total)}
+                  </p>
+                  <p>
+                    <strong>Profit:</strong>{" "}
+                    {formatCurrency(selectedOrder.profit)}
+                  </p>
+                </div>
+                <div className={styles.rightColumn}>
+                  <p>
+                    <strong>Payment:</strong>{" "}
+                    {formatCurrency(selectedOrder.payment_amount)}
+                  </p>
+                  <p>
+                    <strong>Change:</strong>{" "}
+                    {formatCurrency(selectedOrder.change_amount)}
+                  </p>
+                </div>
+              </div>
 
               <div className={styles["receipt-actions"]}>
                 <button
