@@ -428,63 +428,62 @@ export default function Orders({ setPage }) {
     };
   }, []);
 
-const handleScanSuccess = useCallback(
-  (decodedText) => {
-    const foundStock = stocks.find(
-      (s) => String(s.barcode).trim() === String(decodedText).trim()
-    );
-
-    setProducts((prev) => {
-      const alreadyAdded = prev.some(
-        (p) => String(p.stock_id).trim() === String(decodedText).trim()
+  const handleScanSuccess = useCallback(
+    (decodedText) => {
+      const foundStock = stocks.find(
+        (s) => String(s.barcode).trim() === String(decodedText).trim()
       );
 
-      if (alreadyAdded) return prev;
+      setProducts((prev) => {
+        const alreadyAdded = prev.some(
+          (p) => String(p.stock_id).trim() === String(decodedText).trim()
+        );
 
-      const newProduct = {
-        stock_id: decodedText,
-        name: foundStock?.name || "",
-        selling_price: foundStock?.selling_price || "",
-        buying_price: foundStock?.buying_price || "",
-        quantity: 1,
-      };
+        if (alreadyAdded) return prev;
 
-      const newProducts = [...prev, newProduct];
-      calculateTotals(newProducts);
-      return newProducts;
-    });
+        const newProduct = {
+          stock_id: decodedText,
+          name: foundStock?.name || "",
+          selling_price: foundStock?.selling_price || "",
+          buying_price: foundStock?.buying_price || "",
+          quantity: 1,
+        };
 
-    setOrderNumber(generateOrderNumber());
-  },
-  [stocks, generateOrderNumber]
-);
+        const newProducts = [...prev, newProduct];
+        calculateTotals(newProducts);
+        return newProducts;
+      });
 
-const handleScanError = useCallback((err) => {
-  console.warn("Scan error:", err);
-}, []);
+      setOrderNumber(generateOrderNumber());
+    },
+    [stocks, generateOrderNumber]
+  );
 
-const openScanner = useCallback(() => {
-  setShowScanner(true);
+  const handleScanError = useCallback((err) => {
+    console.warn("Scan error:", err);
+  }, []);
 
-  setTimeout(() => {
-    if (scannerRef.current) return;
+  const openScanner = useCallback(() => {
+    setShowScanner(true);
 
-    scannerRef.current = new Html5QrcodeScanner("order-barcode-reader", {
-      fps: 10,
-      qrbox: 180,
-      rememberLastUsedCamera: true,
-    });
+    setTimeout(() => {
+      if (scannerRef.current) return;
 
-    scannerRef.current.render(handleScanSuccess, handleScanError);
-  }, 300);
-}, [handleScanSuccess, handleScanError]);
+      scannerRef.current = new Html5QrcodeScanner("order-barcode-reader", {
+        fps: 10,
+        qrbox: 180,
+        rememberLastUsedCamera: true,
+      });
 
-useEffect(() => {
-  if (showScanner) {
-    openScanner();
-  }
-}, [showScanner, openScanner]);
+      scannerRef.current.render(handleScanSuccess, handleScanError);
+    }, 300);
+  }, [handleScanSuccess, handleScanError]);
 
+  useEffect(() => {
+    if (showScanner) {
+      openScanner();
+    }
+  }, [showScanner, openScanner]);
 
   useEffect(() => {
     // If no payment entered yet, show 0 instead of negative
@@ -564,41 +563,55 @@ useEffect(() => {
                 />
                 {/*<h1>Orders</h1>*/}
 
-                <div className={styles["filter-controls"]}>
-                  {/* First row: Show All / Show Today button */}
-                  <div className={styles["filter-top"]}>
-                    <button onClick={() => setShowAll(!showAll)}>
-                      {showAll ? "Show Today" : "Show All"}
-                    </button>
-                  </div>
+<div className={styles["filter-controls"]}>
+  {/* First row: Show All / Show Today toggle button */}
+  <div className={styles["filter-top"]}>
+    <button onClick={() => setShowAll(!showAll)}>
+      {showAll ? "Show Today" : "Show All"}
+    </button>
+  </div>
 
-                  {/* Second row: Date navigation */}
-                  <div className={styles["filter-bottom"]}>
-                    <button
-                      onClick={() =>
-                        setFilterDate((prev) => {
-                          const d = new Date(prev);
-                          d.setDate(d.getDate() - 1);
-                          return d;
-                        })
-                      }
-                    >
-                      ←
-                    </button>
+  {/* Second row: Date navigation */}
+  <div className={styles["filter-bottom"]}>
+    {/* Previous day button */}
+    <button
+      onClick={() =>
+        setFilterDate(
+          new Date(filterDate.setDate(filterDate.getDate() - 1))
+        )
+      }
+    >
+      ←
+    </button>
 
-                    <button
-                      onClick={() =>
-                        setFilterDate((prev) => {
-                          const d = new Date(prev);
-                          d.setDate(d.getDate() + 1);
-                          return d;
-                        })
-                      }
-                    >
-                      →
-                    </button>
-                  </div>
-                </div>
+    {/* Display "All Orders" label if showing all, otherwise date picker */}
+    {showAll ? (
+      <span>All Orders</span>
+    ) : (
+      <input
+        type="date"
+        value={formatDate(filterDate)}
+        onChange={(e) => {
+          if (!e.target.value) return; // ignore clear button
+          setFilterDate(new Date(e.target.value));
+        }}
+        className={styles.datePicker}
+      />
+    )}
+
+    {/* Next day button */}
+    <button
+      onClick={() =>
+        setFilterDate(
+          new Date(filterDate.setDate(filterDate.getDate() + 1))
+        )
+      }
+    >
+      →
+    </button>
+  </div>
+</div>
+
               </div>
 
               <div className={styles["orders-table-container"]}>
@@ -886,7 +899,7 @@ useEffect(() => {
                         type="number"
                         placeholder="Quantity"
                         value={product.quantity}
-                        min={1} 
+                        min={1}
                         onChange={(e) => {
                           const value = e.target.value;
 
