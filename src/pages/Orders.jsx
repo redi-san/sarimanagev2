@@ -428,7 +428,8 @@ export default function Orders({ setPage }) {
     };
   }, []);
 
-  const handleScanSuccess = (decodedText) => {
+const handleScanSuccess = useCallback(
+  (decodedText) => {
     const foundStock = stocks.find(
       (s) => String(s.barcode).trim() === String(decodedText).trim()
     );
@@ -445,13 +446,8 @@ export default function Orders({ setPage }) {
         name: foundStock?.name || "",
         selling_price: foundStock?.selling_price || "",
         buying_price: foundStock?.buying_price || "",
-        quantity: 1, // ✅ always start with 1
+        quantity: 1,
       };
-
-      if (newProduct.quantity <= 0) {
-        showToast("Quantity must be 1 or more");
-        return prev;
-      }
 
       const newProducts = [...prev, newProduct];
       calculateTotals(newProducts);
@@ -459,28 +455,29 @@ export default function Orders({ setPage }) {
     });
 
     setOrderNumber(generateOrderNumber());
-  };
+  },
+  [stocks, generateOrderNumber]
+);
 
-  const handleScanError = (err) => {
-    console.warn("Scan error:", err);
-  };
+const handleScanError = useCallback((err) => {
+  console.warn("Scan error:", err);
+}, []);
 
-  const openScanner = () => {
-    setShowScanner(true);
+const openScanner = useCallback(() => {
+  setShowScanner(true);
 
-    setTimeout(() => {
-      // Prevent duplicate scanners
-      if (scannerRef.current) return;
+  setTimeout(() => {
+    if (scannerRef.current) return;
 
-      scannerRef.current = new Html5QrcodeScanner("order-barcode-reader", {
-        fps: 10,
-        qrbox: 180,
-        rememberLastUsedCamera: true,
-      });
+    scannerRef.current = new Html5QrcodeScanner("order-barcode-reader", {
+      fps: 10,
+      qrbox: 180,
+      rememberLastUsedCamera: true,
+    });
 
-      scannerRef.current.render(handleScanSuccess, handleScanError);
-    }, 300);
-  };
+    scannerRef.current.render(handleScanSuccess, handleScanError);
+  }, 300);
+}, [handleScanSuccess, handleScanError]);
 
 useEffect(() => {
   if (showScanner) {
