@@ -87,7 +87,15 @@ export default function Stocks({ setPage }) {
 
       scanner.render(
         (decodedText) => {
-          setProductId(decodedText); // auto-fill product ID
+          if (modalMode === "add") {
+            setProductId(decodedText);
+          } else if (modalMode === "edit" && selectedStock) {
+            setSelectedStock({
+              ...selectedStock,
+              barcode: decodedText,
+            });
+          }
+
           setShowScanner(false); // close scanner
           scanner.clear();
         },
@@ -143,15 +151,33 @@ export default function Stocks({ setPage }) {
     const user = auth.currentUser;
     const formData = new FormData();
 
+    // Trim product name
+    const cleanedName = stockName.trim().replace(/\s+/g, " ");
+
+    // ✅ Validation: Buying Price must be <= Selling Price
+    const buy = parseFloat(buying_price);
+    const sell = parseFloat(selling_price);
+
+    if (isNaN(buy) || isNaN(sell)) {
+      return alert(
+        "Buying price and Suggested Retail Price must be valid numbers."
+      );
+    }
+
+    if (buy > sell) {
+      return alert(
+        "Buying Price cannot be higher than Suggested Retail Price!"
+      );
+    }
+
     formData.append("firebase_uid", user.uid);
     formData.append("barcode", productId);
-    formData.append("name", stockName);
+    formData.append("name", cleanedName);
     formData.append("category", category);
     formData.append("stock", stockAmount);
     formData.append("lowstock", lowStock);
     formData.append("buying_price", buying_price);
     formData.append("selling_price", selling_price);
-    //formData.append("notes", notes);
     if (manufacturing_date)
       formData.append("manufacturing_date", manufacturing_date);
     if (expiry_date) formData.append("expiry_date", expiry_date);
@@ -159,6 +185,7 @@ export default function Stocks({ setPage }) {
     if (productImage) {
       formData.append("image", productImage);
     }
+
     if (!categories.includes(category)) {
       setCategories([...categories, category]);
     }
@@ -177,44 +204,60 @@ export default function Stocks({ setPage }) {
   };
 
   //  Update stock
-  const updateStock = async () => {
-    try {
-      const formData = new FormData();
+const updateStock = async () => {
+  try {
+    const buy = parseFloat(selectedStock.buying_price);
+    const sell = parseFloat(selectedStock.selling_price);
 
-      // append only valid fields
-      Object.entries(selectedStock).forEach(([key, value]) => {
-        if (
-          value !== null &&
-          value !== undefined &&
-          value !== "" &&
-          key !== "id" &&
-          key !== "image" &&
-          key !== "previewImage" &&
-          key !== "newImageFile"
-        ) {
-          formData.append(key, value);
-        }
-      });
-
-      // append image separately
-      if (selectedStock.newImageFile) {
-        formData.append("image", selectedStock.newImageFile);
-      }
-
-      await axios.put(`${BASE_URL}/stocks/${selectedStock.id}`, formData, {
-        headers: { "Content-Type": "multipart/form-data" },
-      });
-
-      // update local state
-      setStocks((prev) =>
-        prev.map((s) => (s.id === selectedStock.id ? selectedStock : s))
-      );
-
-      setShowModal(false);
-    } catch (err) {
-      console.error("Error updating stock:", err);
+    if (isNaN(buy) || isNaN(sell)) {
+      return alert("Buying price and Suggested Retail Price must be valid numbers.");
     }
-  };
+
+    if (buy > sell) {
+      return alert("Buying Price cannot be higher than Suggested Retail Price!");
+    }
+
+    const formData = new FormData();
+
+    // append only valid fields
+    Object.entries(selectedStock).forEach(([key, value]) => {
+      if (
+        value !== null &&
+        value !== undefined &&
+        value !== "" &&
+        key !== "id" &&
+        key !== "image" &&
+        key !== "previewImage" &&
+        key !== "newImageFile"
+      ) {
+        formData.append(key, value);
+      }
+    });
+
+    if (selectedStock.name) {
+      selectedStock.name = selectedStock.name.trim().replace(/\s+/g, ' ');
+    }
+
+    // append image separately
+    if (selectedStock.newImageFile) {
+      formData.append("image", selectedStock.newImageFile);
+    }
+
+    await axios.put(`${BASE_URL}/stocks/${selectedStock.id}`, formData, {
+      headers: { "Content-Type": "multipart/form-data" },
+    });
+
+    // update local state
+    setStocks((prev) =>
+      prev.map((s) => (s.id === selectedStock.id ? selectedStock : s))
+    );
+
+    setShowModal(false);
+  } catch (err) {
+    console.error("Error updating stock:", err);
+  }
+};
+
 
   //Delete stock
   const deleteStock = async (id) => {

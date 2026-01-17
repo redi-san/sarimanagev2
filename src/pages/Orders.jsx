@@ -228,18 +228,30 @@ export default function Orders({ setPage }) {
   const saveOrder = async () => {
     const user = auth.currentUser;
 
-if (!user) return showToast("You must be logged in to save orders.");
-if (products.length === 0) return showToast("Please add at least one product.");
+    if (!user) return showToast("You must be logged in to save orders.");
+    if (products.length === 0)
+      return showToast("Please add at least one product.");
 
+    const pay = parseFloat(paymentAmount) || 0;
+    const total = parseFloat(totals.total) || 0;
+
+    // ✅ Add validation here
+    if (!paymentAmount) {
+      return showToast("Payment Amount is required.");
+    }
+
+    if (pay < total) {
+      return showToast("Payment amount is not enough");
+    }
 
     const orderData = {
       firebase_uid: user.uid,
       order_number,
       customer_name,
-      total: totals.total,
+      total,
       profit: totals.profit,
-      payment_amount: paymentAmount,
-      change_amount: changeAmount,
+      payment_amount: pay,
+      change_amount: pay - total,
       products: products.map((p) => ({
         stock_id: p.stock_id,
         name: p.name,
@@ -252,12 +264,12 @@ if (products.length === 0) return showToast("Please add at least one product.");
     try {
       if (editingOrderId) {
         await axios.put(`${BASE_URL}/orders/${editingOrderId}`, orderData);
-        alert("Order updated successfully!");
+        showToast("Order updated successfully!");
         setEditingOrderId(null);
         setIsEditing(false);
       } else {
-        await axios.post(`${BASE_URL}/orders`, orderData); // use BASE_URL
-showToast("Order created successfully!");
+        await axios.post(`${BASE_URL}/orders`, orderData);
+        showToast("Order created successfully!");
       }
 
       fetchOrders();
@@ -266,7 +278,7 @@ showToast("Order created successfully!");
       resetForm();
     } catch (err) {
       console.error("Error saving order:", err);
-      alert("Failed to save order.");
+      showToast("Failed to save order.");
     }
   };
 
@@ -331,7 +343,9 @@ showToast("Order created successfully!");
   };
 
   const formatDate = (date) => {
-    return date.toISOString().split("T")[0]; // YYYY-MM-DD
+    return new Date(date.getTime() - date.getTimezoneOffset() * 60000)
+      .toISOString()
+      .split("T")[0];
   };
 
   const getOrderDate = (order) => {
@@ -413,40 +427,38 @@ showToast("Order created successfully!");
     };
   }, []);
 
-const handleScanSuccess = (decodedText) => {
-  const foundStock = stocks.find(
-    (s) => s.barcode?.toString() === decodedText
-  );
-
-  // Prevent duplicate rapid scans of the SAME barcode
-  setProducts((prev) => {
-    const alreadyAdded = prev.some(
-      (p) => p.stock_id?.toString() === decodedText
+  const handleScanSuccess = (decodedText) => {
+    const foundStock = stocks.find(
+      (s) => String(s.barcode).trim() === String(decodedText).trim()
     );
 
-    if (alreadyAdded) return prev;
+    setProducts((prev) => {
+      const alreadyAdded = prev.some(
+        (p) => String(p.stock_id).trim() === String(decodedText).trim()
+      );
 
-    const newProducts = [
-      ...prev,
-      {
+      if (alreadyAdded) return prev;
+
+      const newProduct = {
         stock_id: decodedText,
         name: foundStock?.name || "",
         selling_price: foundStock?.selling_price || "",
         buying_price: foundStock?.buying_price || "",
-        quantity: 1,
-      },
-    ];
+        quantity: 1, // ✅ always start with 1
+      };
 
-    calculateTotals(newProducts);
-    return newProducts;
-  });
+      if (newProduct.quantity <= 0) {
+        showToast("Quantity must be 1 or more");
+        return prev;
+      }
 
-  setOrderNumber(generateOrderNumber());
+      const newProducts = [...prev, newProduct];
+      calculateTotals(newProducts);
+      return newProducts;
+    });
 
-  // ✅ DO NOTHING ELSE
-  // Scanner stays open
-};
-
+    setOrderNumber(generateOrderNumber());
+  };
 
   const handleScanError = (err) => {
     console.warn("Scan error:", err);
@@ -475,43 +487,40 @@ const handleScanSuccess = (decodedText) => {
     }
   }, [showScanner]);
 
-useEffect(() => {
-  // If no payment entered yet, show 0 instead of negative
-  if (!paymentAmount) {
-    setChangeAmount(0);
-    return;
-  }
+  useEffect(() => {
+    // If no payment entered yet, show 0 instead of negative
+    if (!paymentAmount) {
+      setChangeAmount(0);
+      return;
+    }
 
-  const pay = parseFloat(paymentAmount) || 0;
-  const total = parseFloat(totals.total) || 0;
-  setChangeAmount(pay - total);
-}, [paymentAmount, totals.total]);
+    const pay = parseFloat(paymentAmount) || 0;
+    const total = parseFloat(totals.total) || 0;
+    setChangeAmount(pay - total);
+  }, [paymentAmount, totals.total]);
 
-  
-const [toasts, setToasts] = useState([]);
+  const [toasts, setToasts] = useState([]);
 
-// Function to show toast
-const showToast = (message, duration = 3000) => {
-  const id = Date.now(); // unique id
-  setToasts((prev) => [...prev, { id, message }]);
+  // Function to show toast
+  const showToast = (message, duration = 3000) => {
+    const id = Date.now(); // unique id
+    setToasts((prev) => [...prev, { id, message }]);
 
-  setTimeout(() => {
-    setToasts((prev) => prev.filter((t) => t.id !== id));
-  }, duration);
-};
-
+    setTimeout(() => {
+      setToasts((prev) => prev.filter((t) => t.id !== id));
+    }, duration);
+  };
 
   return (
     <div>
-
       {/* Toast container */}
-<div className={styles.toastContainer}>
-  {toasts.map((t) => (
-    <div key={t.id} className={styles.toast}>
-      {t.message}
-    </div>
-  ))}
-</div>
+      <div className={styles.toastContainer}>
+        {toasts.map((t) => (
+          <div key={t.id} className={styles.toast}>
+            {t.message}
+          </div>
+        ))}
+      </div>
 
       {/* Topbar */}
       <div className={styles.topbar}>
@@ -568,32 +577,23 @@ const showToast = (message, duration = 3000) => {
                   <div className={styles["filter-bottom"]}>
                     <button
                       onClick={() =>
-                        setFilterDate(
-                          new Date(filterDate.setDate(filterDate.getDate() - 1))
-                        )
+                        setFilterDate((prev) => {
+                          const d = new Date(prev);
+                          d.setDate(d.getDate() - 1);
+                          return d;
+                        })
                       }
                     >
                       ←
                     </button>
-                    {showAll ? (
-                      <span>All Orders</span>
-                    ) : (
-                      <input
-                        type="date"
-                        value={formatDate(filterDate)}
-                        onChange={(e) => {
-                          if (!e.target.value) return; // 👈 ignore clear (❌) button
-                          setFilterDate(new Date(e.target.value));
-                        }}
-                        className={styles.datePicker}
-                      />
-                    )}
 
                     <button
                       onClick={() =>
-                        setFilterDate(
-                          new Date(filterDate.setDate(filterDate.getDate() + 1))
-                        )
+                        setFilterDate((prev) => {
+                          const d = new Date(prev);
+                          d.setDate(d.getDate() + 1);
+                          return d;
+                        })
                       }
                     >
                       →
@@ -708,6 +708,8 @@ const showToast = (message, duration = 3000) => {
                   placeholder="0.00"
                   value={paymentAmount}
                   onChange={(e) => setPaymentAmount(e.target.value)}
+                  required
+                  min={totals.total}
                 />
               </div>
 
@@ -855,13 +857,13 @@ const showToast = (message, duration = 3000) => {
                       //const id = e.target.value;
                       const barcode = e.target.value;
 
-                      //updateProduct(index, "stock_id", id);
                       updateProduct(index, "stock_id", barcode);
 
                       const foundStock = stocks.find(
-                        //(s) => s.id.toString() === id
-                        (s) => s.barcode.toString() === barcode
+                        (s) =>
+                          String(s.barcode).trim() === String(barcode).trim()
                       );
+
                       if (foundStock) {
                         updateProduct(index, "name", foundStock.name);
                         updateProduct(
@@ -885,9 +887,26 @@ const showToast = (message, duration = 3000) => {
                         type="number"
                         placeholder="Quantity"
                         value={product.quantity}
-                        onChange={(e) =>
-                          updateProduct(index, "quantity", e.target.value)
-                        }
+                        min={1} 
+                        onChange={(e) => {
+                          const value = e.target.value;
+
+                          // Only update if it's empty or numeric
+                          if (/^\d*$/.test(value)) {
+                            updateProduct(
+                              index,
+                              "quantity",
+                              value === "" ? "" : parseInt(value, 10)
+                            );
+                          }
+                        }}
+                        onBlur={() => {
+                          // If left empty or 0 → reset to 1
+                          if (!product.quantity || product.quantity <= 0) {
+                            showToast("Quantity must be 1 or more");
+                            updateProduct(index, "quantity", 1);
+                          }
+                        }}
                       />
                     </div>
 
