@@ -78,37 +78,37 @@ export default function Stocks({ setPage }) {
     return () => unsubscribe();
   }, []);
 
-  useEffect(() => {
-    if (showScanner) {
-      const scanner = new Html5QrcodeScanner("barcode-reader", {
-        fps: 10,
-        qrbox: 180,
-      });
+useEffect(() => {
+  if (showScanner) {
+    const scanner = new Html5QrcodeScanner("barcode-reader", {
+      fps: 10,
+      qrbox: 180,
+    });
 
-      scanner.render(
-        (decodedText) => {
-          if (modalMode === "add") {
-            setProductId(decodedText);
-          } else if (modalMode === "edit" && selectedStock) {
-            setSelectedStock({
-              ...selectedStock,
-              barcode: decodedText,
-            });
-          }
-
-          setShowScanner(false); // close scanner
-          scanner.clear();
-        },
-        (error) => {
-          console.warn("Scanning error:", error);
+    scanner.render(
+      (decodedText) => {
+        if (modalMode === "add") {
+          setProductId(decodedText);
+        } else if (modalMode === "edit") {
+          setSelectedStock((prev) =>
+            prev ? { ...prev, barcode: decodedText } : prev
+          );
         }
-      );
 
-      return () => {
-        scanner.clear().catch((err) => console.error("Clear failed:", err));
-      };
-    }
-  }, [showScanner]);
+        setShowScanner(false);
+        scanner.clear();
+      },
+      (error) => {
+        console.warn("Scanning error:", error);
+      }
+    );
+
+    return () => {
+      scanner.clear().catch((err) => console.error("Clear failed:", err));
+    };
+  }
+}, [showScanner, modalMode]);
+
 
   useEffect(() => {
     const low = stocks.filter(

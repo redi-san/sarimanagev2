@@ -1,6 +1,6 @@
 import styles from "../css/Home.module.css";
 import { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+//import { Link } from "react-router-dom";
 import axios from "axios";
 import { getAuth } from "firebase/auth";
 import BottomNav from "../components/BottomNav";

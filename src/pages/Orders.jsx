@@ -3,7 +3,8 @@ import styles from "../css/Orders.module.css";
 import deleteIcon from "../assets/deleteIcon.png";
 import axios from "axios";
 import { getAuth } from "firebase/auth";
-import { Html5QrcodeScanner, Html5QrcodeScanType } from "html5-qrcode";
+//import { Html5QrcodeScanner, Html5QrcodeScanType } from "html5-qrcode";
+import { Html5QrcodeScanner } from "html5-qrcode";
 import BottomNav from "../components/BottomNav";
 import AddDebtModal from "../components/AddDebtModal";
 import Debts from "./Debts"; // reuse your component
@@ -481,11 +482,12 @@ export default function Orders({ setPage }) {
     }, 300);
   };
 
-  useEffect(() => {
-    if (showScanner) {
-      openScanner();
-    }
-  }, [showScanner]);
+useEffect(() => {
+  if (showScanner) {
+    openScanner();
+  }
+}, [showScanner, openScanner]);
+
 
   useEffect(() => {
     // If no payment entered yet, show 0 instead of negative

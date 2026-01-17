@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom"; // Removed unused Navigate
 import { useEffect } from "react";
 import LogIn from "./auth/LogIn";
 import ForgotPassword from "./auth/ForgotPassword";
