@@ -479,11 +479,13 @@ export default function Orders({ setPage }) {
     }, 300);
   }, [handleScanSuccess, handleScanError]);
 
-  useEffect(() => {
-    if (showScanner) {
-      openScanner();
-    }
-  }, [showScanner, openScanner]);
+useEffect(() => {
+  if (!showScanner) return;
+  if (stocks.length === 0) return; // 🔥 WAIT FOR STOCKS
+
+  openScanner();
+}, [showScanner, stocks, openScanner]);
+
 
   useEffect(() => {
     // If no payment entered yet, show 0 instead of negative
@@ -766,7 +768,7 @@ export default function Orders({ setPage }) {
             <div
               className={`${styles["modal-content"]} ${styles["modal-second"]}`}
             >
-              <h2>Add Products</h2>
+              <h2>Add Productss</h2>
               {products.map((product, index) => (
                 <div className={styles["product-entry"]} key={index}>
                   {/* Product Name */}
