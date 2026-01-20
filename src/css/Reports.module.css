@@ -58,7 +58,7 @@
 
 .sidebar a:hover {
   background: #f0f0f0;
-  color: #ffcc00;
+  color: var(--primary-color);
 }
 
 .active {
@@ -284,7 +284,7 @@
 }
 
 .filterSelect {
-  background: #ffcc00;
+  background: var(--primary-color);
   color: #000;
   border: none;
   border-radius: 8px;
@@ -366,7 +366,7 @@
 }
 
 .activeBar {
-  background: #ffcc00 !important;
+  background: var(--primary-color) !important;
   box-shadow: 0 0 8px rgba(255, 204, 0, 0.8);
   transition: background 0.3s ease, box-shadow 0.3s ease;
 }
@@ -536,9 +536,9 @@
 }
 
 .active {
-  background: #ffe14d;
+  background: var(--primary-color);
   color: #222;
-  border-bottom: 3px solid #d1a700;
+  border-bottom: 3px solid var(--primary-color);
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
 }
 
@@ -563,7 +563,7 @@
 
 .toggleButton {
   padding: 6px 14px; /* smaller size */
-  border: 2px solid #ffcc00;
+  border: 2px solid var(--primary-color);
   background: #fff; /* inactive background */
   color: #444;
   font-weight: 600;
@@ -574,7 +574,7 @@
 }
 
 .activeToggle {
-  background: #ffcc00;
+  background: var(--primary-color);
   color: #000;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
 }
@@ -675,5 +675,16 @@
   inset: 0;
   opacity: 0;
   cursor: pointer;
+}
+
+.pdfButton {
+  background-color: var(--primary-color);
+  color: var(--text-color);
+  border: none;
+  border-radius: 8px;
+  padding: 8px 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s ease;
 }
 

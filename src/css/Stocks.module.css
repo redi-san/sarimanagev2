@@ -43,7 +43,7 @@
   height: 90px;
   border-radius: 50%;
   border: none;
-  background-color: #ffcc00;
+  background-color: var(--primary-color);
   color: white;
   font-size: 32px;
   font-weight: bold;
@@ -187,7 +187,7 @@
   width: 90px;
   height: 90px;
   margin: 0 auto 20px auto;
-  border: 2px dashed #ffcc00;
+  border: 2px dashed var(--primary-color);
   border-radius: 16px;
   display: flex;
   align-items: center;
@@ -342,7 +342,7 @@
 .scannerModal button {
   margin-top: 10px;
   padding: 10px 20px;
-  background: #ffcc00;
+  background: var(--primary-color);
   border: none;
   border-radius: 8px;
   cursor: pointer;
@@ -354,7 +354,7 @@
 }
 
 .category-dropdown li:hover {
-  background-color: #ffcc00;
+  background-color: var(--primary-color);
   color: #fff;
   text-align: left;
 }
@@ -434,7 +434,7 @@ body {
 }
 
 .stocksTable th {
-  background-color: #ffcc00;
+  background-color: var(--primary-color);
   color: #333;
   padding: 12px 8px;
   border-bottom: 2px solid #ddd;
@@ -569,11 +569,11 @@ body {
   display: none;
   }
 
-  .productThumb,
+  /*.productThumb,
   .productCell img {
     width: 24px;
     height: 24px;
-  }
+  } */
 
   .productName {
     font-size: 13px;
@@ -652,7 +652,8 @@ body {
 .categoryHeader {
   width: 100%;
   padding: 1rem 1.2rem;
-  background: linear-gradient(90deg, #ffd54f, #ffca28);
+  /*background: linear-gradient(90deg, #ffd54f, #ffca28);*/
+  background-color: var(--primary-color);
   border: none;
   border-radius: 12px 12px 0 0;
   color: #333;
@@ -707,7 +708,8 @@ body {
   color: var(--text-color);
   font-weight: 600;
   padding: 0.8rem;
-  border-bottom: 2px solid #f0e68c;
+  /*border-bottom: 2px solid #f0e68c;*/ 
+  border-bottom: 2px solid var(--primary-color);
 }
 
 .stocksTable td {
@@ -761,8 +763,8 @@ body {
   }
 
   .productThumb {
-    width: 36px;
-    height: 36px;
+    width: 50px;
+    height: 50px;
   }
 
   .categoryAccordionContainer {
@@ -914,7 +916,8 @@ body {
 /* General button styling */
 .filterBar button {
   padding: 10px 20px;
-  border: 2px solid #ffcc00;
+  /*border: 2px solid #ffcc00; */
+  border: 2px solid var(--primary-color);
   border-radius: 12px;
   background-color: var(--card-bg);
   color:  var(--text-color);
@@ -934,9 +937,9 @@ body {
 
 /* Active filter */
 .filterBar button.activeFilter {
-  background-color: #ffcc00;
+  background-color: var(--primary-color);/*#ffcc00;*/
   color: #333;
-  border-color: #daae00;
+  border-color: var(--primary-color); /*#daae00;*/
   box-shadow: 0 4px 8px rgba(0,0,0,0.15);
 }
 

@@ -22,6 +22,15 @@ export default function Settings() {
     return localStorage.getItem("fontScale") || "1";
   });
 
+  const [primaryColor, setPrimaryColor] = useState(() => {
+    return localStorage.getItem("primaryColor") || "#ffcc00";
+  });
+
+  const resetPrimaryColor = () => {
+    const defaultColor = "#ffcc00"; // original default
+    setPrimaryColor(defaultColor);
+  };
+
   const [editedData, setEditedData] = useState({
     firstName: "",
     lastName: "",
@@ -144,6 +153,11 @@ export default function Settings() {
     setFontScale(e.target.value);
   };
 
+  useEffect(() => {
+    document.documentElement.style.setProperty("--primary-color", primaryColor);
+    localStorage.setItem("primaryColor", primaryColor);
+  }, [primaryColor]);
+
   return (
     <div>
       {/* Topbar */}
@@ -234,6 +248,43 @@ export default function Settings() {
                 </div>
 
                 <div className={styles.formGroup}>
+                  <label>Primary Color</label>
+                  <div
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "10px",
+                    }}
+                  >
+                    <input
+                      type="color"
+                      value={primaryColor}
+                      onChange={(e) => setPrimaryColor(e.target.value)}
+                      style={{
+                        width: "50px",
+                        height: "30px",
+                        border: "none",
+                        padding: 0,
+                        cursor: "pointer",
+                      }}
+                    />
+                    <button
+                      type="button"
+                      onClick={resetPrimaryColor}
+                      style={{
+                        padding: "6px 12px",
+                        border: "none",
+                        borderRadius: "8px",
+                        background: "#ddd",
+                        cursor: "pointer",
+                      }}
+                    >
+                      Reset
+                    </button>
+                  </div>
+                </div>
+
+                <div className={styles.formGroup}>
                   <label>Font Size</label>
                   <select
                     className={styles.selectInput}
@@ -279,17 +330,16 @@ export default function Settings() {
                 />
               </div>
 
-<div className={styles.formGroup}>
-  <label>Email</label>
-  <input
-    id="email"
-    type="email"
-    value={editedData.email}
-    readOnly
-    placeholder="Enter email address"
-  />
-</div>
-
+              <div className={styles.formGroup}>
+                <label>Email</label>
+                <input
+                  id="email"
+                  type="email"
+                  value={editedData.email}
+                  readOnly
+                  placeholder="Enter email address"
+                />
+              </div>
 
               <div className={styles.formGroup}>
                 <label>Username</label>

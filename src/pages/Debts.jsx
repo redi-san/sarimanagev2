@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import styles from "../css/Debts.module.css";
 import deleteIcon from "../assets/deleteIcon.png";
 import { Html5Qrcode } from "html5-qrcode";
@@ -125,7 +125,7 @@ export default function Debts({ setPage }) {
         html5QrCode.stop();
         setShowScanner(false);
         setScanningIndex(null);
-      }
+      },
     );
 
     return () => {
@@ -154,13 +154,13 @@ export default function Debts({ setPage }) {
 
       if (field === "name") {
         match = stocks.find(
-          (s) => s.name.toLowerCase() === value.toLowerCase()
+          (s) => s.name.toLowerCase() === value.toLowerCase(),
         );
       } else if (field === "productId") {
         match = stocks.find(
           (s) =>
             s.barcode?.toString().toLowerCase() ===
-            value.toString().toLowerCase()
+            value.toString().toLowerCase(),
         );
       }
 
@@ -216,7 +216,7 @@ export default function Debts({ setPage }) {
         total: totals.total,
         profit: totals.profit,
         products: products.map((p) => ({
-          stock_id: p.stock_id ?? null, // 🆕 include it
+          stock_id: p.stock_id ?? null,
           name: p.name,
           quantity: p.quantity,
           selling_price: p.sellingPrice ?? p.selling_price ?? 0,
@@ -227,8 +227,13 @@ export default function Debts({ setPage }) {
 
       try {
         await axios.put(`${BASE_URL}/debts/${debtId}`, updatedDebt);
+
+        // Update debtsList locally instead of fetching
+        setDebtsList((prev) =>
+          prev.map((d) => (d.id === debtId ? { ...d, ...updatedDebt } : d)),
+        );
+
         alert("✅ Debt updated successfully!");
-        fetchDebts();
         setShowModal(false);
         setShowSecondModal(false);
         setEditingDebtIndex(null);
@@ -241,6 +246,7 @@ export default function Debts({ setPage }) {
       return;
     }
 
+    // New Debt
     const newDebt = {
       user_id: user.uid,
       customer_name,
@@ -260,9 +266,15 @@ export default function Debts({ setPage }) {
     };
 
     try {
-      await axios.post(`${BASE_URL}/debts`, newDebt);
+      const res = await axios.post(`${BASE_URL}/debts`, newDebt);
       alert("Debt created successfully!");
-      fetchDebts();
+
+      // Append the new debt immediately to the table
+      setDebtsList((prev) => [...prev, res.data]);
+
+      // ✅ Force tab to unpaid so new debt is visible
+      setActiveTab("unpaid");
+
       setShowSecondModal(false);
       resetForm();
     } catch (err) {
@@ -282,10 +294,11 @@ export default function Debts({ setPage }) {
 
   const getPaymentKey = (debtId) => `payment_history_${debtId}`;
 
-  const loadPaymentHistory = (debtId) => {
-    const stored = localStorage.getItem(getPaymentKey(debtId));
-    return stored ? JSON.parse(stored) : [];
-  };
+const loadPaymentHistory = useCallback((debtId) => {
+  const stored = localStorage.getItem(getPaymentKey(debtId));
+  return stored ? JSON.parse(stored) : [];
+}, []);
+
 
   const savePaymentHistory = (debtId, history) => {
     localStorage.setItem(getPaymentKey(debtId), JSON.stringify(history));
@@ -300,26 +313,50 @@ export default function Debts({ setPage }) {
 
       const amount = parseFloat(paymentAmount);
 
-      const res = await axios.post(
-        `${BASE_URL}/debts/${paymentDebtId}/payment`,
-        { amount }
-      );
+      // Load payment history from localStorage
+      const history = loadPaymentHistory(paymentDebtId);
+      const totalPaid = history.reduce((sum, p) => sum + p.amount, 0);
 
-      // 🔽 ADD THIS BLOCK
+      // Find debt total from debtsList
+      const debt = debtsList.find((d) => d.id === paymentDebtId);
+      if (!debt) {
+        alert("Debt not found");
+        return;
+      }
+
+      const balance = debt.total - totalPaid;
+
+      let paymentToRecord = amount;
+      let change = 0;
+
+      if (amount > balance) {
+        change = amount - balance; // return excess as change
+        paymentToRecord = balance; // only pay remaining balance
+      }
+
+      // Save payment via API (optional if you want backend record)
+      await axios.post(`${BASE_URL}/debts/${paymentDebtId}/payment`, {
+        amount: paymentToRecord,
+      });
+
+      // Save to localStorage
       const newEntry = {
-        amount,
+        amount: paymentToRecord,
+        change,
         date: new Date().toLocaleString("en-PH"),
       };
 
-      const updatedHistory = [newEntry, ...loadPaymentHistory(paymentDebtId)];
-
+      const updatedHistory = [...history, newEntry]; // append at end
       savePaymentHistory(paymentDebtId, updatedHistory);
       setPaymentHistory(updatedHistory);
-      // 🔼 END ADD
 
-      alert(res.data.message || "Payment recorded successfully!");
+      alert(
+        `Payment recorded successfully!` +
+          (change > 0 ? ` Change to return: ${formatPeso(change)}` : ""),
+      );
+
+      // Refresh debts and close modal
       await fetchDebts();
-
       setShowPaymentModal(false);
       setSelectedDebt(null);
     } catch (err) {
@@ -383,6 +420,14 @@ export default function Debts({ setPage }) {
     // For mobile devices: opens SMS app with number and message pre-filled
     window.location.href = `sms:${number}?body=${encodedMessage}`;
   };
+
+useEffect(() => {
+  if (selectedDebt) {
+    const history = loadPaymentHistory(selectedDebt.id);
+    setPaymentHistory(history);
+  }
+}, [selectedDebt, loadPaymentHistory]);
+
 
   return (
     <div>
@@ -458,7 +503,7 @@ export default function Debts({ setPage }) {
                 .filter((debt) =>
                   debt.customer_name
                     .toLowerCase()
-                    .includes(search.toLowerCase())
+                    .includes(search.toLowerCase()),
                 )
 
                 .map((debt, index) => (
@@ -474,8 +519,8 @@ export default function Debts({ setPage }) {
                             debt.status === "Paid"
                               ? "green"
                               : debt.status === "Overdue"
-                              ? "red"
-                              : "orange",
+                                ? "red"
+                                : "orange",
                           fontWeight: "bold",
                         }}
                       >
@@ -486,13 +531,16 @@ export default function Debts({ setPage }) {
                     <td>
                       <button
                         className={styles["table-delete-btn"]}
-                        onClick={(e) => {
+                        onClick={async (e) => {
                           e.stopPropagation();
-                          deleteDebt(debt.id);
-                          const filtered = debtsList.filter(
-                            (_, i) => i !== index
-                          );
-                          setDebtsList(filtered);
+                          try {
+                            await deleteDebt(debt.id);
+                            setDebtsList((prev) =>
+                              prev.filter((d) => d.id !== debt.id),
+                            );
+                          } catch (err) {
+                            console.error(err);
+                          }
                         }}
                       >
                         <img
@@ -660,7 +708,7 @@ export default function Debts({ setPage }) {
                       stocks.filter((s) =>
                         s.name
                           .toLowerCase()
-                          .startsWith(product.name.toLowerCase())
+                          .startsWith(product.name.toLowerCase()),
                       ).length > 0 && (
                         <ul
                           style={{
@@ -683,7 +731,7 @@ export default function Debts({ setPage }) {
                             .filter((s) =>
                               s.name
                                 .toLowerCase()
-                                .startsWith(product.name.toLowerCase())
+                                .startsWith(product.name.toLowerCase()),
                             )
                             .map((s, i) => (
                               <li
@@ -699,12 +747,12 @@ export default function Debts({ setPage }) {
                                   updateProduct(
                                     index,
                                     "sellingPrice",
-                                    s.selling_price
+                                    s.selling_price,
                                   );
                                   updateProduct(
                                     index,
                                     "buyingPrice",
-                                    s.buying_price
+                                    s.buying_price,
                                   );
                                   //updateProduct(index, "stock_id", s.barcode);
                                   updateProduct(index, "stock_id", s.id);
@@ -885,7 +933,7 @@ export default function Debts({ setPage }) {
                               selectedDebt.customer_name
                             }, this is a friendly reminder that your debt of ${formatPeso(
                               selectedDebt.total -
-                                (selectedDebt.total_paid || 0)
+                                (selectedDebt.total_paid || 0),
                             )} is due${
                               selectedDebt.due_date
                                 ? ` on ${selectedDebt.due_date}`
@@ -902,7 +950,7 @@ export default function Debts({ setPage }) {
                         <button
                           onClick={() => {
                             setEditingDebtIndex(
-                              debtsList.indexOf(selectedDebt)
+                              debtsList.indexOf(selectedDebt),
                             );
                             setCustomerName(selectedDebt.customer_name);
                             setContactNumber(selectedDebt.contact_number);
@@ -923,7 +971,7 @@ export default function Debts({ setPage }) {
                                   p.buying_price ?? p.buyingPrice ?? 0,
                                 dateAdded: p.dateAdded || p.date_added || "",
                                 stock_id: p.stock_id ?? null,
-                              }))
+                              })),
                             );
 
                             setTotals({
@@ -976,8 +1024,8 @@ export default function Debts({ setPage }) {
                       selectedDebt.status === "Paid"
                         ? "green"
                         : selectedDebt.status === "Overdue"
-                        ? "red"
-                        : "orange",
+                          ? "red"
+                          : "orange",
                     fontWeight: "bold",
                   }}
                 >
@@ -1026,107 +1074,124 @@ export default function Debts({ setPage }) {
 
                 <p>
                   <strong>Payment:</strong>{" "}
-                  {formatPeso(selectedDebt.total_paid || 0)}
+                  {formatPeso(
+                    paymentHistory.reduce((sum, p) => sum + p.amount, 0),
+                  )}
                 </p>
 
                 <p>
                   <strong>Current Balance:</strong>{" "}
                   {formatPeso(
-                    selectedDebt.total - (selectedDebt.total_paid || 0)
+                    selectedDebt.total -
+                      paymentHistory.reduce((sum, p) => sum + p.amount, 0),
                   )}
                 </p>
+
+                {paymentHistory.length > 0 &&
+                  paymentHistory[paymentHistory.length - 1].change > 0 && (
+                    <p>
+                      <strong>Change:</strong>{" "}
+                      {formatPeso(
+                        paymentHistory[paymentHistory.length - 1].change,
+                      )}
+                    </p>
+                  )}
               </div>
 
-{/* Action buttons */}
-<div className={styles["modal-actions"]}>
-  <button
-    className={styles.Edit}
-    onClick={() => {
-      setEditingDebtIndex(debtsList.indexOf(selectedDebt));
-      setCustomerName(selectedDebt.customer_name);
-      setContactNumber(selectedDebt.contact_number);
-      setDate(selectedDebt.date);
-      setDueDate(selectedDebt.due_date);
-      setNote(selectedDebt.note || "");
-      setStatus(selectedDebt.status || "Unpaid");
-      setProducts(
-        (selectedDebt.products || []).map((p) => ({
-          ...p,
-          productId: p.productId || p.stock_id || p.id || "",
-          name: p.name || "",
-          quantity: p.quantity || "",
-          sellingPrice: p.selling_price ?? p.sellingPrice ?? 0,
-          buyingPrice: p.buying_price ?? p.buyingPrice ?? 0,
-          dateAdded: p.dateAdded || p.date_added || "",
-          stock_id: p.stock_id ?? null,
-        }))
-      );
-      setTotals({
-        total: selectedDebt.total || 0,
-        profit: selectedDebt.profit || 0,
-      });
-      setSelectedDebt(null);
-      setShowModal(false);
-      setShowSecondModal(true);
-    }}
-  >
-    Edit
-  </button>
+              {/* Action buttons */}
+              <div className={styles["modal-actions"]}>
+                <button
+                  className={styles.Edit}
+                  onClick={() => {
+                    setEditingDebtIndex(debtsList.indexOf(selectedDebt));
+                    setCustomerName(selectedDebt.customer_name);
+                    setContactNumber(selectedDebt.contact_number);
+                    setDate(selectedDebt.date);
+                    setDueDate(selectedDebt.due_date);
+                    setNote(selectedDebt.note || "");
+                    setStatus(selectedDebt.status || "Unpaid");
+                    setProducts(
+                      (selectedDebt.products || []).map((p) => ({
+                        ...p,
+                        productId: p.productId || p.stock_id || p.id || "",
+                        name: p.name || "",
+                        quantity: p.quantity || "",
+                        sellingPrice: p.selling_price ?? p.sellingPrice ?? 0,
+                        buyingPrice: p.buying_price ?? p.buyingPrice ?? 0,
+                        dateAdded: p.dateAdded || p.date_added || "",
+                        stock_id: p.stock_id ?? null,
+                      })),
+                    );
+                    setTotals({
+                      total: selectedDebt.total || 0,
+                      profit: selectedDebt.profit || 0,
+                    });
+                    setSelectedDebt(null);
+                    setShowModal(false);
+                    setShowSecondModal(true);
+                  }}
+                >
+                  Edit
+                </button>
 
-  <button
-    className={styles.Full}
-    onClick={() => openPaymentModal(selectedDebt.id)}
-  >
-    Payment
-  </button>
-</div>
-
-
-{showPaymentModal && (
-  <div className={styles.modal}>
-    <div
-      className={styles["modal-content"]}
-      onClick={(e) => e.stopPropagation()}
-    >
-      {/* 🔽 Payment History */}
-      {paymentHistory.length > 0 && (
-        <div className={styles["payment-history"]}>
-          <h4>Payment History</h4>
-          {paymentHistory.map((p, i) => {
-            const formattedDate = new Date(p.date).toLocaleDateString(); // Date only
-            return (
-              <div key={i} className={styles["payment-row"]}>
-                <span className={styles["payment-date"]}>{formattedDate}</span>
-                <span className={styles["payment-amount"]}>{formatPeso(p.amount)}</span>
+                <button
+                  className={styles.Full}
+                  onClick={() => openPaymentModal(selectedDebt.id)}
+                >
+                  Payment
+                </button>
               </div>
-            );
-          })}
-        </div>
-      )}
 
-      <h2>Enter Payment Amount</h2>
-      <input
-        type="text"
-        className="enter-payment-input"
-        placeholder="Enter Payment Amount"
-        value={paymentAmount}
-        onChange={(e) => setPaymentAmount(e.target.value)}
-      />
-      <div className={styles["modal-actions"]}>
-        <button
-          className={styles.Cancel}
-          onClick={() => setShowPaymentModal(false)}
-        >
-          Cancel
-        </button>
-        <button className={styles.Next} onClick={recordPayment}>
-          Submit
-        </button>
-      </div>
-    </div>
-  </div>
-)}
+              {showPaymentModal && (
+                <div className={styles.modal}>
+                  <div
+                    className={styles["modal-content"]}
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    {/* 🔽 Payment History */}
+                    {paymentHistory.length > 0 && (
+                      <div className={styles["payment-history"]}>
+                        <h4>Payment History</h4>
+                        {paymentHistory.map((p, i) => {
+                          const formattedDate = new Date(
+                            p.date,
+                          ).toLocaleDateString(); // Date only
+                          return (
+                            <div key={i} className={styles["payment-row"]}>
+                              <span className={styles["payment-date"]}>
+                                {formattedDate}
+                              </span>
+                              <span className={styles["payment-amount"]}>
+                                {formatPeso(p.amount)}
+                              </span>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    )}
 
+                    <h2>Enter Payment Amount</h2>
+                    <input
+                      type="text"
+                      className="enter-payment-input"
+                      placeholder="Enter Payment Amount"
+                      value={paymentAmount}
+                      onChange={(e) => setPaymentAmount(e.target.value)}
+                    />
+                    <div className={styles["modal-actions"]}>
+                      <button
+                        className={styles.Cancel}
+                        onClick={() => setShowPaymentModal(false)}
+                      >
+                        Cancel
+                      </button>
+                      <button className={styles.Next} onClick={recordPayment}>
+                        Submit
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         )}

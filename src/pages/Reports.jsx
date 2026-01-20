@@ -797,7 +797,7 @@ export default function Reports() {
                             p.date?.toDateString() ===
                               filterDate.toDateString()) ||
                           (isMonthly && i === filterDate.getMonth())
-                            ? "#ffcc00"
+                            ? "var(--primary-color)"
                             : "rgba(76, 175, 80, 0.5)"
                         }
                         style={{ cursor: "pointer" }}

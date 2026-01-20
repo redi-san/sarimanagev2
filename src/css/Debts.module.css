@@ -134,7 +134,7 @@
   top: -8px;
   left: 12px;
   font-size: 12px;
-  color: #ffc107;
+  color: var(--primary-color);
   background: transparent;
   padding: 0 4px;
 }
@@ -201,7 +201,7 @@
 .modal-content h2 {
   margin-top: 0px;
   margin-bottom: 0px;
-  color: #ffc107;
+  color: var(--primary-color);
 }
 
 .modal-content input {
@@ -230,7 +230,7 @@
 }
 
 .modal-actions .Next {
-  background: #ffc107;
+  background: var(--primary-color);
   color: #262626;
   font-weight: bold;
   border: none;
@@ -256,7 +256,7 @@
 }
 
 .add-product-btn {
-  background: #ffcc00;
+  background: var(--primary-color);
   color: #262626;
   border: none;
   padding: 8px 12px;
@@ -493,7 +493,7 @@ input:checked + .slider:before {
 }
 
 .receipt-modal button {
-  background: #daae00;
+  background: var(--primary-color);
   color: #000;
   border: none;
   font-weight: bold;
@@ -541,7 +541,7 @@ input:checked + .slider:before {
 }
 
 .scan-product-btn {
-  background: #ffc107;
+  background: var(--primary-color);
   color: #262626;
   border: none;
   padding: 6px 12px;
@@ -727,7 +727,7 @@ input:checked + .slider:before {
   top: -5px;
   left: 12px; 
   font-size: 12px;
-  color: #ffc107;
+  color: var(--primary-color);
 }
 
 .receipt-modal {
@@ -761,7 +761,7 @@ input:checked + .slider:before {
 }
 
 .debts-table th {
-  background-color: #ffcc00;
+  background-color: var(--primary-color);
   color: #333;
 }
 
@@ -883,7 +883,7 @@ input:checked + .slider:before {
 }
 
 .activeTab {
-  background: #ffcc00; 
+  background: var(--primary-color); 
   color: #333;
 }
 
