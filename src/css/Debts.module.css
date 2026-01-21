@@ -26,12 +26,12 @@
   border: 2px solid var(--primary-color);
 }
 
-.page-header h1 {
+/*.page-header h1 {
   color: #ffcc00;
   font-size: 32px;
   font-weight: bold;
   margin: 0;
-}
+} */
 
 .create-button {
   position: fixed;
@@ -201,7 +201,7 @@
 .modal-content h2 {
   margin-top: 0px;
   margin-bottom: 0px;
-  color: var(--primary-color);
+  color: var(--text-color);
 }
 
 .modal-content input {
@@ -268,7 +268,7 @@
 }
 
 .add-product-btn:hover {
-  background: #e6b800;
+  background: color-mix(in srgb, var(--primary-color) 85%, black);
 }
 
 .totals {
@@ -485,7 +485,7 @@ color: var(--text-color);
 }
 
 input:checked + .slider {
-  background-color: #ffcc00;
+  background-color: var(--primary-color)
 }
 
 input:checked + .slider:before {
@@ -552,7 +552,7 @@ input:checked + .slider:before {
 }
 
 .scan-product-btn:hover {
-  background: #e6b800;
+  background: color-mix(in srgb, var(--primary-color) 85%, black);
 }
 
 .delete-product-btn {
@@ -635,7 +635,7 @@ input:checked + .slider:before {
 
 
 .receipt-kebab:hover {
-  color: #ffcc00;
+  color: color-mix(in srgb, var(--primary-color) 85%, black);
 } 
 
 .receipt-kebab-container {
@@ -674,7 +674,7 @@ input:checked + .slider:before {
 
 .kebab-menu button:hover {
   background: #f8f8f8;
-  color: #ffcc00;
+  color: var(--primary-color);
 }
 
 @keyframes fadeIn {
@@ -869,7 +869,7 @@ input:checked + .slider:before {
 .tabButton {
   flex: 1;
   padding: 10px 0;
-  background: #fff3b0; 
+  background: color-mix(in srgb, var(--primary-color) 50%, rgb(255, 255, 255));
   border: none;
   border-radius: 8px;
   font-weight: 600;
@@ -879,7 +879,7 @@ input:checked + .slider:before {
 }
 
 .tabButton:hover {
-  background: #ffe066; 
+  background: color-mix(in srgb, var(--primary-color) 50%, rgb(255, 255, 255));
 }
 
 .activeTab {
@@ -919,12 +919,12 @@ input:checked + .slider:before {
 }
 
 .modal-actions .Next:hover {
-  background: var(--secondary-color);
+  background: color-mix(in srgb, var(--primary-color) 85%, black);
 }
 
 .orders-table tbody tr:hover,
 .debts-table tr:hover {
-  background: var(--secondary-color);
+  background: color-mix(in srgb, var(--primary-color) 50%, rgb(255, 255, 255));
 }
 
 /*.product-entry {

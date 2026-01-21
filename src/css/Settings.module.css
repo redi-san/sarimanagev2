@@ -10,8 +10,7 @@
   --logout-color: #ff4d4f;
   --logout-hover: #d9363e;
   --header-text-color: #000000; /* NEW: topbar & page header text */
-    --font-scale: 1;
-  
+  --font-scale: 1;
 }
 
 [data-theme="dark"] {
@@ -84,9 +83,7 @@ html {
   font-size: 1.5rem;
   font-weight: bold;
   color: var(--header-text-color); /* use variable */
-
 }
-
 
 .main {
   margin-top: 60px;
@@ -110,9 +107,11 @@ html {
 }
 
 .card {
-  background: #fff;
+  /*background: #fff;*/
+  background: var(--card-bg);
   border-radius: 12px;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  /*box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);*/
+  box-shadow: 0 2px 6px var(--card-shadow);
   padding: 20px;
   margin-bottom: 20px;
   transition: transform 0.2s ease;
@@ -133,7 +132,7 @@ html {
   font-weight: bold;
   font-size: 1rem;
   margin-bottom: 8px;
-  color:  var(--header-text-color);
+  color: var(--header-text-color);
 }
 
 .profilePic {
@@ -207,9 +206,9 @@ html {
 
 @media (min-width: 1024px) {
   .card {
-    width: 500px; 
-    max-width: 1000px; 
-    margin: 0 auto 20px auto; 
+    width: 500px;
+    max-width: 1000px;
+    margin: 0 auto 20px auto;
   }
 
   .main {
@@ -229,7 +228,7 @@ html {
   font-weight: 600;
   margin-bottom: 5px;
   color: #333;
-    color: var(--text-color); /* matches current theme */
+  color: var(--text-color); /* matches current theme */
 }
 
 .formGroup input {
@@ -239,8 +238,8 @@ html {
   font-size: 1rem;
   outline: none;
   transition: border-color 0.2s ease;
-    background: var(--card-bg); /* match card background */
-  color: var(--text-color);   /* match text color */
+  background: var(--card-bg); /* match card background */
+  color: var(--text-color); /* match text color */
   border: 1px solid var(--input-border);
 }
 
@@ -306,7 +305,6 @@ html {
   }
 }
 
-
 .selectInput {
   padding: 10px 12px;
   border: 1px solid #ccc;
@@ -323,16 +321,10 @@ body {
   color: var(--text-color);
 }
 
-
 .main {
   margin-top: 60px;
   padding: 20px;
   color: var(--text-color);
-}
-
-.card {
-  background: var(--card-bg);
-  box-shadow: 0 2px 6px var(--card-shadow);
 }
 
 .topbar {
@@ -366,7 +358,6 @@ body {
   background: var(--logout-hover);
 }
 
-
 .pageTitle {
   margin-bottom: 20px;
   font-size: 24px;
@@ -380,8 +371,8 @@ body {
 
 .formGroup input,
 .selectInput {
-  background: var(--card-bg);  /* match card background */
-  color: var(--text-color);    /* match text color */
+  background: var(--card-bg); /* match card background */
+  color: var(--text-color); /* match text color */
   border: 1px solid var(--input-border);
 }
 

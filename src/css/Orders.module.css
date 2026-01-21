@@ -40,13 +40,13 @@
 }
 
 .tabButton:hover {
-  background-color: var(--secondary-color);
+  background-color: color-mix(in srgb, var(--primary-color) 85%, black);
 }
 
 .active {
   background: var(--primary-color);
   color: #222;
-  border-bottom: 3px solid #d1a700;
+  border-bottom: 3px solid var(--primary-color);
 }
 
 .search-input {
@@ -109,7 +109,7 @@
 }
 
 .create-button:hover {
-  background-color: var(--secondary-color);
+  background: color-mix(in srgb, var(--primary-color) 85%, black);
 }
 
 .topbar {
@@ -269,7 +269,8 @@
 }
 
 .add-product-btn:hover {
-  background: #e6b800;
+  /*background: #e6b800;*/
+  background: color-mix(in srgb, var(--primary-color) 85%, black);
 }
 
 .totals {
@@ -527,8 +528,13 @@
 }
 
 .filter-top button:hover {
-  background: #e6b800;
+  background: color-mix(in srgb, var(--primary-color) 85%, black);
   transform: translateY(-2px);
+}
+
+.filter-bottom button:hover {
+  background:color-mix(in srgb, var(--primary-color) 85%, black);
+  transform: translateY(-1px);
 }
 
 .filter-bottom {
@@ -555,10 +561,7 @@
   transition: all 0.2s ease;
 }
 
-.filter-bottom button:hover {
-  background: #e6b800;
-  transform: translateY(-1px);
-}
+
 
 .filter-bottom span {
   font-weight: 600;
@@ -798,7 +801,7 @@
 }
 
 .orders-table tbody tr:hover {
-  background-color: var(--secondary-color);
+  background-color: color-mix(in srgb, var(--primary-color) 85%, black);
 }
 
 /* Inputs inside Add Products modal */
