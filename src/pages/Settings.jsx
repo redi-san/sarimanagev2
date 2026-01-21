@@ -285,7 +285,7 @@ export default function Settings() {
                     {/* Reset Button */}
                     <button
                       type="button"
-                      onClick={() => setPrimaryColor("#ffcc00")}
+                      onClick={resetPrimaryColor}
                       style={{
                         padding: "6px 12px",
                         border: "none",
