@@ -636,7 +636,7 @@ export default function Reports() {
                   <h3 style={{ marginBottom: "10px", marginLeft: "10px" }}>
                     {activeTab === "inventory" && selectedProduct
                       ? `${
-                          showAll ? "Sold This Month" : "Sold Today"
+                          showAll ? "Sold this month" : "Sold today"
                         } - ${selectedProduct}`
                       : activeTab === "sales"
                       ? showForecast
@@ -765,7 +765,7 @@ export default function Reports() {
                           />
                           <text
                             x={x}
-                            y={height - padding + 2}
+                            y={height - padding - 24}
                             fontSize="13"
                             textAnchor="middle"
                             fill="#007BFF"

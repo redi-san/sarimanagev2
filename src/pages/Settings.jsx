@@ -125,11 +125,11 @@ export default function Settings() {
   useEffect(() => {
     if (theme === "system") {
       const prefersDark = window.matchMedia(
-        "(prefers-color-scheme: dark)"
+        "(prefers-color-scheme: dark)",
       ).matches;
       document.documentElement.setAttribute(
         "data-theme",
-        prefersDark ? "dark" : "light"
+        prefersDark ? "dark" : "light",
       );
     } else {
       document.documentElement.setAttribute("data-theme", theme);
@@ -256,21 +256,36 @@ export default function Settings() {
                       gap: "10px",
                     }}
                   >
+                    {/* Live Preview */}
+                    <div
+                      style={{
+                        width: "50px",
+                        height: "30px",
+                        borderRadius: "6px",
+                        backgroundColor: primaryColor,
+                        border: "1px solid #ccc",
+                      }}
+                    ></div>
+
+                    {/* Native Color Picker */}
                     <input
                       type="color"
-                      value={primaryColor}
+                      value={primaryColor} // ✅ ensures hue/saturation/value is initialized
                       onChange={(e) => setPrimaryColor(e.target.value)}
                       style={{
                         width: "50px",
                         height: "30px",
-                        border: "none",
                         padding: 0,
+                        border: "none",
                         cursor: "pointer",
+                        background: "transparent",
                       }}
                     />
+
+                    {/* Reset Button */}
                     <button
                       type="button"
-                      onClick={resetPrimaryColor}
+                      onClick={() => setPrimaryColor("#ffcc00")}
                       style={{
                         padding: "6px 12px",
                         border: "none",
@@ -281,6 +296,17 @@ export default function Settings() {
                     >
                       Reset
                     </button>
+                  </div>
+
+                  {/* Optional: show hex code for instant feedback */}
+                  <div
+                    style={{
+                      marginTop: "6px",
+                      fontSize: "12px",
+                      color: "#555",
+                    }}
+                  >
+                    {primaryColor.toUpperCase()}
                   </div>
                 </div>
 
