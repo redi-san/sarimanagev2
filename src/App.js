@@ -15,16 +15,35 @@ import AuthRedirect from "./components/AuthRedirect";
 
 function App() {
   // ✅ Apply theme on app load
-  useEffect(() => {
-    const theme = localStorage.getItem("theme") || "light";
+useEffect(() => {
+  const theme = localStorage.getItem("theme") || "light";
+  const fontScale = localStorage.getItem("fontScale") || "1";
+  const primaryColor = localStorage.getItem("primaryColor") || "#ffcc00";
 
-    if (theme === "system") {
-      const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
-      document.documentElement.setAttribute("data-theme", prefersDark ? "dark" : "light");
-    } else {
-      document.documentElement.setAttribute("data-theme", theme);
-    }
-  }, []);
+  // 🌗 Theme
+  if (theme === "system") {
+    const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+    document.documentElement.setAttribute(
+      "data-theme",
+      prefersDark ? "dark" : "light"
+    );
+  } else {
+    document.documentElement.setAttribute("data-theme", theme);
+  }
+
+  // 🔠 Font scale
+  document.documentElement.style.setProperty(
+    "--font-scale",
+    fontScale
+  );
+
+  // 🎨 PRIMARY COLOR (THIS IS WHAT YOU WERE MISSING)
+  document.documentElement.style.setProperty(
+    "--primary-color",
+    primaryColor
+  );
+}, []);
+
 
   return (
     <div>

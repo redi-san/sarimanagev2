@@ -8,29 +8,36 @@ import { getAuth } from "firebase/auth";
 
 const BASE_URL = process.env.REACT_APP_API_URL;
 const EXPIRY_WARNING_DAYS = 14;
+const OUT_OF_STOCK_WARNING_DAYS = 7;
 
 export default function NotificationBell() {
   const [lowStockItems, setLowStockItems] = useState([]);
   const [expiringItems, setExpiringItems] = useState([]);
+  const [nearOutOfStockItems, setNearOutOfStockItems] = useState([]);
   const [showDropdown, setShowDropdown] = useState(false);
-  const auth = getAuth();
+  const auth = getAuth(); // fixed line
 
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged(async (user) => {
       if (!user) return;
 
       try {
-        const res = await axios.get(`${BASE_URL}/stocks/user/${user.uid}`);
-        const stocks = res.data;
+        const [stocksRes, ordersRes] = await Promise.all([
+          axios.get(`${BASE_URL}/stocks/user/${user.uid}`),
+          axios.get(`${BASE_URL}/orders/user/${user.uid}`),
+        ]);
 
-        // Low stock
+        const stocks = stocksRes.data;
+        const orders = ordersRes.data;
+        const today = new Date();
+
+        // --- Low stock
         const lowStock = stocks.filter(
-          (s) => Number(s.stock) <= Number(s.lowstock)
+          (s) => Number(s.stock) <= Number(s.lowstock),
         );
         setLowStockItems(lowStock);
 
-        // Expiring soon
-        const today = new Date();
+        // --- Expiring soon
         const expiring = stocks.filter((stock) => {
           if (!stock.expiry_date) return false;
           const expiry = new Date(stock.expiry_date);
@@ -38,6 +45,63 @@ export default function NotificationBell() {
           return diffDays <= EXPIRY_WARNING_DAYS && diffDays >= 0;
         });
         setExpiringItems(expiring);
+
+        // --- Near out-of-stock with predicted date
+        const nearOut = stocks
+          .map((stock) => {
+            const stockQty = Number(stock.stock);
+            if (stockQty <= 0) return null;
+
+            // Average daily sold (last 7 days)
+            const pastDays = 7;
+            let soldDaysCount = 0;
+            let totalSold = 0;
+
+            for (let i = 0; i < pastDays; i++) {
+              const date = new Date(today);
+              date.setDate(today.getDate() - i);
+
+              let soldToday = 0;
+              orders.forEach((order) => {
+                const orderDate = new Date(
+                  order.order_number.slice(0, 2) +
+                    "/" +
+                    order.order_number.slice(2, 4) +
+                    "/" +
+                    order.order_number.slice(4, 8),
+                );
+                if (orderDate.toDateString() === date.toDateString()) {
+                  const product = order.products.find(
+                    (p) => p.name === stock.name,
+                  );
+                  if (product) soldToday += Number(product.quantity) || 0;
+                }
+              });
+
+              if (soldToday > 0) {
+                totalSold += soldToday;
+                soldDaysCount += 1;
+              }
+            }
+
+            const avgDailySold =
+              soldDaysCount > 0 ? totalSold / soldDaysCount : 0;
+            if (avgDailySold <= 0) return null;
+
+            const daysToDeplete = stockQty / avgDailySold;
+            if (daysToDeplete > OUT_OF_STOCK_WARNING_DAYS) return null;
+
+            const predictedDate = new Date(today);
+            predictedDate.setDate(today.getDate() + Math.ceil(daysToDeplete));
+
+            return {
+              ...stock,
+              predictedOutOfStock: predictedDate,
+            };
+          })
+          .filter(Boolean);
+
+        setNearOutOfStockItems(nearOut);
       } catch (err) {
         console.error("Error fetching stocks for notifications:", err);
       }
@@ -46,7 +110,8 @@ export default function NotificationBell() {
     return () => unsubscribe();
   }, [auth]);
 
-  const totalAlerts = lowStockItems.length + expiringItems.length;
+  const totalAlerts =
+    lowStockItems.length + expiringItems.length + nearOutOfStockItems.length;
 
   return (
     <div className={styles.notifWrapper}>
@@ -79,6 +144,20 @@ export default function NotificationBell() {
                     {lowStockItems.map((item) => (
                       <li key={item.id}>
                         <strong>{item.name}</strong> - {item.stock} left
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+
+              {nearOutOfStockItems.length > 0 && (
+                <div className={styles.notifSection}>
+                  <h4>Near Out of Stock</h4>
+                  <ul>
+                    {nearOutOfStockItems.map((item) => (
+                      <li key={item.id}>
+                        <strong>{item.name}</strong> - {item.stock} left, expected out
+                        by {item.predictedOutOfStock.toLocaleDateString()}
                       </li>
                     ))}
                   </ul>

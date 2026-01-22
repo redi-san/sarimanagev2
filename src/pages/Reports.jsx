@@ -316,6 +316,85 @@ export default function Reports() {
     }
   }, [stocks, selectedProduct]);
 
+/*const getDailyAverageSold = (productName) => {
+  const today = new Date();
+  const pastDays = 7;
+  let totalSold = 0;
+
+  for (let i = 0; i < pastDays; i++) {
+    const date = new Date(today);
+    date.setDate(today.getDate() - i);
+
+    for (const order of orders) {
+      const orderDate = getOrderDate(order);
+      if (orderDate.toDateString() === date.toDateString()) {
+        const product = order.products.find(
+          (p) => p.name === productName
+        );
+        if (product) {
+          totalSold += parseFloat(product.quantity) || 0;
+        }
+      }
+    }
+  }
+
+  return totalSold / pastDays; // daily average
+}; */
+
+
+  /*const getOutOfStockDate = (product) => {
+    const remainingStock = parseFloat(product.remaining);
+    const avgDailySold = getDailyAverageSold(product.name);
+
+    if (avgDailySold <= 0) return null; // cannot predict
+
+    const daysToDeplete = remainingStock / avgDailySold;
+    const outOfStockDate = new Date();
+    outOfStockDate.setDate(outOfStockDate.getDate() + Math.ceil(daysToDeplete));
+
+    return outOfStockDate;
+  };*/
+
+  const getOutOfStockPredictionText = (productName) => {
+    const product = inventoryData.find((p) => p.name === productName);
+    if (!product) return "";
+
+    const today = new Date();
+    const pastDays = 7;
+
+    let totalSold = 0;
+    let daysWithSales = 0;
+
+    for (let i = 0; i < pastDays; i++) {
+      const date = new Date(today);
+      date.setDate(today.getDate() - i);
+
+      let soldToday = 0;
+
+      orders.forEach((order) => {
+        const orderDate = getOrderDate(order);
+        if (orderDate.toDateString() === date.toDateString()) {
+          const pItem = order.products.find((p) => p.name === productName);
+          if (pItem) soldToday += parseFloat(pItem.quantity) || 0;
+        }
+      });
+
+      if (soldToday > 0) {
+        totalSold += soldToday;
+        daysWithSales += 1;
+      }
+    }
+
+    const avgDailySold = daysWithSales > 0 ? totalSold / daysWithSales : 0;
+    if (avgDailySold <= 0) return "Stock sufficient / cannot predict";
+
+    const daysToDeplete = product.remaining / avgDailySold;
+    const outOfStockDate = new Date();
+    outOfStockDate.setDate(outOfStockDate.getDate() + Math.ceil(daysToDeplete));
+
+    return `Expected to run out of stock on: ${formatDisplayDate(outOfStockDate)}`;
+  };
+
   return (
     <div>
       {/* Topbar */}
@@ -635,27 +714,31 @@ export default function Reports() {
                 <div>
                   <h3 style={{ marginBottom: "10px", marginLeft: "10px" }}>
                     {activeTab === "inventory" && selectedProduct
-                      ? `${
-                          showAll ? "Sold this month" : "Sold today"
-                        } - ${selectedProduct}`
+                      ? `${showAll ? "Sold this month" : "Sold today"} - ${selectedProduct}`
                       : activeTab === "sales"
                         ? showForecast
                           ? "Sales Forecast"
-                          : `${
-                              showAll
-                                ? "Sales of the Month"
-                                : "Sales of the Day"
-                            }`
+                          : `${showAll ? "Sales of the Month" : "Sales of the Day"}`
                         : activeTab === "profit"
-                          ? `${
-                              showAll
-                                ? "Profits of the Month"
-                                : "Profits of the Day"
-                            }`
+                          ? `${showAll ? "Profits of the Month" : "Profits of the Day"}`
                           : activeTab === "debt"
                             ? "Debt Overview"
                             : ""}
                   </h3>
+
+{/* Out-of-stock prediction */}
+{activeTab === "inventory" && selectedProduct && (
+  <p
+    style={{
+      marginLeft: "10px",
+      color: "#555",
+      fontSize: "14px",
+    }}
+  >
+    {getOutOfStockPredictionText(selectedProduct)}
+  </p>
+)}
+
 
                   <svg
                     viewBox={`0 0 ${width} ${height}`}
