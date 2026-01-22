@@ -508,7 +508,7 @@ export default function Reports() {
                         date.getMonth() === i
                       ) {
                         const product = order.products.find(
-                          (p) => p.name === selectedProduct
+                          (p) => p.name === selectedProduct,
                         );
                         if (product) value += parseFloat(product.quantity);
                       }
@@ -518,7 +518,7 @@ export default function Reports() {
                 } else {
                   const startOfWeek = new Date(filterDate);
                   startOfWeek.setDate(
-                    filterDate.getDate() - filterDate.getDay()
+                    filterDate.getDate() - filterDate.getDay(),
                   );
                   const weekDates = Array.from({ length: 7 }, (_, i) => {
                     const d = new Date(startOfWeek);
@@ -532,7 +532,7 @@ export default function Reports() {
                       const orderDate = getOrderDate(order);
                       if (orderDate.toDateString() === date.toDateString()) {
                         const product = order.products.find(
-                          (p) => p.name === selectedProduct
+                          (p) => p.name === selectedProduct,
                         );
                         if (product) value += parseFloat(product.quantity);
                       }
@@ -570,7 +570,7 @@ export default function Reports() {
 
                   if (activeTab === "sales") {
                     forecastPoints = getThreeMonthMovingAverage(
-                      filterDate.getFullYear()
+                      filterDate.getFullYear(),
                     ).map((v, i) => ({
                       label: labels[i],
                       value: v || 0,
@@ -581,7 +581,7 @@ export default function Reports() {
                 } else {
                   const startOfWeek = new Date(filterDate);
                   startOfWeek.setDate(
-                    filterDate.getDate() - filterDate.getDay()
+                    filterDate.getDate() - filterDate.getDay(),
                   );
                   const weekDates = Array.from({ length: 7 }, (_, i) => {
                     const d = new Date(startOfWeek);
@@ -616,9 +616,9 @@ export default function Reports() {
               }
 
               const maxValue = Math.max(...dataPoints.map((d) => d.value)) || 1;
-              const width = 550;
-              const height = 180;
-              const padding = 30;
+              const width = 900; // wider chart
+              const height = 350; // taller chart
+              const padding = 50; // increase padding proportionally
 
               const points = dataPoints.map((d, i) => ({
                 x: padding + (i / (labels.length - 1)) * (width - 2 * padding),
@@ -639,28 +639,29 @@ export default function Reports() {
                           showAll ? "Sold this month" : "Sold today"
                         } - ${selectedProduct}`
                       : activeTab === "sales"
-                      ? showForecast
-                        ? "Sales Forecast"
-                        : `${
-                            showAll ? "Sales of the Month" : "Sales of the Day"
-                          }`
-                      : activeTab === "profit"
-                      ? `${
-                          showAll
-                            ? "Profits of the Month"
-                            : "Profits of the Day"
-                        }`
-                      : activeTab === "debt"
-                      ? "Debt Overview"
-                      : ""}
+                        ? showForecast
+                          ? "Sales Forecast"
+                          : `${
+                              showAll
+                                ? "Sales of the Month"
+                                : "Sales of the Day"
+                            }`
+                        : activeTab === "profit"
+                          ? `${
+                              showAll
+                                ? "Profits of the Month"
+                                : "Profits of the Day"
+                            }`
+                          : activeTab === "debt"
+                            ? "Debt Overview"
+                            : ""}
                   </h3>
 
                   <svg
                     viewBox={`0 0 ${width} ${height}`}
                     style={{
                       width: "100%",
-                      maxWidth: "100%",
-                      height: "auto",
+                      height: "200px",
                       background: "var(--card-bg)",
                       borderRadius: "12px",
                       padding: "10px",
@@ -704,11 +705,11 @@ export default function Reports() {
                                 height -
                                 padding -
                                 (p.value / maxValue) * (height - 2 * padding)
-                              }`
+                              }`,
                         )
                         .join(" ")}
                       stroke="#4caf50"
-                      strokeWidth="2"
+                      strokeWidth="8"
                       fill="none"
                     />
 
@@ -735,11 +736,11 @@ export default function Reports() {
                                   height -
                                   padding -
                                   (p.value / maxValue) * (height - 2 * padding)
-                                }`
+                                }`,
                           )
                           .join(" ")}
                         stroke="#007BFF"
-                        strokeWidth="2"
+                        strokeWidth="8"
                         fill="none"
                       />
                     )}
@@ -759,14 +760,14 @@ export default function Reports() {
                           <circle
                             cx={x}
                             cy={y}
-                            r={5}
+                            r={12}
                             fill="#007BFF"
                             style={{ cursor: "pointer" }}
                           />
                           <text
                             x={x}
-                            y={height - padding - 24}
-                            fontSize="13"
+                            y={height - padding - 36}
+                            fontSize="28"
                             textAnchor="middle"
                             fill="#007BFF"
                             fontWeight="600"
@@ -789,8 +790,8 @@ export default function Reports() {
                             p.date?.toDateString() ===
                               filterDate.toDateString()) ||
                           (isMonthly && i === filterDate.getMonth())
-                            ? 6
-                            : 5
+                            ? 8
+                            : 8
                         }
                         fill={
                           (!isMonthly &&
@@ -817,8 +818,8 @@ export default function Reports() {
                       <text
                         key={i}
                         x={p.x}
-                        y={height - padding + 15}
-                        fontSize="14"
+                        y={height - padding + 36}
+                        fontSize="28"
                         textAnchor="middle"
                         fill="var(--chart-label)"
                       >
@@ -831,7 +832,7 @@ export default function Reports() {
                         key={i}
                         x={p.x}
                         y={p.y - 6}
-                        fontSize="14"
+                        fontSize="28"
                         textAnchor="middle"
                         fill="var(--chart-text)"
                       >
@@ -912,7 +913,7 @@ export default function Reports() {
                       const paidAmount =
                         debt.payments?.reduce(
                           (sum, p) => sum + parseFloat(p.amount),
-                          0
+                          0,
                         ) || 0;
                       const balance =
                         (parseFloat(debt.total) || 0) - paidAmount;
@@ -928,7 +929,7 @@ export default function Reports() {
                               {
                                 minimumFractionDigits: 2,
                                 maximumFractionDigits: 2,
-                              }
+                              },
                             )}
                           </td>
                           <td>
@@ -975,7 +976,7 @@ export default function Reports() {
                         ₱
                         {Number(
                           stocks.find((s) => s.name === p.name)?.buying_price ||
-                            0
+                            0,
                         ).toFixed(2)}
                       </td>
                       <td>{p.totalQty}</td>

@@ -52,14 +52,14 @@ export default function Orders({ setPage }) {
         try {
           // Fetch stocks first
           const stocksRes = await axios.get(
-            `${BASE_URL}/stocks/user/${user.uid}`
+            `${BASE_URL}/stocks/user/${user.uid}`,
           );
 
           setStocks(stocksRes.data);
 
           // Then fetch orders
           const ordersRes = await axios.get(
-            `${BASE_URL}/orders/user/${user.uid}`
+            `${BASE_URL}/orders/user/${user.uid}`,
           );
 
           setOrdersList(ordersRes.data);
@@ -89,7 +89,7 @@ export default function Orders({ setPage }) {
           (acc, p) =>
             acc +
             (parseFloat(p.quantity) || 0) * (parseFloat(p.selling_price) || 0),
-          0
+          0,
         );
         const profit = products.reduce(
           (acc, p) =>
@@ -97,22 +97,22 @@ export default function Orders({ setPage }) {
             (parseFloat(p.quantity) || 0) *
               ((parseFloat(p.selling_price) || 0) -
                 (parseFloat(p.buying_price) || 0)),
-          0
+          0,
         );
         return { total, profit };
       });
     },
-    [products]
+    [products],
   );
 
   const generateOrderNumber = useCallback(() => {
     const today = new Date();
     const dateStr = `${String(today.getMonth() + 1).padStart(2, "0")}${String(
-      today.getDate()
+      today.getDate(),
     ).padStart(2, "0")}${today.getFullYear()}`;
 
     const todaysOrders = ordersList.filter((order) =>
-      order.order_number.startsWith(dateStr)
+      order.order_number.startsWith(dateStr),
     );
 
     const nextNumber = String(todaysOrders.length + 1).padStart(2, "0");
@@ -385,8 +385,8 @@ export default function Orders({ setPage }) {
 
       const inputs = Array.from(
         document.querySelectorAll(
-          'input:not([readonly]):not([type="hidden"]), select, textarea'
-        )
+          'input:not([readonly]):not([type="hidden"]), select, textarea',
+        ),
       );
       const index = inputs.indexOf(e.target);
       if (index > -1 && index < inputs.length - 1) {
@@ -431,12 +431,12 @@ export default function Orders({ setPage }) {
   const handleScanSuccess = useCallback(
     (decodedText) => {
       const foundStock = stocks.find(
-        (s) => String(s.barcode).trim() === String(decodedText).trim()
+        (s) => String(s.barcode).trim() === String(decodedText).trim(),
       );
 
       setProducts((prev) => {
         const alreadyAdded = prev.some(
-          (p) => String(p.stock_id).trim() === String(decodedText).trim()
+          (p) => String(p.stock_id).trim() === String(decodedText).trim(),
         );
 
         if (alreadyAdded) return prev;
@@ -456,7 +456,7 @@ export default function Orders({ setPage }) {
 
       setOrderNumber(generateOrderNumber());
     },
-    [stocks, generateOrderNumber]
+    [stocks, generateOrderNumber],
   );
 
   const handleScanError = useCallback((err) => {
@@ -479,13 +479,12 @@ export default function Orders({ setPage }) {
     }, 300);
   }, [handleScanSuccess, handleScanError]);
 
-useEffect(() => {
-  if (!showScanner) return;
-  if (stocks.length === 0) return; // 🔥 WAIT FOR STOCKS
+  useEffect(() => {
+    if (!showScanner) return;
+    if (stocks.length === 0) return; // 🔥 WAIT FOR STOCKS
 
-  openScanner();
-}, [showScanner, stocks, openScanner]);
-
+    openScanner();
+  }, [showScanner, stocks, openScanner]);
 
   useEffect(() => {
     // If no payment entered yet, show 0 instead of negative
@@ -565,55 +564,58 @@ useEffect(() => {
                 />
                 {/*<h1>Orders</h1>*/}
 
-<div className={styles["filter-controls"]}>
-  {/* First row: Show All / Show Today toggle button */}
-  <div className={styles["filter-top"]}>
-    <button onClick={() => setShowAll(!showAll)}>
-      {showAll ? "Show Today" : "Show All"}
-    </button>
-  </div>
+                <div className={styles["filter-controls"]}>
+                  {/* First row: Show All / Show Today toggle button */}
+                  <div className={styles["filter-top"]}>
+                    <button onClick={() => setShowAll(!showAll)}>
+                      {showAll ? "Show Today" : "Show All"}
+                    </button>
+                  </div>
 
-  {/* Second row: Date navigation */}
-  <div className={styles["filter-bottom"]}>
-    {/* Previous day button */}
-    <button
-      onClick={() =>
-        setFilterDate(
-          new Date(filterDate.setDate(filterDate.getDate() - 1))
-        )
-      }
-    >
-      ←
-    </button>
+                  {/* Second row: Date navigation */}
+                  <div className={styles["filter-bottom"]}>
+                    {/* Previous day button */}
+                    <button
+                      onClick={() =>
+                        setFilterDate(
+                          new Date(
+                            filterDate.setDate(filterDate.getDate() - 1),
+                          ),
+                        )
+                      }
+                    >
+                      ←
+                    </button>
 
-    {/* Display "All Orders" label if showing all, otherwise date picker */}
-    {showAll ? (
-      <span>All Orders</span>
-    ) : (
-      <input
-        type="date"
-        value={formatDate(filterDate)}
-        onChange={(e) => {
-          if (!e.target.value) return; // ignore clear button
-          setFilterDate(new Date(e.target.value));
-        }}
-        className={styles.datePicker}
-      />
-    )}
+                    {/* Display "All Orders" label if showing all, otherwise date picker */}
+                    {showAll ? (
+                      <span>All Orders</span>
+                    ) : (
+                      <input
+                        type="date"
+                        value={formatDate(filterDate)}
+                        onChange={(e) => {
+                          if (!e.target.value) return; // ignore clear button
+                          setFilterDate(new Date(e.target.value));
+                        }}
+                        className={styles.datePicker}
+                      />
+                    )}
 
-    {/* Next day button */}
-    <button
-      onClick={() =>
-        setFilterDate(
-          new Date(filterDate.setDate(filterDate.getDate() + 1))
-        )
-      }
-    >
-      →
-    </button>
-  </div>
-</div>
-
+                    {/* Next day button */}
+                    <button
+                      onClick={() =>
+                        setFilterDate(
+                          new Date(
+                            filterDate.setDate(filterDate.getDate() + 1),
+                          ),
+                        )
+                      }
+                    >
+                      →
+                    </button>
+                  </div>
+                </div>
               </div>
 
               <div className={styles["orders-table-container"]}>
@@ -682,8 +684,19 @@ useEffect(() => {
 
         {/* Add Order Modal */}
         {showModal && (
-          <div className={styles.modal}>
-            <div className={styles["modal-content"]}>
+          <div
+            className={styles.modal}
+            onClick={() => {
+              setShowModal(false);
+              setShowSecondModal(false);
+              setShowDebtModal(false);
+              setSelectedOrder(null);
+            }}
+          >
+            <div
+              className={styles["modal-content"]}
+              onClick={(e) => e.stopPropagation()}
+            >
               <h2>Add Order</h2>
               <p>Enter order details</p>
               <div className={styles["form-group"]}>
@@ -715,17 +728,20 @@ useEffect(() => {
                 />
               </div>
 
-              <div className={styles["form-group"]}>
-                <label className={styles.inputLabel}>Payment Amount</label>
-                <input
-                  type="number"
-                  placeholder="0.00"
-                  value={paymentAmount}
-                  onChange={(e) => setPaymentAmount(e.target.value)}
-                  required
-                  min={totals.total}
-                />
-              </div>
+              <input
+                type="number"
+                placeholder="0.00"
+                value={paymentAmount}
+                onChange={(e) => setPaymentAmount(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    e.preventDefault();
+                    saveOrder();
+                  }
+                }}
+                required
+                min={totals.total}
+              />
 
               <div className={styles.totals}>
                 <div className={styles.totalBox}>
@@ -764,9 +780,13 @@ useEffect(() => {
 
         {/* 2nd Modal */}
         {showSecondModal && (
-          <div className={styles.modal}>
+          <div
+            className={styles.modal}
+            onClick={() => setShowSecondModal(false)}
+          >
             <div
               className={`${styles["modal-content"]} ${styles["modal-second"]}`}
+              onClick={(e) => e.stopPropagation()}
             >
               <h2>Add Productss</h2>
               {products.map((product, index) => (
@@ -804,7 +824,7 @@ useEffect(() => {
                       stocks.filter((s) =>
                         s.name
                           .toLowerCase()
-                          .startsWith(product.name.toLowerCase())
+                          .startsWith(product.name.toLowerCase()),
                       ).length > 0 && (
                         <ul
                           style={{
@@ -827,7 +847,7 @@ useEffect(() => {
                             .filter((s) =>
                               s.name
                                 .toLowerCase()
-                                .startsWith(product.name.toLowerCase())
+                                .startsWith(product.name.toLowerCase()),
                             )
                             .map((s, i) => (
                               <li
@@ -843,12 +863,12 @@ useEffect(() => {
                                   updateProduct(
                                     index,
                                     "selling_price",
-                                    s.selling_price
+                                    s.selling_price,
                                   );
                                   updateProduct(
                                     index,
                                     "buying_price",
-                                    s.buying_price
+                                    s.buying_price,
                                   );
                                   updateProduct(index, "stock_id", s.barcode);
                                   setActiveSuggestionIndex(null); // close dropdown
@@ -875,7 +895,7 @@ useEffect(() => {
 
                       const foundStock = stocks.find(
                         (s) =>
-                          String(s.barcode).trim() === String(barcode).trim()
+                          String(s.barcode).trim() === String(barcode).trim(),
                       );
 
                       if (foundStock) {
@@ -883,12 +903,12 @@ useEffect(() => {
                         updateProduct(
                           index,
                           "selling_price",
-                          foundStock.selling_price
+                          foundStock.selling_price,
                         );
                         updateProduct(
                           index,
                           "buying_price",
-                          foundStock.buying_price
+                          foundStock.buying_price,
                         );
                       }
                     }}
@@ -910,7 +930,7 @@ useEffect(() => {
                             updateProduct(
                               index,
                               "quantity",
-                              value === "" ? "" : parseInt(value, 10)
+                              value === "" ? "" : parseInt(value, 10),
                             );
                           }
                         }}
@@ -1082,9 +1102,13 @@ useEffect(() => {
         />
 
         {selectedOrder && (
-          <div className={styles.modal}>
+          <div
+            className={styles.modal}
+            onClick={() => setSelectedOrder(null)} // 👈 click outside closes
+          >
             <div
               className={`${styles["modal-content"]} ${styles["receipt-modal"]}`}
+              onClick={(e) => e.stopPropagation()} // 👈 prevent close inside
             >
               <h2>Receipt</h2>
               <p>
@@ -1148,7 +1172,7 @@ useEffect(() => {
                     const updatedProducts = (selectedOrder.products || []).map(
                       (p) => {
                         const foundStock = stocks.find(
-                          (s) => s.name === p.name || s.barcode === p.stock_id
+                          (s) => s.name === p.name || s.barcode === p.stock_id,
                         );
 
                         return {
@@ -1157,7 +1181,7 @@ useEffect(() => {
                             ? foundStock.barcode
                             : p.stock_id || "",
                         };
-                      }
+                      },
                     );
 
                     setProducts(updatedProducts);
