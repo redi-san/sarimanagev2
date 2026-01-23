@@ -312,7 +312,7 @@ export default function Orders({ setPage }) {
       };
 
       await axios.post(`${BASE_URL}/debts`, debtPayload);
-      alert("Debt saved successfully!");
+      showToast("Debt saved successfully!");
       setShowDebtModal(false);
       resetForm();
 

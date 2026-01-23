@@ -873,8 +873,8 @@ export default function Reports() {
                             p.date?.toDateString() ===
                               filterDate.toDateString()) ||
                           (isMonthly && i === filterDate.getMonth())
-                            ? 8
-                            : 8
+                            ? 16
+                            : 16
                         }
                         fill={
                           (!isMonthly &&

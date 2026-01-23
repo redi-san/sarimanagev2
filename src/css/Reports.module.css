@@ -509,7 +509,7 @@
   margin: 0;             /* remove any margin */
   padding: 0;            /* remove any padding */
   justify-content: space-between; /* or space-evenly */
-  background: #ffffff;
+  background: var(--card-bg);
   border-bottom: 2px solid #ddd;
   position: sticky;
   top: 60px; 
@@ -525,8 +525,8 @@
   border: none;
   /*font-size: 16px;*/
   font-size: var(--text-md);
-  font-weight: 600;
-  color: #444;
+  font-weight: bold;
+  color: var(--header-text-color);
   cursor: pointer;
   transition: background 0.3s, color 0.3s;
 }

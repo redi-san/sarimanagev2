@@ -78,41 +78,40 @@ export default function Stocks({ setPage }) {
     return () => unsubscribe();
   }, []);
 
-useEffect(() => {
-  if (showScanner) {
-    const scanner = new Html5QrcodeScanner("barcode-reader", {
-      fps: 10,
-      qrbox: 180,
-    });
+  useEffect(() => {
+    if (showScanner) {
+      const scanner = new Html5QrcodeScanner("barcode-reader", {
+        fps: 10,
+        qrbox: 180,
+      });
 
-    scanner.render(
-      (decodedText) => {
-        if (modalMode === "add") {
-          setProductId(decodedText);
-        } else if (modalMode === "edit") {
-          setSelectedStock((prev) =>
-            prev ? { ...prev, barcode: decodedText } : prev
-          );
-        }
+      scanner.render(
+        (decodedText) => {
+          if (modalMode === "add") {
+            setProductId(decodedText);
+          } else if (modalMode === "edit") {
+            setSelectedStock((prev) =>
+              prev ? { ...prev, barcode: decodedText } : prev,
+            );
+          }
 
-        setShowScanner(false);
-        scanner.clear();
-      },
-      (error) => {
-        console.warn("Scanning error:", error);
-      }
-    );
+          setShowScanner(false);
+          scanner.clear();
+        },
+        (error) => {
+          console.warn("Scanning error:", error);
+        },
+      );
 
-    return () => {
-      scanner.clear().catch((err) => console.error("Clear failed:", err));
-    };
-  }
-}, [showScanner, modalMode]);
-
+      return () => {
+        scanner.clear().catch((err) => console.error("Clear failed:", err));
+      };
+    }
+  }, [showScanner, modalMode]);
 
   useEffect(() => {
     const low = stocks.filter(
-      (stock) => Number(stock.stock) <= Number(stock.lowstock)
+      (stock) => Number(stock.stock) <= Number(stock.lowstock),
     );
     setLowStockItems(low);
   }, [stocks]);
@@ -160,13 +159,13 @@ useEffect(() => {
 
     if (isNaN(buy) || isNaN(sell)) {
       return alert(
-        "Buying price and Suggested Retail Price must be valid numbers."
+        "Buying price and Suggested Retail Price must be valid numbers.",
       );
     }
 
     if (buy > sell) {
       return alert(
-        "Buying Price cannot be higher than Suggested Retail Price!"
+        "Buying Price cannot be higher than Suggested Retail Price!",
       );
     }
 
@@ -204,60 +203,63 @@ useEffect(() => {
   };
 
   //  Update stock
-const updateStock = async () => {
-  try {
-    const buy = parseFloat(selectedStock.buying_price);
-    const sell = parseFloat(selectedStock.selling_price);
+  const updateStock = async () => {
+    try {
+      const buy = parseFloat(selectedStock.buying_price);
+      const sell = parseFloat(selectedStock.selling_price);
 
-    if (isNaN(buy) || isNaN(sell)) {
-      return alert("Buying price and Suggested Retail Price must be valid numbers.");
-    }
-
-    if (buy > sell) {
-      return alert("Buying Price cannot be higher than Suggested Retail Price!");
-    }
-
-    const formData = new FormData();
-
-    // append only valid fields
-    Object.entries(selectedStock).forEach(([key, value]) => {
-      if (
-        value !== null &&
-        value !== undefined &&
-        value !== "" &&
-        key !== "id" &&
-        key !== "image" &&
-        key !== "previewImage" &&
-        key !== "newImageFile"
-      ) {
-        formData.append(key, value);
+      if (isNaN(buy) || isNaN(sell)) {
+        return alert(
+          "Buying price and Suggested Retail Price must be valid numbers.",
+        );
       }
-    });
 
-    if (selectedStock.name) {
-      selectedStock.name = selectedStock.name.trim().replace(/\s+/g, ' ');
+      if (buy > sell) {
+        return alert(
+          "Buying Price cannot be higher than Suggested Retail Price!",
+        );
+      }
+
+      const formData = new FormData();
+
+      // append only valid fields
+      Object.entries(selectedStock).forEach(([key, value]) => {
+        if (
+          value !== null &&
+          value !== undefined &&
+          value !== "" &&
+          key !== "id" &&
+          key !== "image" &&
+          key !== "previewImage" &&
+          key !== "newImageFile"
+        ) {
+          formData.append(key, value);
+        }
+      });
+
+      if (selectedStock.name) {
+        selectedStock.name = selectedStock.name.trim().replace(/\s+/g, " ");
+      }
+
+      // append image separately
+      if (selectedStock.newImageFile) {
+        formData.append("image", selectedStock.newImageFile);
+      }
+
+      await axios.put(`${BASE_URL}/stocks/${selectedStock.id}`, formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
+
+      // update local state
+      setStocks((prev) =>
+        prev.map((s) => (s.id === selectedStock.id ? selectedStock : s)),
+      );
+
+      setShowModal(false);
+    } catch (err) {
+      console.error("Error updating stock:", err);
     }
-
-    // append image separately
-    if (selectedStock.newImageFile) {
-      formData.append("image", selectedStock.newImageFile);
-    }
-
-    await axios.put(`${BASE_URL}/stocks/${selectedStock.id}`, formData, {
-      headers: { "Content-Type": "multipart/form-data" },
-    });
-
-    // update local state
-    setStocks((prev) =>
-      prev.map((s) => (s.id === selectedStock.id ? selectedStock : s))
-    );
-
-    setShowModal(false);
-  } catch (err) {
-    console.error("Error updating stock:", err);
-  }
-};
-
+  };
 
   //Delete stock
   const deleteStock = async (id) => {
@@ -317,8 +319,8 @@ const updateStock = async () => {
       e.preventDefault();
       const inputs = Array.from(
         document.querySelectorAll(
-          'input:not([type="hidden"]):not([disabled]), textarea, select'
-        )
+          'input:not([type="hidden"]):not([disabled]), textarea, select',
+        ),
       );
 
       const index = inputs.indexOf(e.target);
@@ -482,10 +484,10 @@ const updateStock = async () => {
                                 setSelectedStock({
                                   ...stock,
                                   manufacturing_date: formatDateForInput(
-                                    stock.manufacturing_date
+                                    stock.manufacturing_date,
                                   ),
                                   expiry_date: formatDateForInput(
-                                    stock.expiry_date
+                                    stock.expiry_date,
                                   ),
                                 });
                                 setModalMode("edit");
@@ -732,8 +734,8 @@ const updateStock = async () => {
                             (modalMode === "add"
                               ? category
                               : selectedStock?.category || ""
-                            ).toLowerCase()
-                          )
+                            ).toLowerCase(),
+                          ),
                       )
                       .map((cat, i) => (
                         <li

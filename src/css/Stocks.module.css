@@ -722,6 +722,11 @@ body {
   gap: 0.6rem;
 }
 
+.stocksTable td:nth-child(3),
+.stocksTable th:nth-child(3) {
+  text-align: center;
+}
+
 .lowStockRow {
   background-color: var(--low-stock-bg);
   color: var(--text-color); /* optional if you want text color contrast */

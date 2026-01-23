@@ -50,8 +50,14 @@ const MonthlySalesChart = ({ orders }) => {
     });
 
     const getActualIfPresent = (y, m) => {
-      while (m < 0) { y--; m += 12; }
-      while (m > 11) { y++; m -= 12; }
+      while (m < 0) {
+        y--;
+        m += 12;
+      }
+      while (m > 11) {
+        y++;
+        m -= 12;
+      }
       return salesByYearMonth[y]?.[m] ?? null;
     };
 
@@ -68,9 +74,26 @@ const MonthlySalesChart = ({ orders }) => {
     return forecast;
   };
 
-  const labels = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+  const labels = [
+    "Jan",
+    "Feb",
+    "Mar",
+    "Apr",
+    "May",
+    "Jun",
+    "Jul",
+    "Aug",
+    "Sep",
+    "Oct",
+    "Nov",
+    "Dec",
+  ];
   const actualSales = getMonthlySales();
   const forecastSales = getThreeMonthMovingAverage();
+
+  //const chartHeight = 180;   // actual chart area
+const svgHeight = 210;     // background height (taller)
+
 
   const width = 550;
   const height = 180;
@@ -92,67 +115,122 @@ const MonthlySalesChart = ({ orders }) => {
   }));
 
   const linePath = (pts) =>
-    pts.map((p, i) => (i === 0 ? `M ${p.x} ${p.y}` : `L ${p.x} ${p.y}`)).join(" ");
+    pts
+      .map((p, i) => (i === 0 ? `M ${p.x} ${p.y}` : `L ${p.x} ${p.y}`))
+      .join(" ");
 
   return (
-    <div style={{ margin: "20px auto", maxWidth: "600px", textAlign: "center" }}>
-      <svg
-        viewBox={`0 0 ${width} ${height}`}
-        style={{
-          width: "100%",
-          maxWidth: "100%",
-          height: "auto",
-          background: "var(--card-bg)",
-          borderRadius: "12px",
-          padding: "10px",
-          boxSizing: "border-box",
-        }}
-      >
+    <div
+      style={{ margin: "20px auto", maxWidth: "600px", textAlign: "center" }}
+    >
+<svg
+  viewBox={`0 0 ${width} ${svgHeight}`}
+  style={{
+    width: "100%",
+    height: "auto",
+    background: "var(--card-bg)",
+    borderRadius: "12px",
+    padding: "10px",
+    boxSizing: "border-box",
+  }}
+>
+
         {/* Axes */}
-        <line x1={padding} y1={padding} x2={padding} y2={height - padding} stroke="#999" />
-        <line x1={padding} y1={height - padding} x2={width - padding} y2={height - padding} stroke="#999" />
+        <line
+          x1={padding}
+          y1={padding}
+          x2={padding}
+          y2={height - padding}
+          stroke="#999"
+        />
+        <line
+          x1={padding}
+          y1={height - padding}
+          x2={width - padding}
+          y2={height - padding}
+          stroke="#999"
+        />
 
         {/* Actual Sales Line */}
-        <path d={linePath(points)} stroke="#4caf50" strokeWidth="2" fill="none" />
-        {points.map((p, i) => <circle key={i} cx={p.x} cy={p.y} r={5} fill="#4caf50" />)}
+        <path
+          d={linePath(points)}
+          stroke="#4caf50"
+          strokeWidth="2"
+          fill="none"
+        />
+        {points.map((p, i) => (
+          <circle key={i} cx={p.x} cy={p.y} r={5} fill="#4caf50" />
+        ))}
 
         {/* Forecast Sales Line */}
-{/* Forecast Sales Line */}
-<path d={linePath(forecastPoints)} stroke="#007BFF" strokeWidth="2" fill="none" />
-{forecastPoints.map((p, i) => (
-  <circle key={i} cx={p.x} cy={p.y} r={5} fill="#007BFF" />
-))}
+        {/* Forecast Sales Line */}
+        <path
+          d={linePath(forecastPoints)}
+          stroke="#007BFF"
+          strokeWidth="2"
+          fill="none"
+        />
+        {forecastPoints.map((p, i) => (
+          <circle key={i} cx={p.x} cy={p.y} r={5} fill="#007BFF" />
+        ))}
 
-{/* Forecast Values above months */}
-{forecastPoints.map((p, i) => (
-  <text
-    key={"f" + i}
-    x={p.x}
-    y={height - padding - 24} // just above the month labels
-    fontSize="14"
-    textAnchor="middle"
-    fill="#007BFF"
-    fontWeight="600"
-  >
-    {p.value.toLocaleString(undefined, { maximumFractionDigits: 0 })}
-  </text>
-))}
-
-
+        {/* Forecast Values above months */}
+        {forecastPoints.map((p, i) => (
+          <text
+            key={"f" + i}
+            x={p.x}
+            y={height - padding - 24} // just above the month labels
+            fontSize="16"
+            textAnchor="middle"
+            fill="#007BFF"
+            fontWeight="600"
+          >
+            {p.value.toLocaleString(undefined, { maximumFractionDigits: 0 })}
+          </text>
+        ))}
 
         {/* Labels */}
         {points.map((p, i) => (
-          <text key={i} x={p.x} y={height - padding + 15} fontSize="14" textAnchor="middle" fill="var(--chart-label)">
+          <text
+            key={i}
+            x={p.x}
+            y={height - padding + 24}
+            fontSize="16"
+            textAnchor="middle"
+            fill="var(--chart-label)"
+          >
             {p.label}
           </text>
         ))}
 
         {/* Values */}
         {points.map((p, i) => (
-          <text key={i} x={p.x} y={p.y - 6} fontSize="14" textAnchor="middle" fill="var(--chart-text)">
+          <text
+            key={i}
+            x={p.x}
+            y={p.y - 6}
+            fontSize="16"
+            textAnchor="middle"
+            fill="#4caf50"
+          >
             {p.value.toLocaleString(undefined, { maximumFractionDigits: 0 })}
           </text>
         ))}
+
+        {/* Legend */}
+        <g transform={`translate(${width / 2 - 110}, ${height + 16})`}>
+          {/* Actual Sales */}
+          <circle cx="0" cy="0" r="5" fill="#4caf50" />
+          <text x="10" y="4" fontSize="16" fill="var(--chart-text)">
+             Sales
+          </text>
+
+          {/* Forecast */}
+          <circle cx="100" cy="0" r="5" fill="#007BFF" />
+          <text x="110" y="4" fontSize="16" fill="var(--chart-text)">
+            Forecast
+          </text>
+        </g>
       </svg>
     </div>
   );

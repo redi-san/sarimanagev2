@@ -22,16 +22,25 @@ export default function AddDebtModal({
   const [due_date, setDueDate] = useState(initialData.due_date || "");
   const [note, setNote] = useState(initialData.note || "");
 
-  const handleEnterKey = (e) => {
-    if (e.key === "Enter" && !e.shiftKey) {
-      e.preventDefault();
-      const form = e.target.form;
-      const index = Array.prototype.indexOf.call(form, e.target);
-      const next = form.elements[index + 1];
-      if (next) next.focus();
-      else form.requestSubmit();
+const handleEnterKey = (e) => {
+  if (e.key === "Enter" && !e.shiftKey) {
+    e.preventDefault();
+    const form = e.target.form;
+
+    // If we're in the textarea (note), submit the form
+    if (e.target.tagName === "TEXTAREA") {
+      form.requestSubmit(); // ✅ triggers the Save button
+      return;
     }
-  };
+
+    // Otherwise, move to next input
+    const index = Array.prototype.indexOf.call(form, e.target);
+    const next = form.elements[index + 1];
+    if (next) next.focus();
+    else form.requestSubmit();
+  }
+};
+
 
   if (!show) return null;
 
@@ -54,64 +63,64 @@ export default function AddDebtModal({
             onSave(debtData); // ✅ unified - works for both add & edit
           }}
         >
-          <div className={styles["form-group"]}>
-            <input
-              type="text"
-              value={customer_name}
-              onChange={(e) => setCustomerName(e.target.value)}
-              onKeyDown={handleEnterKey}
-              placeholder=" "
-              required
-            />
-            <label>Customer Name</label>
-          </div>
+<div className={styles["form-group"]}>
+  <label className={styles.label}>Customer Name</label>
+  <input
+    type="text"
+    value={customer_name}
+    onChange={(e) => setCustomerName(e.target.value)}
+    onKeyDown={handleEnterKey} // ✅ added
+    placeholder="e.g. Juan Dela Cruz"
+    required
+  />
+</div>
 
-          <div className={styles["form-group"]}>
-            <input
-              type="text"
-              value={contact_number}
-              onChange={(e) => setContactNumber(e.target.value)}
-              onKeyDown={handleEnterKey}
-              placeholder=" "
-            />
-            <label>Contact Number</label>
-          </div>
+<div className={styles["form-group"]}>
+  <label className={styles.label}>Contact Number</label>
+  <input
+    type="text"
+    value={contact_number}
+    onChange={(e) => setContactNumber(e.target.value)}
+    onKeyDown={handleEnterKey} // ✅ added
+    placeholder="e.g. 09XXXXXXXXX"
+  />
+</div>
 
-          <div className={styles["form-row"]}>
-            <div className={styles["form-group"]}>
-              <input
-                type="date"
-                value={date}
-                onChange={(e) => setDate(e.target.value)}
-                onKeyDown={handleEnterKey}
-                placeholder=" "
-                required
-              />
-              <label>Date</label>
-            </div>
-            <div className={styles["form-group"]}>
-              <input
-                type="date"
-                value={due_date}
-                onChange={(e) => setDueDate(e.target.value)}
-                onKeyDown={handleEnterKey}
-                placeholder=" "
-              />
-              <label>Due Date</label>
-            </div>
-          </div>
+<div className={styles["form-row"]}>
+  <div className={styles["form-group"]}>
+    <label className={styles.label}>Date</label>
+    <input
+      type="date"
+      value={date}
+      onChange={(e) => setDate(e.target.value)}
+      onKeyDown={handleEnterKey} // ✅ added
+      required
+    />
+  </div>
 
-          <div className={styles["form-group"]}>
-            <textarea
-              value={note}
-              onChange={(e) => setNote(e.target.value)}
-              onKeyDown={handleEnterKey}
-              placeholder=" "
-              rows="3"
-              className={styles.textarea}
-            />
-            <label>Note</label>
-          </div>
+  <div className={styles["form-group"]}>
+    <label className={styles.label}>Due Date</label>
+    <input
+      type="date"
+      value={due_date}
+      onChange={(e) => setDueDate(e.target.value)}
+      onKeyDown={handleEnterKey} // ✅ added
+    />
+  </div>
+</div>
+
+<div className={styles["form-group"]}>
+  <label className={styles.label}>Note</label>
+  <textarea
+    value={note}
+    onChange={(e) => setNote(e.target.value)}
+    onKeyDown={handleEnterKey} // ✅ added
+    rows="3"
+    className={styles.textarea}
+  />
+</div>
+
+
 
 <div className={styles["modal-actions"]}>
   <button

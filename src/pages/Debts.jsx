@@ -45,6 +45,8 @@ export default function Debts({ setPage }) {
 
   const [paymentHistory, setPaymentHistory] = useState([]);
 
+  const [toasts, setToasts] = useState([]);
+
   useEffect(() => {
     productsRef.current = products;
   }, [products]);
@@ -233,14 +235,17 @@ export default function Debts({ setPage }) {
           prev.map((d) => (d.id === debtId ? { ...d, ...updatedDebt } : d)),
         );
 
-        alert("✅ Debt updated successfully!");
+        showToast("Debt updated successfully", "success");
         setShowModal(false);
         setShowSecondModal(false);
         setEditingDebtIndex(null);
         resetForm();
       } catch (err) {
         console.error("Error updating debt:", err);
-        alert(err.response?.data?.error || "Failed to update debt.");
+        showToast(
+          err.response?.data?.error || "Failed to update debt",
+          "error",
+        );
       }
 
       return;
@@ -267,7 +272,7 @@ export default function Debts({ setPage }) {
 
     try {
       const res = await axios.post(`${BASE_URL}/debts`, newDebt);
-      alert("Debt created successfully!");
+      showToast("Debt created successfully", "success");
 
       // Append the new debt immediately to the table
       setDebtsList((prev) => [...prev, res.data]);
@@ -279,7 +284,7 @@ export default function Debts({ setPage }) {
       resetForm();
     } catch (err) {
       console.error("Error saving debt:", err);
-      alert(err.response?.data?.error || "Failed to save debt.");
+      showToast(err.response?.data?.error || "Failed to save debt", "error");
     }
   };
 
@@ -294,11 +299,10 @@ export default function Debts({ setPage }) {
 
   const getPaymentKey = (debtId) => `payment_history_${debtId}`;
 
-const loadPaymentHistory = useCallback((debtId) => {
-  const stored = localStorage.getItem(getPaymentKey(debtId));
-  return stored ? JSON.parse(stored) : [];
-}, []);
-
+  const loadPaymentHistory = useCallback((debtId) => {
+    const stored = localStorage.getItem(getPaymentKey(debtId));
+    return stored ? JSON.parse(stored) : [];
+  }, []);
 
   const savePaymentHistory = (debtId, history) => {
     localStorage.setItem(getPaymentKey(debtId), JSON.stringify(history));
@@ -307,7 +311,7 @@ const loadPaymentHistory = useCallback((debtId) => {
   const recordPayment = async () => {
     try {
       if (!paymentAmount || parseFloat(paymentAmount) <= 0) {
-        alert("Enter a valid amount");
+        showToast("Enter a valid payment amount", "error");
         return;
       }
 
@@ -320,7 +324,7 @@ const loadPaymentHistory = useCallback((debtId) => {
       // Find debt total from debtsList
       const debt = debtsList.find((d) => d.id === paymentDebtId);
       if (!debt) {
-        alert("Debt not found");
+        showToast("Debt not found", "error");
         return;
       }
 
@@ -350,9 +354,11 @@ const loadPaymentHistory = useCallback((debtId) => {
       savePaymentHistory(paymentDebtId, updatedHistory);
       setPaymentHistory(updatedHistory);
 
-      alert(
-        `Payment recorded successfully!` +
-          (change > 0 ? ` Change to return: ${formatPeso(change)}` : ""),
+      showToast(
+        `Payment recorded successfully${
+          change > 0 ? `. Change: ${formatPeso(change)}` : ""
+        }`,
+        "success",
       );
 
       // Refresh debts and close modal
@@ -410,7 +416,7 @@ const loadPaymentHistory = useCallback((debtId) => {
 
   const sendManualSMS = (number, message) => {
     if (!number) {
-      alert("Customer does not have a contact number.");
+      showToast("Customer has no contact number", "info");
       return;
     }
 
@@ -421,12 +427,21 @@ const loadPaymentHistory = useCallback((debtId) => {
     window.location.href = `sms:${number}?body=${encodedMessage}`;
   };
 
-useEffect(() => {
-  if (selectedDebt) {
-    const history = loadPaymentHistory(selectedDebt.id);
-    setPaymentHistory(history);
-  }
-}, [selectedDebt, loadPaymentHistory]);
+  useEffect(() => {
+    if (selectedDebt) {
+      const history = loadPaymentHistory(selectedDebt.id);
+      setPaymentHistory(history);
+    }
+  }, [selectedDebt, loadPaymentHistory]);
+
+    const showToast = (message, type = "success") => {
+    const id = Date.now();
+    setToasts((prev) => [...prev, { id, message, type }]);
+
+    setTimeout(() => {
+      setToasts((prev) => prev.filter((t) => t.id !== id));
+    }, 3000);
+  };
 
 
   return (
@@ -716,7 +731,7 @@ useEffect(() => {
                             top: "100%",
                             left: 0,
                             width: "100%",
-                            background: "white",
+                            background: "var(--card-bg)",
                             border: "1px solid #ccc",
                             borderRadius: "8px",
                             maxHeight: "150px",
@@ -1170,7 +1185,7 @@ useEffect(() => {
                       </div>
                     )}
 
-                    <h2>Enter Payment Amount</h2>
+                    <h2>Payment</h2>
                     <input
                       type="text"
                       className="enter-payment-input"
@@ -1192,6 +1207,16 @@ useEffect(() => {
                   </div>
                 </div>
               )}
+            </div>
+            <div className={styles.toastContainer}>
+              {toasts.map((toast) => (
+                <div
+                  key={toast.id}
+                  className={`${styles.toast} ${styles[toast.type]}`}
+                >
+                  {toast.message}
+                </div>
+              ))}
             </div>
           </div>
         )}
