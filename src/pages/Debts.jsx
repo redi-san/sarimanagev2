@@ -329,14 +329,8 @@ export default function Debts({ setPage }) {
       }
 
       const balance = debt.total - totalPaid;
-
-      let paymentToRecord = amount;
-      let change = 0;
-
-      if (amount > balance) {
-        change = amount - balance; // return excess as change
-        paymentToRecord = balance; // only pay remaining balance
-      }
+      const paymentToRecord = amount;
+      const overpay = amount - balance > 0 ? amount - balance : 0;
 
       // Save payment via API (optional if you want backend record)
       await axios.post(`${BASE_URL}/debts/${paymentDebtId}/payment`, {
@@ -345,8 +339,8 @@ export default function Debts({ setPage }) {
 
       // Save to localStorage
       const newEntry = {
-        amount: paymentToRecord,
-        change,
+        amount: paymentToRecord, // full paid amount
+        change: overpay, // optional, for display only
         date: new Date().toLocaleString("en-PH"),
       };
 
@@ -356,7 +350,7 @@ export default function Debts({ setPage }) {
 
       showToast(
         `Payment recorded successfully${
-          change > 0 ? `. Change: ${formatPeso(change)}` : ""
+          overpay > 0 ? `. Change: ${formatPeso(overpay)}` : ""
         }`,
         "success",
       );
@@ -1100,8 +1094,11 @@ export default function Debts({ setPage }) {
                 <p>
                   <strong>Current Balance:</strong>{" "}
                   {formatPeso(
-                    selectedDebt.total -
-                      paymentHistory.reduce((sum, p) => sum + p.amount, 0),
+                    Math.max(
+                      0,
+                      selectedDebt.total -
+                        paymentHistory.reduce((sum, p) => sum + p.amount, 0),
+                    ),
                   )}
                 </p>
 

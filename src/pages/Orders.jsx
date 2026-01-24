@@ -42,6 +42,9 @@ export default function Orders({ setPage }) {
 
   const location = useLocation();
 
+  const [editingFromProducts, setEditingFromProducts] = useState(false);
+
+
   //const [graphType, setGraphType] = useState("actual"); // "actual" | "forecast"
 
   useEffect(() => {
@@ -120,76 +123,6 @@ export default function Orders({ setPage }) {
     return `${dateStr}-${nextNumber}`;
   }, [ordersList]);
 
-  /* useEffect(() => {
-    if (!showScanner) return;
-
-    const elementId = "order-barcode-reader";
-
-    // If scanner div doesn't exist, stop.
-    const el = document.getElementById(elementId);
-    if (!el) return;
-
-    // 🔥 If scanner already exists, DO NOT recreate it
-    if (scannerRef.current && scannerRef.current._html5Qrcode?.isScanning) {
-      console.log("Scanner already active. Not creating a new one.");
-      return;
-    }
-
-    // Create new scanner once
-    if (!scannerRef.current) {
-      scannerRef.current = new Html5QrcodeScanner(elementId, {
-        fps: 10,
-        qrbox: 180,
-        rememberLastUsedCamera: true,
-        supportedScanTypes: [
-          Html5QrcodeScanType.SCAN_TYPE_CAMERA,
-          Html5QrcodeScanType.SCAN_TYPE_FILE,
-        ],
-      });
-    }
-
-    scannerRef.current.render(
-      (decodedText) => {
-        const foundStock = stocks.find(
-          (s) => s.barcode?.toString() === decodedText
-        );
-
-        setProducts((prev) => {
-          const newProducts = [
-            ...prev,
-            {
-              stock_id: decodedText,
-              name: foundStock?.name || "",
-              selling_price: foundStock?.selling_price || "",
-              buying_price: foundStock?.buying_price || "",
-              quantity: 1,
-            },
-          ];
-          calculateTotals(newProducts);
-          return newProducts;
-        });
-
-        // Stop scanner after scanning
-        scannerRef.current.clear().catch(() => {});
-        scannerRef.current = null;
-        setShowScanner(false);
-        setOrderNumber(generateOrderNumber());
-      },
-      (error) => console.warn("Scan error:", error)
-    );
-
-    // Cleanup
-    return () => {
-      if (scannerRef.current) {
-        scannerRef.current.clear().catch(() => {});
-        scannerRef.current = null;
-      }
-
-      const el = document.getElementById(elementId);
-      if (el) el.innerHTML = "";
-    };
-  }, [showScanner, stocks, generateOrderNumber]); */
-
   const fetchOrders = async () => {
     const user = auth.currentUser;
 
@@ -225,6 +158,23 @@ export default function Orders({ setPage }) {
     });
     setTotals({ total, profit });
   };
+
+const getErrorMessage = (err) => {
+  // Axios error with response JSON
+  if (err.response?.data?.message) return err.response.data.message;
+
+  // Axios error with plain text response
+  if (err.response?.data) {
+    if (typeof err.response.data === "string") return err.response.data;
+    if (err.response.data.error) return err.response.data.error;
+  }
+
+  // Generic Error object (from callback -> thrown)
+  if (err.message) return err.message;
+
+  return "Failed to save order";
+};
+
 
   const saveOrder = async () => {
     const user = auth.currentUser;
@@ -278,9 +228,11 @@ export default function Orders({ setPage }) {
       setShowModal(false);
       resetForm();
     } catch (err) {
-      console.error("Error saving order:", err);
-      showToast("Failed to save order.");
-    }
+  console.error("Error saving order:", err);
+  showToast(getErrorMessage(err));
+}
+
+
   };
 
   const saveAsDebt = async (debtData) => {
@@ -318,11 +270,12 @@ export default function Orders({ setPage }) {
 
       //navigate("/debts");
       setActiveTab("debts");
-    } catch (err) {
-      console.error("Error saving debt:", err);
-      alert("Failed to save debt.");
-    }
-  };
+    }  catch (err) {
+    console.error("Error saving debt:", err);
+    // Use the same toast logic as saveOrder
+    showToast(getErrorMessage(err));
+  }
+};
 
   const deleteOrder = async (id) => {
     try {
@@ -778,17 +731,13 @@ export default function Orders({ setPage }) {
           </div>
         )}
 
-        {/* 2nd Modal */}
+                {/* 2nd Modal */}
         {showSecondModal && (
-          <div
-            className={styles.modal}
-            onClick={() => setShowSecondModal(false)}
-          >
+          <div className={styles.modal}>
             <div
               className={`${styles["modal-content"]} ${styles["modal-second"]}`}
-              onClick={(e) => e.stopPropagation()}
             >
-              <h2>Add Productss</h2>
+              <h2>Add Products</h2>
               {products.map((product, index) => (
                 <div className={styles["product-entry"]} key={index}>
                   {/* Product Name */}
@@ -891,13 +840,13 @@ export default function Orders({ setPage }) {
                       //const id = e.target.value;
                       const barcode = e.target.value;
 
+                      //updateProduct(index, "stock_id", id);
                       updateProduct(index, "stock_id", barcode);
 
                       const foundStock = stocks.find(
-                        (s) =>
-                          String(s.barcode).trim() === String(barcode).trim(),
+                        //(s) => s.id.toString() === id
+                        (s) => s.barcode.toString() === barcode,
                       );
-
                       if (foundStock) {
                         updateProduct(index, "name", foundStock.name);
                         updateProduct(
@@ -921,26 +870,9 @@ export default function Orders({ setPage }) {
                         type="number"
                         placeholder="Quantity"
                         value={product.quantity}
-                        min={1}
-                        onChange={(e) => {
-                          const value = e.target.value;
-
-                          // Only update if it's empty or numeric
-                          if (/^\d*$/.test(value)) {
-                            updateProduct(
-                              index,
-                              "quantity",
-                              value === "" ? "" : parseInt(value, 10),
-                            );
-                          }
-                        }}
-                        onBlur={() => {
-                          // If left empty or 0 → reset to 1
-                          if (!product.quantity || product.quantity <= 0) {
-                            showToast("Quantity must be 1 or more");
-                            updateProduct(index, "quantity", 1);
-                          }
-                        }}
+                        onChange={(e) =>
+                          updateProduct(index, "quantity", e.target.value)
+                        }
                       />
                     </div>
 
@@ -1035,6 +967,7 @@ export default function Orders({ setPage }) {
                 />
               </div>
 
+              {/* Add Debt button, only show when NOT editing an existing order */}
               <div className={styles["modal-actions"]}>
                 <button
                   className={styles.Cancel}
@@ -1054,37 +987,34 @@ export default function Orders({ setPage }) {
                   {location.state?.autoOpen ? "View Table" : "Cancel"}
                 </button>
 
-                {isEditing ? (
+                {/* Add Order / Next button first (left) */}
+                <button
+                  className={styles.Next}
+                  onClick={() => {
+                    if (editingFromProducts) {
+                      setShowSecondModal(false);
+                      setShowModal(true);
+                      setEditingFromProducts(false);
+                    } else {
+                      setShowSecondModal(false);
+                      setShowModal(true);
+                    }
+                  }}
+                >
+                  {editingFromProducts ? "Next" : "Add as Order"}
+                </button>
+
+                {/* Save as Debt button (right) */}
+                {!isEditing && (
                   <button
-                    className={styles.Next}
+                    className={styles["add-debt-btn"]}
                     onClick={() => {
-                      saveOrder(); //
+                      setShowSecondModal(false);
+                      setShowDebtModal(true);
                     }}
                   >
-                    Save
+                    Add as Debt
                   </button>
-                ) : (
-                  <>
-                    <button
-                      className={styles.Next}
-                      onClick={() => {
-                        setShowSecondModal(false);
-                        setShowModal(true);
-                      }}
-                    >
-                      Add Order
-                    </button>
-
-                    <button
-                      className={styles.Next}
-                      onClick={() => {
-                        setShowSecondModal(false);
-                        setShowDebtModal(true);
-                      }}
-                    >
-                      Add Debt
-                    </button>
-                  </>
                 )}
               </div>
             </div>
