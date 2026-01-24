@@ -414,17 +414,18 @@ export default function Debts({ setPage }) {
     }
   };
 
-  const sendManualSMS = (number, message) => {
-    if (!number) {
-      showToast("Customer has no contact number", "info");
-      return;
+  const sendSMSReminder = async (number, message) => {
+    try {
+      await axios.post(`${BASE_URL}/sms/reminder`, {
+        number,
+        message,
+      });
+
+      alert("✅ SMS reminder sent!");
+    } catch (err) {
+      console.error(err);
+      alert("❌ Failed to send SMS");
     }
-
-    // Encode message to handle special characters
-    const encodedMessage = encodeURIComponent(message);
-
-    // For mobile devices: opens SMS app with number and message pre-filled
-    window.location.href = `sms:${number}?body=${encodedMessage}`;
   };
 
   useEffect(() => {
@@ -434,7 +435,7 @@ export default function Debts({ setPage }) {
     }
   }, [selectedDebt, loadPaymentHistory]);
 
-    const showToast = (message, type = "success") => {
+  const showToast = (message, type = "success") => {
     const id = Date.now();
     setToasts((prev) => [...prev, { id, message, type }]);
 
@@ -442,7 +443,6 @@ export default function Debts({ setPage }) {
       setToasts((prev) => prev.filter((t) => t.id !== id));
     }, 3000);
   };
-
 
   return (
     <div>
@@ -955,7 +955,10 @@ export default function Debts({ setPage }) {
                                 : ""
                             }. Products: ${productList}. Please settle it at your earliest convenience.`;
 
-                            sendManualSMS(selectedDebt.contact_number, message);
+                            sendSMSReminder(
+                              selectedDebt.contact_number,
+                              message,
+                            );
                             setShowKebabMenu(false);
                           }}
                         >
