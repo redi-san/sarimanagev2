@@ -244,14 +244,20 @@ export default function Stocks({ setPage }) {
   };
 
   //Delete stock
-  const deleteStock = async (id) => {
-    try {
-      await axios.delete(`${BASE_URL}/stocks/${id}`);
-      setStocks(stocks.filter((s) => s.id !== id));
-    } catch (err) {
-      console.error("Error deleting stock:", err);
-    }
-  };
+// Delete stock
+const deleteStock = async (id) => {
+  try {
+    await axios.delete(`${BASE_URL}/stocks/${id}`);
+
+    // ✅ Clean up cached image
+    localStorage.removeItem(`stock_image_${id}`);
+
+    setStocks((prev) => prev.filter((s) => s.id !== id));
+  } catch (err) {
+    console.error("Error deleting stock:", err);
+  }
+};
+
 
   // Reset form
   const resetFields = () => {
@@ -322,6 +328,28 @@ export default function Stocks({ setPage }) {
     const year = d.getFullYear();
     return `${year}-${month}-${day}`;
   };
+
+  const compressImage = (file, maxWidth = 800, quality = 0.7) =>
+    new Promise((resolve) => {
+      const img = new Image();
+      const reader = new FileReader();
+
+      reader.onload = (e) => (img.src = e.target.result);
+      reader.readAsDataURL(file);
+
+      img.onload = () => {
+        const canvas = document.createElement("canvas");
+        const scale = maxWidth / img.width;
+
+        canvas.width = maxWidth;
+        canvas.height = img.height * scale;
+
+        const ctx = canvas.getContext("2d");
+        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+
+        resolve(canvas.toDataURL("image/jpeg", quality));
+      };
+    });
 
   return (
     <div>
@@ -483,12 +511,17 @@ export default function Stocks({ setPage }) {
                             >
                               <td className={styles.productCell}>
                                 <div className={styles.productInfo}>
-                                  {stock.image ? (
+                                  {stock.image ||
+                                  localStorage.getItem(
+                                    `stock_image_${stock.id}`,
+                                  ) ? (
                                     <img
                                       src={
                                         stock.image
-                                          ? `${BASE_URL}${stock.image}`
-                                          : undefined
+                                          ? `${BASE_URL}${stock.image}` // backend image
+                                          : localStorage.getItem(
+                                              `stock_image_${stock.id}`,
+                                            ) // fallback
                                       }
                                       alt={stock.name}
                                       className={styles.productThumb}
@@ -498,6 +531,7 @@ export default function Stocks({ setPage }) {
                                       No Image
                                     </div>
                                   )}
+
                                   <span className={styles.productName}>
                                     {stock.name}
                                   </span>
@@ -569,6 +603,13 @@ export default function Stocks({ setPage }) {
                     src={`${BASE_URL}${selectedStock.image}`}
                     alt={selectedStock.name}
                   />
+                ) : localStorage.getItem(`stock_image_${selectedStock?.id}`) ? (
+                  <img
+                    src={localStorage.getItem(
+                      `stock_image_${selectedStock?.id}`,
+                    )}
+                    alt={selectedStock.name}
+                  />
                 ) : (
                   <span>Tap to add image</span>
                 )}
@@ -578,21 +619,35 @@ export default function Stocks({ setPage }) {
                   id="imageInput"
                   accept="image/*"
                   style={{ display: "none" }}
-                  onChange={(e) => {
-                    if (!e.target.files || !e.target.files[0]) return;
+                  onChange={async (e) => {
+                    if (!e.target.files?.[0]) return;
 
                     const file = e.target.files[0];
-                    const preview = URL.createObjectURL(file);
 
-                    if (modalMode === "add") {
-                      setProductImage(file);
-                      setImagePreview(preview);
-                    } else {
-                      setSelectedStock((prev) => ({
-                        ...prev,
-                        newImageFile: file,
-                        previewImage: preview,
-                      }));
+                    // Compress image
+                    const base64 = await compressImage(file);
+
+                    setImagePreview(base64);
+                    setProductImage(file); // still send original to backend
+
+                    try {
+const storageKey =
+  modalMode === "add"
+    ? `stock_image_${productId || stockName}`
+    : `stock_image_${selectedStock?.id}`;
+
+if (!storageKey.includes("undefined")) {
+  try {
+    localStorage.setItem(storageKey, base64);
+  } catch (err) {
+    console.warn("LocalStorage full. Image not cached locally.");
+  }
+}
+                    } catch (err) {
+                      console.warn(
+                        "LocalStorage full. Image not cached locally.",
+                      );
+                      // Optional: show toast/snackbar here
                     }
                   }}
                 />
