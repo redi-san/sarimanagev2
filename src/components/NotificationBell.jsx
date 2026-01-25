@@ -47,61 +47,61 @@ export default function NotificationBell() {
         setExpiringItems(expiring);
 
         // --- Near out-of-stock with predicted date
-        const nearOut = stocks
-          .map((stock) => {
-            const stockQty = Number(stock.stock);
-            if (stockQty <= 0) return null;
+// --- Near out-of-stock with predicted date
+const nearOut = stocks
+  .map((stock) => {
+    const stockQty = Number(stock.stock);
+    if (stockQty <= 0) return null;
 
-            // Average daily sold (last 7 days)
-            const pastDays = 7;
-            let soldDaysCount = 0;
-            let totalSold = 0;
+    // Average daily sold (last 7 days)
+    const pastDays = 7;
+    let soldDaysCount = 0;
+    let totalSold = 0;
 
-            for (let i = 0; i < pastDays; i++) {
-              const date = new Date(today);
-              date.setDate(today.getDate() - i);
+    for (let i = 0; i < pastDays; i++) {
+      const date = new Date(today);
+      date.setDate(today.getDate() - i);
 
-              let soldToday = 0;
-              orders.forEach((order) => {
-                const orderDate = new Date(
-                  order.order_number.slice(0, 2) +
-                    "/" +
-                    order.order_number.slice(2, 4) +
-                    "/" +
-                    order.order_number.slice(4, 8),
-                );
-                if (orderDate.toDateString() === date.toDateString()) {
-                  const product = order.products.find(
-                    (p) => p.name === stock.name,
-                  );
-                  if (product) soldToday += Number(product.quantity) || 0;
-                }
-              });
+      let soldToday = 0;
+      orders.forEach((order) => {
+        const orderDate = new Date(
+          order.order_number.slice(0, 2) +
+            "/" +
+            order.order_number.slice(2, 4) +
+            "/" +
+            order.order_number.slice(4, 8),
+        );
+        if (orderDate.toDateString() === date.toDateString()) {
+          const product = order.products.find((p) => p.name === stock.name);
+          if (product) soldToday += Number(product.quantity) || 0;
+        }
+      });
 
-              if (soldToday > 0) {
-                totalSold += soldToday;
-                soldDaysCount += 1;
-              }
-            }
+      if (soldToday > 0) {
+        totalSold += soldToday;
+        soldDaysCount += 1;
+      }
+    }
 
-            const avgDailySold =
-              soldDaysCount > 0 ? totalSold / soldDaysCount : 0;
-            if (avgDailySold <= 0) return null;
+    const avgDailySold = soldDaysCount > 0 ? totalSold / soldDaysCount : 0;
+    if (avgDailySold <= 0) return null;
 
-            const daysToDeplete = stockQty / avgDailySold;
-            if (daysToDeplete > OUT_OF_STOCK_WARNING_DAYS) return null;
+    const daysToDeplete = stockQty / avgDailySold;
+    if (daysToDeplete > OUT_OF_STOCK_WARNING_DAYS) return null;
 
-            const predictedDate = new Date(today);
-            predictedDate.setDate(today.getDate() + Math.ceil(daysToDeplete));
+    const predictedDate = new Date(today);
+    // ✅ Use Math.floor to reflect the actual depletion day
+    predictedDate.setDate(today.getDate() + Math.floor(daysToDeplete));
 
-            return {
-              ...stock,
-              predictedOutOfStock: predictedDate,
-            };
-          })
-          .filter(Boolean);
+    return {
+      ...stock,
+      predictedOutOfStock: predictedDate,
+    };
+  })
+  .filter(Boolean);
 
-        setNearOutOfStockItems(nearOut);
+setNearOutOfStockItems(nearOut);
+
       } catch (err) {
         console.error("Error fetching stocks for notifications:", err);
       }

@@ -268,14 +268,47 @@ export default function Reports() {
     const report = document.getElementById("report-section");
     if (!report) return;
 
+    // Hide Total Sales and Total Profit cards before capturing
+    const summaryCards = report.querySelector("." + styles.summaryCards);
+    if (summaryCards) summaryCards.style.display = "none";
+
+    // --- Add a temporary report title + date header for PDF ---
+    const reportHeader = document.createElement("div");
+    reportHeader.id = "temp-report-header";
+    reportHeader.style.textAlign = "center";
+    reportHeader.style.marginTop = "40px"; // More space above
+    reportHeader.style.marginBottom = "20px"; // Space below header
+
+    // Title (tab name)
+    const title = document.createElement("div");
+    title.style.fontSize = "22px";
+    title.style.fontWeight = "700";
+    title.style.marginBottom = "5px";
+    const tabName = activeTab.charAt(0).toUpperCase() + activeTab.slice(1);
+    title.innerText = `${tabName} Report`;
+
+    // Date line
+    const dateLine = document.createElement("div");
+    dateLine.style.fontSize = "18px";
+    dateLine.style.fontWeight = "600";
+    dateLine.innerText = showAll
+      ? `Month: ${filterDate.toLocaleString("default", { month: "long", year: "numeric" })}`
+      : `Date: ${formatDisplayDate(filterDate)}`;
+
+    reportHeader.appendChild(title);
+    reportHeader.appendChild(dateLine);
+
+    report.prepend(reportHeader);
+
     // Save original styles
     const originalWidth = report.style.width;
     const originalTransform = report.style.transform;
 
-    // Force desktop width (e.g., 1000px or whatever your PC width is)
-    report.style.width = "1000px";
-    report.style.transform = "scale(1)"; // prevent scaling issues
+    // Force desktop width for PDF
+    report.style.width = "800px";
+    report.style.transform = "scale(1)";
 
+    // Capture canvas
     const canvas = await html2canvas(report, { scale: 2 });
     const imgData = canvas.toDataURL("image/png");
     const pdf = new jsPDF("p", "mm", "a4");
@@ -296,11 +329,21 @@ export default function Reports() {
       heightLeft -= pageHeight;
     }
 
-    pdf.save("report.pdf");
+    // --- Generate PDF filename dynamically ---
+    const dateStr = showAll
+      ? `${filterDate.getFullYear()}-${(filterDate.getMonth() + 1).toString().padStart(2, "0")}`
+      : formatDate(filterDate); // yyyy-mm-dd
+    pdf.save(`${tabName}_Report_${dateStr}.pdf`);
 
     // Restore original styles
     report.style.width = originalWidth;
     report.style.transform = originalTransform;
+
+    // Remove temporary header
+    reportHeader.remove();
+
+    // Show summary cards again
+    if (summaryCards) summaryCards.style.display = "flex";
   };
 
   const formatDisplayDate = (date) =>
@@ -316,7 +359,7 @@ export default function Reports() {
     }
   }, [stocks, selectedProduct]);
 
-/*const getDailyAverageSold = (productName) => {
+  /*const getDailyAverageSold = (productName) => {
   const today = new Date();
   const pastDays = 7;
   let totalSold = 0;
@@ -341,7 +384,6 @@ export default function Reports() {
   return totalSold / pastDays; // daily average
 }; */
 
-
   /*const getOutOfStockDate = (product) => {
     const remainingStock = parseFloat(product.remaining);
     const avgDailySold = getDailyAverageSold(product.name);
@@ -355,9 +397,13 @@ export default function Reports() {
     return outOfStockDate;
   };*/
 
-  const getOutOfStockPredictionText = (productName) => {
+  const sortedInventoryData = [...inventoryData].sort((a, b) =>
+    a.name.localeCompare(b.name),
+  );
+
+  const getStockForecastInfo = (productName) => {
     const product = inventoryData.find((p) => p.name === productName);
-    if (!product) return "";
+    if (!product) return null;
 
     const today = new Date();
     const pastDays = 7;
@@ -386,13 +432,28 @@ export default function Reports() {
     }
 
     const avgDailySold = daysWithSales > 0 ? totalSold / daysWithSales : 0;
-    if (avgDailySold <= 0) return "Stock sufficient / cannot predict";
+
+    if (avgDailySold <= 0) {
+      return {
+        avgDailySold: 0,
+        outOfStockDate: null,
+        predictionText: "Stock sufficient / cannot predict",
+      };
+    }
 
     const daysToDeplete = product.remaining / avgDailySold;
     const outOfStockDate = new Date();
-    outOfStockDate.setDate(outOfStockDate.getDate() + Math.ceil(daysToDeplete));
+    outOfStockDate.setDate(
+      outOfStockDate.getDate() + Math.floor(daysToDeplete),
+    );
 
-    return `Expected to run out of stock on: ${formatDisplayDate(outOfStockDate)}`;
+    return {
+      avgDailySold,
+      outOfStockDate,
+      predictionText: `Expected to run out of stock on: ${formatDisplayDate(
+        outOfStockDate,
+      )}`,
+    };
   };
 
   return (
@@ -439,7 +500,7 @@ export default function Reports() {
             }`}
             onClick={() => setActiveTab("debt")}
           >
-            Debt
+            Debts
           </button>
         </div>
 
@@ -458,6 +519,7 @@ export default function Reports() {
 
           <div>
             <button
+              className={styles.arrowButton} // new class
               onClick={() => {
                 const newDate = new Date(filterDate);
                 if (showAll) newDate.setMonth(newDate.getMonth() - 1);
@@ -493,6 +555,7 @@ export default function Reports() {
             )}
 
             <button
+              className={styles.arrowButton} // new class
               onClick={() => {
                 const newDate = new Date(filterDate);
                 if (showAll) newDate.setMonth(newDate.getMonth() + 1);
@@ -510,29 +573,32 @@ export default function Reports() {
         </button>
 
         <div id="report-section">
-          <div className={styles.summaryCards}>
-            <div className={styles.card}>
-              <h3>Total Sales</h3>
-              <p>
-                ₱
-                {totalSales.toLocaleString(undefined, {
-                  minimumFractionDigits: 2,
-                  maximumFractionDigits: 2,
-                })}
-              </p>
-            </div>
+{activeTab !== "debt" && (
+  <div className={styles.summaryCards}>
+    <div className={styles.card}>
+      <h3>Total Sales</h3>
+      <p>
+        ₱
+        {totalSales.toLocaleString(undefined, {
+          minimumFractionDigits: 2,
+          maximumFractionDigits: 2,
+        })}
+      </p>
+    </div>
 
-            <div className={styles.card}>
-              <h3>Total Profit</h3>
-              <p>
-                ₱
-                {totalProfit.toLocaleString(undefined, {
-                  minimumFractionDigits: 2,
-                  maximumFractionDigits: 2,
-                })}
-              </p>
-            </div>
-          </div>
+    <div className={styles.card}>
+      <h3>Total Profit</h3>
+      <p>
+        ₱
+        {totalProfit.toLocaleString(undefined, {
+          minimumFractionDigits: 2,
+          maximumFractionDigits: 2,
+        })}
+      </p>
+    </div>
+  </div>
+)}
+
 
           {/* Sales Overview */}
           <div className={styles.weeklyContainer}>
@@ -726,19 +792,45 @@ export default function Reports() {
                             : ""}
                   </h3>
 
-{/* Out-of-stock prediction */}
-{activeTab === "inventory" && selectedProduct && (
-  <p
-    style={{
-      marginLeft: "10px",
-      color: "#555",
-      fontSize: "14px",
-    }}
-  >
-    {getOutOfStockPredictionText(selectedProduct)}
-  </p>
-)}
+                  {/* Out-of-stock prediction */}
+                  {activeTab === "inventory" &&
+                    selectedProduct &&
+                    (() => {
+                      const info = getStockForecastInfo(selectedProduct);
+                      const product = inventoryData.find(
+                        (p) => p.name === selectedProduct,
+                      );
 
+                      if (!info || !product) return null;
+
+                      return (
+                        <div
+                          style={{
+                            marginLeft: "10px",
+                            marginBottom: "8px",
+                            color: "var(--text-color)",
+                            fontSize: "14px",
+                          }}
+                        >
+                          <p style={{ margin: 0 }}>
+                            <strong>Current stock:</strong> {product.remaining}{" "}
+                            units
+                          </p>
+
+                          <p style={{ margin: 0 }}>
+                            <strong>Average daily sales:</strong>{" "}
+                            {Math.round(info.avgDailySold)} per day (
+                            {info.avgDailySold.toFixed(2)} average)
+                          </p>
+                          <p style={{ margin: 0 }}>
+                            <strong>Expected to run out of stock on:</strong>{" "}
+                            {info.outOfStockDate
+                              ? formatDisplayDate(info.outOfStockDate)
+                              : "Stock sufficient / cannot predict"}
+                          </p>
+                        </div>
+                      );
+                    })()}
 
                   <svg
                     viewBox={`0 0 ${width} ${height}`}
@@ -943,8 +1035,9 @@ export default function Reports() {
                     <th>Status</th>
                   </tr>
                 </thead>
+
                 <tbody>
-                  {inventoryData.map((p, idx) => (
+                  {sortedInventoryData.map((p, idx) => (
                     <tr
                       style={{
                         cursor: "pointer",
@@ -954,6 +1047,7 @@ export default function Reports() {
                             : "transparent",
                       }}
                       onClick={() => setSelectedProduct(p.name)}
+                      key={p.name}
                     >
                       <td>{idx + 1}</td>
                       <td>{p.name}</td>
@@ -993,13 +1087,23 @@ export default function Reports() {
                       );
                     })
                     .map((debt, idx) => {
-                      const paidAmount =
-                        debt.payments?.reduce(
-                          (sum, p) => sum + parseFloat(p.amount),
-                          0,
-                        ) || 0;
-                      const balance =
-                        (parseFloat(debt.total) || 0) - paidAmount;
+                      // Get all payments from localStorage
+                      const payments =
+                        JSON.parse(
+                          localStorage.getItem(`payment_history_${debt.id}`),
+                        ) || [];
+
+                      // Sum of all payments
+                      const paidAmount = payments.reduce(
+                        (sum, p) => sum + parseFloat(p.amount),
+                        0,
+                      );
+
+                      // Balance = total - sum of payments, never negative
+                      const balance = Math.max(
+                        (parseFloat(debt.total) || 0) - paidAmount,
+                        0,
+                      );
 
                       return (
                         <tr key={debt.id}>
@@ -1007,7 +1111,7 @@ export default function Reports() {
                           <td>{debt.customer_name}</td>
                           <td>
                             ₱
-                            {parseFloat(debt.total || 0).toLocaleString(
+                            {(parseFloat(debt.total) || 0).toLocaleString(
                               undefined,
                               {
                                 minimumFractionDigits: 2,
@@ -1025,11 +1129,11 @@ export default function Reports() {
                           <td>{debt.due_date}</td>
                           <td
                             style={{
-                              color: debt.status === "Unpaid" ? "red" : "green",
+                              color: balance > 0 ? "red" : "green",
                               fontWeight: "600",
                             }}
                           >
-                            {debt.status}
+                            {balance > 0 ? "Unpaid" : "Paid"}
                           </td>
                         </tr>
                       );

@@ -61,6 +61,13 @@ function LogIn() {
   return () => unsub();
 }, [auth, navigate]);
 
+useEffect(() => {
+  axios
+    .get(`${BASE_URL}/health`)
+    .then(() => console.log("Backend awake"))
+    .catch(() => console.log("Backend not reachable"));
+}, []);
+
 
   return (
     <div className={styles.container}>

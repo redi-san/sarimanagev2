@@ -416,15 +416,8 @@ export default function Stocks({ setPage }) {
           {stocks.length === 0 ? (
             <div className={styles.noStocks}>
               <p>
-                Your stock list is empty. Click + to add products or Quick Add
-                to add products faster
+                Your stock list is empty. Click + to add your products
               </p>
-              <button
-                className={styles.quickAddButton}
-                onClick={() => setShowModal(true)}
-              >
-                Quick Add
-              </button>
             </div>
           ) : (
             <div className={styles.categoryAccordionContainer}>
