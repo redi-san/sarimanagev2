@@ -27,7 +27,7 @@ export default function Settings() {
   });
 
   const resetPrimaryColor = () => {
-    const defaultColor = "#ffcc00"; // original default
+    const defaultColor = "#F4C430"; // original default
     setPrimaryColor(defaultColor);
   };
 

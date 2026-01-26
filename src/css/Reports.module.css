@@ -526,7 +526,7 @@
   /*font-size: 16px;*/
   font-size: var(--text-md);
   font-weight: bold;
-  color: var(--header-text-color);
+  color: #000;
   cursor: pointer;
   transition: background 0.3s, color 0.3s;
 }
@@ -670,20 +670,20 @@
   font-weight: 500;
   position: relative;
 }
-
 .hiddenDateInput {
   position: absolute;
   inset: 0;
   opacity: 0;
-  cursor: pointer;
+  pointer-events: none; /* 👈 prevents it from blocking buttons */
 }
+
 
 .pdfButton {
   position: fixed;       /* Fix it relative to the viewport */
   bottom: 100px;          /* 20px from the bottom */
   right: 20px;           /* 20px from the right */
   background-color: var(--primary-color);
-  color: var(--header-text-color);
+  color: #000;
   border: none;
   padding: 16px 20px;
   font-size: 18px;

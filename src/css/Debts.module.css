@@ -896,7 +896,7 @@ input:checked + .slider:before {
 }
 
 
-.enter-payment-input {
+.enterPaymentInput {
   width: 200px;
   max-width: 90%;
   height: 40px;
@@ -910,7 +910,6 @@ input:checked + .slider:before {
   background: var(--card-bg);
   color: var(--text-color);
 }
-
 
 
 .modal-content,

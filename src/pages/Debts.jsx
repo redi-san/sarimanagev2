@@ -932,31 +932,36 @@ export default function Debts({ setPage }) {
 
                     {showKebabMenu && (
                       <div className={styles["kebab-menu"]}>
-<button
-  onClick={() => {
-    const productList = (selectedDebt.products || [])
-      .map((p) => `${p.name} x${p.quantity || 0}`)
-      .join(", ");
+                        <button
+                          onClick={() => {
+                            const productList = (selectedDebt.products || [])
+                              .map((p) => `${p.name} x${p.quantity || 0}`)
+                              .join(", ");
 
-    // Get the logged-in user's first name
-    const user = auth.currentUser;
-    const firstName = user?.displayName?.split(" ")[0] || "Your Seller";
+                            // Get the logged-in user's first name
+                            const user = auth.currentUser;
+                            const firstName =
+                              user?.displayName?.split(" ")[0] || "Your Seller";
 
-    // Construct message with line breaks
-    const message = `Hi ${selectedDebt.customer_name}, this is a friendly reminder that your debt of ${formatPeso(
-      selectedDebt.total - (selectedDebt.total_paid || 0)
-    )} is due${selectedDebt.due_date ? ` on ${selectedDebt.due_date}` : ""}.\n\n` +
-      `Products: ${productList}.\n\n` +
-      `Please settle it at your earliest convenience.\n\n` +
-      `From, ${firstName}`;
+                            // Construct message with line breaks
+                            const message =
+                              `Hi ${selectedDebt.customer_name}, this is a friendly reminder that your debt of ${formatPeso(
+                                selectedDebt.total -
+                                  (selectedDebt.total_paid || 0),
+                              )} is due${selectedDebt.due_date ? ` on ${selectedDebt.due_date}` : ""}.\n\n` +
+                              `Products: ${productList}.\n\n` +
+                              `Please settle it at your earliest convenience.\n\n` +
+                              `From, ${firstName}`;
 
-    sendSMSReminder(selectedDebt.contact_number, message);
-    setShowKebabMenu(false);
-  }}
->
-  Remind Customer
-</button>
-
+                            sendSMSReminder(
+                              selectedDebt.contact_number,
+                              message,
+                            );
+                            setShowKebabMenu(false);
+                          }}
+                        >
+                          Remind Customer
+                        </button>
 
                         <button
                           onClick={() => {

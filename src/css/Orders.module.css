@@ -155,7 +155,7 @@
   font-size: 1rem; /*16px;*/
   border: 1px solid #ccc;
   border-radius: 6px;
-  background-color: var(--card-bg);
+  background-color: var(--bg-color);
   color: var(--text-color);
   border: 1px solid var(--input-border);
   outline: none;
@@ -255,6 +255,20 @@
   border-radius: 12px;
   cursor: pointer;
 }
+
+.modal-actions .add-debt-btn
+{
+  background: var(--primary-color);
+  color: #262626;
+  font-weight: bold;
+  border: none;
+  font-size: 1rem; /*16px;*/
+  padding: 8px 20px;
+  border-radius: 12px;
+  cursor: pointer;
+}
+
+
 
 .add-product-btn {
   background: var(--primary-color);
@@ -880,6 +894,16 @@
   font-weight: 500;
   opacity: 0.95;
   animation: slideUp 0.3s ease;
+}
+
+
+.scannerModal button {
+  margin-top: 10px;
+  padding: 10px 20px;
+  background: var(--primary-color);
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
 }
 
 @keyframes slideUp {

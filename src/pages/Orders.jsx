@@ -681,8 +681,13 @@ const getErrorMessage = (err) => {
                 />
               </div>
 
+              <div className={styles["form-group"]}>
+                <label htmlFor="paymentAmount" className={styles.inputLabel}>
+                  Payment Amount
+                </label>
               <input
                 type="number"
+                id="\paymentAmount"
                 placeholder="0.00"
                 value={paymentAmount}
                 onChange={(e) => setPaymentAmount(e.target.value)}
@@ -695,6 +700,7 @@ const getErrorMessage = (err) => {
                 required
                 min={totals.total}
               />
+                  </div>
 
               <div className={styles.totals}>
                 <div className={styles.totalBox}>

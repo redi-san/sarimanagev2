@@ -159,7 +159,7 @@
 
 .Next {
   background: var(--primary-color);
-  color: var(--text-color);
+  color: #000;
 }
 
 .Next:hover {
