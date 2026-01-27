@@ -518,7 +518,7 @@ export default function Debts({ setPage }) {
                 .map((debt, index) => (
                   <tr key={index} onClick={() => setSelectedDebt(debt)}>
                     <td>{debt.customer_name}</td>
-                    <td>{debt.date}</td>
+                    <td>{new Date(debt.date).toLocaleDateString("en-US")}</td>
                     <td>{formatPeso(debt.total)}</td>
 
                     <td>
@@ -1021,12 +1021,19 @@ export default function Debts({ setPage }) {
                 <strong>Contact:</strong> {selectedDebt.contact_number}
               </p>
 
-              <p>
-                <strong>Date:</strong> {selectedDebt.date}
-              </p>
-              <p>
-                <strong>Due Date:</strong> {selectedDebt.due_date}
-              </p>
+<p>
+  <strong>Date:</strong>{" "}
+  {selectedDebt.date
+    ? new Date(selectedDebt.date).toLocaleDateString("en-US")
+    : "-"}
+</p>
+<p>
+  <strong>Due Date:</strong>{" "}
+  {selectedDebt.due_date
+    ? new Date(selectedDebt.due_date).toLocaleDateString("en-US")
+    : "-"}
+</p>
+
 
               <p>
                 <strong>Note:</strong> {selectedDebt.note}

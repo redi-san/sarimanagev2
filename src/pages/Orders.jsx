@@ -8,6 +8,8 @@ import { Html5QrcodeScanner } from "html5-qrcode";
 import BottomNav from "../components/BottomNav";
 import AddDebtModal from "../components/AddDebtModal";
 import Debts from "./Debts"; // reuse your component
+import successSound from "../assets/sarimanage_barcode_successful.mp3";
+
 
 import { useLocation } from "react-router-dom";
 
@@ -43,6 +45,9 @@ export default function Orders({ setPage }) {
   const location = useLocation();
 
   const [editingFromProducts, setEditingFromProducts] = useState(false);
+
+  const audioRef = useRef(new Audio(successSound));
+
 
 
   //const [graphType, setGraphType] = useState("actual"); // "actual" | "forecast"
@@ -404,6 +409,7 @@ const getErrorMessage = (err) => {
 
         const newProducts = [...prev, newProduct];
         calculateTotals(newProducts);
+        audioRef.current.play().catch((err) => console.warn("Audio play failed:", err));
         return newProducts;
       });
 

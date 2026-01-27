@@ -27,9 +27,21 @@
   --header-text-color: #ffffff; /* topbar & page header white in dark mode */
 }
 
+
+
 html {
   font-size: calc(16px * var(--font-scale));
 }
+
+.main {
+  margin-top: 60px;              /* height of topbar */
+  height: calc(100vh - 60px);    /* full screen minus topbar */
+  overflow-y: auto;              /* ENABLE SCROLL */
+  padding: 20px;
+  padding-bottom: 120px;         /* space for BottomNav */
+  -webkit-overflow-scrolling: touch;
+}
+
 
 .sidebar {
   position: fixed;

@@ -45,9 +45,26 @@ function LogIn() {
       setLoggedInEmail(emailToUse); // ✅ store for modal
       setSuccess(true);
       navigate("/home");
-    } catch (err) {
-      setError("Invalid email/username or password.");
-    }
+} catch (err) {
+  console.error("Firebase login error:", err);
+
+  const code = err.code || "";
+
+  if (
+    code === "auth/user-not-found" ||
+    code === "auth/wrong-password" ||
+    code === "auth/invalid-credential" ||
+    code === "auth/invalid-login-credentials"
+  ) {
+    setError("Wrong email/username or password.");
+  } else if (code === "auth/too-many-requests") {
+    setError("Too many attempts. Please try again later.");
+  } else {
+    setError("Login failed. Please try again.");
+  }
+}
+
+
   };
 
   const forgotPassword = () => {

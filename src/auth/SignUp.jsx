@@ -8,6 +8,7 @@ import logo from "../assets/sarimanagelogo.png";
 import hidePasswordIcon from "../assets/hidePassword.png";
 import showPasswordIcon from "../assets/showPassword.png";
 
+
 const BASE_URL = process.env.REACT_APP_API_URL || "http://localhost:5000";
 
 function SignUp() {
@@ -32,12 +33,29 @@ function SignUp() {
 
   const [policyError, setPolicyError] = useState("");
 
-  const handleChange = (e) => {
-    setFormData({
-      ...formData,
-      [e.target.id]: e.target.value,
-    });
-  };
+  const [usernameError, setUsernameError] = useState("");
+
+
+const handleChange = (e) => {
+  const { id, value } = e.target;
+
+  setFormData({
+    ...formData,
+    [id]: value,
+  });
+
+  if (id === "username") {
+    // Get saved usernames from localStorage
+    const savedUsernames = JSON.parse(localStorage.getItem("usernames") || "[]");
+
+    if (savedUsernames.includes(value.toLowerCase())) {
+      setUsernameError("Username already taken");
+    } else {
+      setUsernameError("");
+    }
+  }
+};
+
 
   const validatePassword = (password) => {
     const regex =
@@ -84,6 +102,12 @@ function SignUp() {
         store_name: formData.storeName,
         mobile_number: formData.mobileNumber,
       });
+
+      // Save username to localStorage
+const savedUsernames = JSON.parse(localStorage.getItem("usernames") || "[]");
+savedUsernames.push(formData.username.toLowerCase());
+localStorage.setItem("usernames", JSON.stringify(savedUsernames));
+
 
       // ✅ Clear error
       setPasswordError("");
@@ -150,7 +174,7 @@ function SignUp() {
             />
           </div>
 
-          <div className={styles.inputGroup}>
+<div className={styles.inputGroup}>
   <label htmlFor="username">Username</label>
   <input
     type="text"
@@ -160,7 +184,11 @@ function SignUp() {
     onChange={handleChange}
     required
   />
+  {usernameError && (
+    <p className={styles.errorMessage}>{usernameError}</p>
+  )}
 </div>
+
 
 
           <div className={styles.inputGroup}>

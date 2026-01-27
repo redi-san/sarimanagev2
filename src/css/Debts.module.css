@@ -771,7 +771,9 @@ input:checked + .slider:before {
 .debts-table th {
   background-color: var(--primary-color);
   color: #333;
+    text-align: center; 
 }
+
 
 .debts-table tr:hover {
   background-color: #fafafa;
@@ -835,12 +837,19 @@ input:checked + .slider:before {
 .debts-table th,
 .debts-table td {
   padding: 12px 16px;
-  text-align: left;
+  text-align: center;
   border-bottom: 1px solid #eee;
   vertical-align: middle;
   white-space: normal; 
   overflow-wrap: break-word;
 }
+
+.debts-table td:first-child {
+  text-align: left; /* only the first column left-aligned */
+  padding-left: 16px; /* optional: add some padding */
+}
+
+
 
 @media (max-width: 768px) {
   .debts-table {

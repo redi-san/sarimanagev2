@@ -19,14 +19,20 @@ const EXPIRY_WARNING_DAYS = 14;
 
 const defaultCategories = [
   "Beverages & Drinks",
-  "Snacks & Chips",
-  "Instant Foods",
-  "Condiments & Sauces",
-  "Dairy & Eggs",
-  "Personal Care",
+  "Bread & Biscuits",
+  "Canned Goods",
   "Cleaning Supplies",
+  "Condiments & Sauces",
+  "Cooking Essentials",
+  "Dairy & Eggs",
   "Frozen Foods",
+  "Household Essentials",
+  "Instant Foods",
+  "Personal Care",
+  "Powdered Drinks & Milk",
+  "Snacks & Chips",
 ];
+
 
 export default function Stocks({ setPage }) {
   const [, setLowStockItems] = useState([]);
@@ -139,16 +145,18 @@ export default function Stocks({ setPage }) {
     setExpiringItems(expiring);
   }, [stocks]);
 
-  useEffect(() => {
-    const uniqueStockCategories = [
-      ...new Set(stocks.map((stock) => stock.category).filter(Boolean)),
-    ];
+useEffect(() => {
+  const uniqueStockCategories = [
+    ...new Set(stocks.map((stock) => stock.category).filter(Boolean)),
+  ];
 
-    const allCategories = [
-      ...new Set([...defaultCategories, ...uniqueStockCategories]),
-    ];
-    setCategories(allCategories);
-  }, [stocks]);
+  const allCategories = [
+    ...new Set([...defaultCategories, ...uniqueStockCategories]),
+  ].sort((a, b) => a.localeCompare(b)); // 🔹 SORT alphabetically
+
+  setCategories(allCategories);
+}, [stocks]);
+
 
   // Save stock to backend
   const saveStock = async () => {

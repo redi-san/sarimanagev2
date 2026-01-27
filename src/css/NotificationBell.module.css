@@ -83,3 +83,8 @@
   text-align: center;
   color: var(--text-color);
 }
+
+.notifDropdown li strong {
+  font-weight: 700; /* force bold */
+  display: inline;  /* ensures proper inline rendering */
+}

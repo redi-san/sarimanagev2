@@ -109,11 +109,10 @@
 }
 
 .errorMessage {
-  color: red;
+  color: rgb(255, 56, 20);
   font-size: 13px;
   margin-top: -15px;
   margin-bottom: 15px;
-  display: none; 
 }
 
 .btn {
