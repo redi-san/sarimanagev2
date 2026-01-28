@@ -92,8 +92,7 @@ const MonthlySalesChart = ({ orders }) => {
   const forecastSales = getThreeMonthMovingAverage();
 
   //const chartHeight = 180;   // actual chart area
-const svgHeight = 210;     // background height (taller)
-
+  const svgHeight = 210; // background height (taller)
 
   const width = 550;
   const height = 180;
@@ -123,18 +122,17 @@ const svgHeight = 210;     // background height (taller)
     <div
       style={{ margin: "20px auto", maxWidth: "600px", textAlign: "center" }}
     >
-<svg
-  viewBox={`0 0 ${width} ${svgHeight}`}
-  style={{
-    width: "100%",
-    height: "auto",
-    background: "var(--card-bg)",
-    borderRadius: "12px",
-    padding: "10px",
-    boxSizing: "border-box",
-  }}
->
-
+      <svg
+        viewBox={`0 0 ${width} ${svgHeight}`}
+        style={{
+          width: "100%",
+          height: "auto",
+          background: "var(--card-bg)",
+          borderRadius: "12px",
+          padding: "10px",
+          boxSizing: "border-box",
+        }}
+      >
         {/* Axes */}
         <line
           x1={padding}
@@ -222,7 +220,7 @@ const svgHeight = 210;     // background height (taller)
           {/* Actual Sales */}
           <circle cx="0" cy="0" r="5" fill="#4caf50" />
           <text x="10" y="4" fontSize="16" fill="var(--chart-text)">
-             Sales
+            Sales
           </text>
 
           {/* Forecast */}

@@ -406,10 +406,9 @@ export default function Reports() {
     if (!product) return null;
 
     const today = new Date();
-    const pastDays = 7;
+    const pastDays = 7; // last 7 days including today
 
     let totalSold = 0;
-    let daysWithSales = 0;
 
     for (let i = 0; i < pastDays; i++) {
       const date = new Date(today);
@@ -425,13 +424,11 @@ export default function Reports() {
         }
       });
 
-      if (soldToday > 0) {
-        totalSold += soldToday;
-        daysWithSales += 1;
-      }
+      // Add today's sales (even if 0)
+      totalSold += soldToday;
     }
 
-    const avgDailySold = daysWithSales > 0 ? totalSold / daysWithSales : 0;
+    const avgDailySold = totalSold / pastDays; // divide by total days, not only days with sales
 
     if (avgDailySold <= 0) {
       return {
@@ -450,9 +447,7 @@ export default function Reports() {
     return {
       avgDailySold,
       outOfStockDate,
-      predictionText: `Expected to run out of stock on: ${formatDisplayDate(
-        outOfStockDate,
-      )}`,
+      predictionText: `Expected to run out of stock on: ${formatDisplayDate(outOfStockDate)}`,
     };
   };
 
@@ -573,32 +568,31 @@ export default function Reports() {
         </button>
 
         <div id="report-section">
-{activeTab !== "debt" && (
-  <div className={styles.summaryCards}>
-    <div className={styles.card}>
-      <h3>Total Sales</h3>
-      <p>
-        ₱
-        {totalSales.toLocaleString(undefined, {
-          minimumFractionDigits: 2,
-          maximumFractionDigits: 2,
-        })}
-      </p>
-    </div>
+          {activeTab !== "debt" && (
+            <div className={styles.summaryCards}>
+              <div className={styles.card}>
+                <h3>Total Sales</h3>
+                <p>
+                  ₱
+                  {totalSales.toLocaleString(undefined, {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2,
+                  })}
+                </p>
+              </div>
 
-    <div className={styles.card}>
-      <h3>Total Profit</h3>
-      <p>
-        ₱
-        {totalProfit.toLocaleString(undefined, {
-          minimumFractionDigits: 2,
-          maximumFractionDigits: 2,
-        })}
-      </p>
-    </div>
-  </div>
-)}
-
+              <div className={styles.card}>
+                <h3>Total Profit</h3>
+                <p>
+                  ₱
+                  {totalProfit.toLocaleString(undefined, {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2,
+                  })}
+                </p>
+              </div>
+            </div>
+          )}
 
           {/* Sales Overview */}
           <div className={styles.weeklyContainer}>
@@ -836,7 +830,7 @@ export default function Reports() {
                     viewBox={`0 0 ${width} ${height}`}
                     style={{
                       width: "100%",
-                      height: "200px",
+                      height: "220px",
                       background: "var(--card-bg)",
                       borderRadius: "12px",
                       padding: "10px",
@@ -954,6 +948,36 @@ export default function Reports() {
                         </g>
                       );
                     })}
+
+                    {/* Legend */}
+                    {activeTab === "sales" && showAll && (
+                      <g
+                        transform={`translate(${width / 2 - 150}, ${height + 30})`}
+                      >
+                        {[
+                          { label: "Sales", color: "#4caf50" },
+                          ...(forecastPoints.length > 0
+                            ? [{ label: "Forecast", color: "#007BFF" }]
+                            : []),
+                        ].map((item, index) => (
+                          <g
+                            key={item.label}
+                            transform={`translate(${index * 180}, 0)`}
+                          >
+                            <circle cx={0} cy={0} r={12} fill={item.color} />
+                            <text
+                              x={20}
+                              y={6}
+                              fontSize={24}
+                              fill="var(--chart-text)"
+                              fontWeight="600"
+                            >
+                              {item.label}
+                            </text>
+                          </g>
+                        ))}
+                      </g>
+                    )}
 
                     {points.map((p, i) => (
                       <circle

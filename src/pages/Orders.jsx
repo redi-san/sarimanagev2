@@ -10,7 +10,6 @@ import AddDebtModal from "../components/AddDebtModal";
 import Debts from "./Debts"; // reuse your component
 import successSound from "../assets/sarimanage_barcode_successful.mp3";
 
-
 import { useLocation } from "react-router-dom";
 
 const BASE_URL = process.env.REACT_APP_API_URL || "http://localhost:5000";
@@ -47,8 +46,6 @@ export default function Orders({ setPage }) {
   const [editingFromProducts, setEditingFromProducts] = useState(false);
 
   const audioRef = useRef(new Audio(successSound));
-
-
 
   //const [graphType, setGraphType] = useState("actual"); // "actual" | "forecast"
 
@@ -164,22 +161,21 @@ export default function Orders({ setPage }) {
     setTotals({ total, profit });
   };
 
-const getErrorMessage = (err) => {
-  // Axios error with response JSON
-  if (err.response?.data?.message) return err.response.data.message;
+  const getErrorMessage = (err) => {
+    // Axios error with response JSON
+    if (err.response?.data?.message) return err.response.data.message;
 
-  // Axios error with plain text response
-  if (err.response?.data) {
-    if (typeof err.response.data === "string") return err.response.data;
-    if (err.response.data.error) return err.response.data.error;
-  }
+    // Axios error with plain text response
+    if (err.response?.data) {
+      if (typeof err.response.data === "string") return err.response.data;
+      if (err.response.data.error) return err.response.data.error;
+    }
 
-  // Generic Error object (from callback -> thrown)
-  if (err.message) return err.message;
+    // Generic Error object (from callback -> thrown)
+    if (err.message) return err.message;
 
-  return "Failed to save order";
-};
-
+    return "Failed to save order";
+  };
 
   const saveOrder = async () => {
     const user = auth.currentUser;
@@ -233,11 +229,9 @@ const getErrorMessage = (err) => {
       setShowModal(false);
       resetForm();
     } catch (err) {
-  console.error("Error saving order:", err);
-  showToast(getErrorMessage(err));
-}
-
-
+      console.error("Error saving order:", err);
+      showToast(getErrorMessage(err));
+    }
   };
 
   const saveAsDebt = async (debtData) => {
@@ -275,12 +269,12 @@ const getErrorMessage = (err) => {
 
       //navigate("/debts");
       setActiveTab("debts");
-    }  catch (err) {
-    console.error("Error saving debt:", err);
-    // Use the same toast logic as saveOrder
-    showToast(getErrorMessage(err));
-  }
-};
+    } catch (err) {
+      console.error("Error saving debt:", err);
+      // Use the same toast logic as saveOrder
+      showToast(getErrorMessage(err));
+    }
+  };
 
   const deleteOrder = async (id) => {
     try {
@@ -409,7 +403,9 @@ const getErrorMessage = (err) => {
 
         const newProducts = [...prev, newProduct];
         calculateTotals(newProducts);
-        audioRef.current.play().catch((err) => console.warn("Audio play failed:", err));
+        audioRef.current
+          .play()
+          .catch((err) => console.warn("Audio play failed:", err));
         return newProducts;
       });
 
@@ -595,7 +591,13 @@ const getErrorMessage = (err) => {
                           colSpan="6"
                           style={{ textAlign: "center", padding: "20px" }}
                         >
-                          No orders found.
+                          <p style={{ margin: 0 }}>
+                            No orders have been created yet.
+                          </p>
+                          <p style={{ margin: 0 }}>
+                            Tap the <b>+</b> button to add a new
+                            order.
+                          </p>
                         </td>
                       </tr>
                     ) : (
@@ -691,22 +693,22 @@ const getErrorMessage = (err) => {
                 <label htmlFor="paymentAmount" className={styles.inputLabel}>
                   Payment Amount
                 </label>
-              <input
-                type="number"
-                id="\paymentAmount"
-                placeholder="0.00"
-                value={paymentAmount}
-                onChange={(e) => setPaymentAmount(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter") {
-                    e.preventDefault();
-                    saveOrder();
-                  }
-                }}
-                required
-                min={totals.total}
-              />
-                  </div>
+                <input
+                  type="number"
+                  id="\paymentAmount"
+                  placeholder="0.00"
+                  value={paymentAmount}
+                  onChange={(e) => setPaymentAmount(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                      e.preventDefault();
+                      saveOrder();
+                    }
+                  }}
+                  required
+                  min={totals.total}
+                />
+              </div>
 
               <div className={styles.totals}>
                 <div className={styles.totalBox}>
@@ -743,12 +745,28 @@ const getErrorMessage = (err) => {
           </div>
         )}
 
-                {/* 2nd Modal */}
-        {showSecondModal && (
-          <div className={styles.modal}>
-            <div
-              className={`${styles["modal-content"]} ${styles["modal-second"]}`}
-            >
+        {/* 2nd Modal */}
+{showSecondModal && (
+  <div
+    className={styles.modal}
+    onClick={() => {
+      // Click outside closes the modal
+      // Stop scanner if running
+      if (scannerRef.current) {
+        scannerRef.current._html5Qrcode?.stop().catch(() => {});
+        scannerRef.current?.clear().catch(() => {});
+        scannerRef.current = null;
+        setShowScanner(false);
+      }
+      setShowSecondModal(false);
+      resetForm();
+      setIsEditing(false);
+    }}
+  >
+    <div
+      className={`${styles["modal-content"]} ${styles["modal-second"]}`}
+      onClick={(e) => e.stopPropagation()} // Prevent modal close on inner click
+    >
               <h2>Add Products</h2>
               {products.map((product, index) => (
                 <div className={styles["product-entry"]} key={index}>

@@ -902,12 +902,15 @@ body {
 /* Filter Buttons Container */
 .filterBar {
   display: flex;
-  justify-content: center; /* center the buttons */
-  align-items: center;
-  gap: 12px; /* spacing between buttons */
+  justify-content: center; /* center the buttons horizontally */
+  align-items: center;     /* vertically center if buttons have different heights */
+  gap: 8px;                /* spacing between buttons */
   margin: 20px 0;
-  flex-wrap: wrap; /* wrap on smaller screens */
+  flex-wrap: nowrap;        /* prevent wrapping to second line */
+  overflow-x: auto;         /* optional: allow horizontal scroll if very small screen */
+  white-space: nowrap;      /* prevent text inside buttons from breaking */
 }
+
 
 /* General button styling */
 .filterBar button {

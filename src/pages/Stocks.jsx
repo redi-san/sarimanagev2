@@ -2,6 +2,8 @@ import { useState, useEffect, useCallback } from "react";
 import styles from "../css/Stocks.module.css";
 import axios from "axios";
 import { getAuth } from "firebase/auth";
+import successSound from "../assets/sarimanage_barcode_successful.mp3";
+
 //import bellIcon from "../assets/bell.png";
 //import bellAlertIcon from "../assets/bellalert.png";
 
@@ -16,6 +18,9 @@ import NotificationBell from "../components/NotificationBell";
 const BASE_URL = process.env.REACT_APP_API_URL; // e.g., https://sarimanage-render.onrender.com
 
 const EXPIRY_WARNING_DAYS = 14;
+
+const audio = new Audio(successSound);
+
 
 const defaultCategories = [
   "Beverages & Drinks",
@@ -98,6 +103,8 @@ export default function Stocks({ setPage }) {
 
       scanner.render(
         (decodedText) => {
+              audio.play().catch(err => console.warn("Sound play failed:", err));
+
           if (modalMode === "add") {
             setProductId(decodedText);
           } else if (modalMode === "edit") {

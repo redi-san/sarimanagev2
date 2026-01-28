@@ -622,8 +622,8 @@
 
 @media (min-width: 1024px) {
   svg {
-    width: 680px !important;
-    height: 200px !important;
+    width: 650px !important;
+    height: 350px !important;
   }
 }
 
@@ -705,4 +705,3 @@
 
     margin: 0 16px; /* 10px on left and right */
 }
-

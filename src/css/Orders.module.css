@@ -894,6 +894,7 @@
   font-weight: 500;
   opacity: 0.95;
   animation: slideUp 0.3s ease;
+  white-space: nowrap; /* prevents text from breaking into multiple lines */
 }
 
 

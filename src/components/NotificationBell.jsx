@@ -47,61 +47,63 @@ export default function NotificationBell() {
         setExpiringItems(expiring);
 
         // --- Near out-of-stock with predicted date
-// --- Near out-of-stock with predicted date
-const nearOut = stocks
-  .map((stock) => {
-    const stockQty = Number(stock.stock);
-    if (stockQty <= 0) return null;
+        const nearOut = stocks
+          .map((stock) => {
+            const stockQty = Number(stock.stock);
+            if (stockQty <= 0) return null;
 
-    // Average daily sold (last 7 days)
-    const pastDays = 7;
-    let soldDaysCount = 0;
-    let totalSold = 0;
+            const today = new Date();
 
-    for (let i = 0; i < pastDays; i++) {
-      const date = new Date(today);
-      date.setDate(today.getDate() - i);
+            // Determine period to calculate daily average
+            // Option 1: last 30 days (or any custom period)
+            const periodDays = 7; // you can adjust
+            const startDate = new Date(today);
+            startDate.setDate(today.getDate() - (periodDays - 1)); // include today
 
-      let soldToday = 0;
-      orders.forEach((order) => {
-        const orderDate = new Date(
-          order.order_number.slice(0, 2) +
-            "/" +
-            order.order_number.slice(2, 4) +
-            "/" +
-            order.order_number.slice(4, 8),
-        );
-        if (orderDate.toDateString() === date.toDateString()) {
-          const product = order.products.find((p) => p.name === stock.name);
-          if (product) soldToday += Number(product.quantity) || 0;
-        }
-      });
+            const totalDays = periodDays;
+            let totalSold = 0;
 
-      if (soldToday > 0) {
-        totalSold += soldToday;
-        soldDaysCount += 1;
-      }
-    }
+            for (let i = 0; i < totalDays; i++) {
+              const date = new Date(startDate);
+              date.setDate(startDate.getDate() + i);
 
-    const avgDailySold = soldDaysCount > 0 ? totalSold / soldDaysCount : 0;
-    if (avgDailySold <= 0) return null;
+              let soldToday = 0;
+              orders.forEach((order) => {
+                const orderDate = new Date(
+                  order.order_number.slice(0, 2) +
+                    "/" +
+                    order.order_number.slice(2, 4) +
+                    "/" +
+                    order.order_number.slice(4, 8),
+                );
+                if (orderDate.toDateString() === date.toDateString()) {
+                  const product = order.products.find(
+                    (p) => p.name === stock.name,
+                  );
+                  if (product) soldToday += Number(product.quantity) || 0;
+                }
+              });
 
-    const daysToDeplete = stockQty / avgDailySold;
-    if (daysToDeplete > OUT_OF_STOCK_WARNING_DAYS) return null;
+              totalSold += soldToday; // include 0 sales
+            }
 
-    const predictedDate = new Date(today);
-    // ✅ Use Math.floor to reflect the actual depletion day
-    predictedDate.setDate(today.getDate() + Math.floor(daysToDeplete));
+            const avgDailySold = totalSold / totalDays;
+            if (avgDailySold <= 0) return null;
 
-    return {
-      ...stock,
-      predictedOutOfStock: predictedDate,
-    };
-  })
-  .filter(Boolean);
+            const daysToDeplete = stockQty / avgDailySold;
+            if (daysToDeplete > OUT_OF_STOCK_WARNING_DAYS) return null;
 
-setNearOutOfStockItems(nearOut);
+            const predictedDate = new Date(today);
+            predictedDate.setDate(today.getDate() + Math.floor(daysToDeplete));
 
+            return {
+              ...stock,
+              predictedOutOfStock: predictedDate,
+            };
+          })
+          .filter(Boolean);
+
+        setNearOutOfStockItems(nearOut);
       } catch (err) {
         console.error("Error fetching stocks for notifications:", err);
       }
@@ -156,8 +158,9 @@ setNearOutOfStockItems(nearOut);
                   <ul>
                     {nearOutOfStockItems.map((item) => (
                       <li key={item.id}>
-                        <strong>{item.name}</strong> - {item.stock} left, expected out
-                        by {item.predictedOutOfStock.toLocaleDateString()}
+                        <strong>{item.name}</strong> - {item.stock} left,
+                        expected out by{" "}
+                        {item.predictedOutOfStock.toLocaleDateString()}
                       </li>
                     ))}
                   </ul>
