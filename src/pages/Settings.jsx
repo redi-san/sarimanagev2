@@ -374,6 +374,7 @@ export default function Settings() {
                   type="text"
                   value={editedData.username}
                   onChange={handleChange}
+                  placeholder="Enter Username"
                 />
               </div>
 
@@ -384,7 +385,7 @@ export default function Settings() {
                   type="text"
                   value={editedData.storeName}
                   onChange={handleChange}
-                  placeholder="where is your store name bro"
+                  placeholder="Enter Store Name"
                 />
               </div>
 
@@ -395,6 +396,7 @@ export default function Settings() {
                   type="text"
                   value={editedData.mobileNumber}
                   onChange={handleChange}
+                  placeholder="Enter Mobile Number"
                 />
               </div>
 

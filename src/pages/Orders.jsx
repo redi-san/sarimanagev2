@@ -182,7 +182,7 @@ export default function Orders({ setPage }) {
 
     if (!user) return showToast("You must be logged in to save orders.");
     if (products.length === 0)
-      return showToast("Please add at least one product.");
+      return showToast("Please add at least one valid product.");
 
     const pay = parseFloat(paymentAmount) || 0;
     const total = parseFloat(totals.total) || 0;
@@ -1017,22 +1017,26 @@ export default function Orders({ setPage }) {
                   {location.state?.autoOpen ? "View Table" : "Cancel"}
                 </button>
 
-                {/* Add Order / Next button first (left) */}
-                <button
-                  className={styles.Next}
-                  onClick={() => {
-                    if (editingFromProducts) {
-                      setShowSecondModal(false);
-                      setShowModal(true);
-                      setEditingFromProducts(false);
-                    } else {
-                      setShowSecondModal(false);
-                      setShowModal(true);
-                    }
-                  }}
-                >
-                  {editingFromProducts ? "Next" : "Add as Order"}
-                </button>
+<button
+  className={styles.Next}
+  onClick={async () => {
+    // ✅ STOP scanner first (important)
+    await stopScanner();
+    setShowScanner(false);
+
+    // ✅ GUARANTEE order number exists
+    setOrderNumber((prev) => prev || generateOrderNumber());
+
+    // ✅ Switch modals
+    setShowSecondModal(false);
+    setShowModal(true);
+
+    setEditingFromProducts(false);
+  }}
+>
+  {editingFromProducts ? "Next" : "Add as Order"}
+</button>
+
 
                 {/* Save as Debt button (right) */}
                 {!isEditing && (

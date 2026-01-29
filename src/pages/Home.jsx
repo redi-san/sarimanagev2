@@ -16,10 +16,10 @@ import MonthlySalesChart from "../components/MonthlySalesChart";
 const BASE_URL = process.env.REACT_APP_API_URL; // Use live backend URL
 
 export default function Home() {
-  const [todaysSale, setTodaysSale] = useState(0);
-  const [todaysProfit, setTodaysProfit] = useState(0);
-  const [lowStockCount, setLowStockCount] = useState(0);
-  const [totalDebts, setTotalDebts] = useState(0);
+  const [todaysSale, setTodaysSale] = useState(null);
+  const [todaysProfit, setTodaysProfit] = useState(null);
+  const [lowStockCount, setLowStockCount] = useState(null);
+  const [totalDebts, setTotalDebts] = useState(null);
 
   const auth = getAuth();
 
@@ -44,7 +44,7 @@ const [monthlyData, setMonthlyData] = useState([]); */
       try {
         // Fetch today's orders
         const ordersRes = await axios.get(
-          `${BASE_URL}/orders/user/${user.uid}`
+          `${BASE_URL}/orders/user/${user.uid}`,
         );
         const allOrders = ordersRes.data;
         setOrders(allOrders); // ← add this
@@ -59,20 +59,20 @@ const [monthlyData, setMonthlyData] = useState([]); */
         };
 
         const todaysOrders = allOrders.filter(
-          (order) => getOrderDate(order) === today
+          (order) => getOrderDate(order) === today,
         );
 
         setTodaysSale(
           todaysOrders.reduce(
             (sum, order) => sum + parseFloat(order.total || 0),
-            0
-          )
+            0,
+          ),
         );
         setTodaysProfit(
           todaysOrders.reduce(
             (sum, order) => sum + parseFloat(order.profit || 0),
-            0
-          )
+            0,
+          ),
         );
       } catch (err) {
         console.error("Error fetching orders:", err);
@@ -81,13 +81,13 @@ const [monthlyData, setMonthlyData] = useState([]); */
       try {
         // Fetch stocks
         const stocksRes = await axios.get(
-          `${BASE_URL}/stocks/user/${user.uid}`
+          `${BASE_URL}/stocks/user/${user.uid}`,
         );
         const allStocks = stocksRes.data;
         setLowStockCount(
           allStocks.filter(
-            (stock) => Number(stock.stock) <= Number(stock.lowstock)
-          ).length
+            (stock) => Number(stock.stock) <= Number(stock.lowstock),
+          ).length,
         );
       } catch (err) {
         console.error("Error fetching stocks:", err);
@@ -121,7 +121,7 @@ const [monthlyData, setMonthlyData] = useState([]); */
 
       try {
         const ordersRes = await axios.get(
-          `${BASE_URL}/orders/user/${user.uid}`
+          `${BASE_URL}/orders/user/${user.uid}`,
         );
         const allOrders = ordersRes.data;
 
@@ -186,7 +186,13 @@ const [monthlyData, setMonthlyData] = useState([]); */
               <h3>Today's Sales</h3>
             </div>
             <div className={styles.cardValue}>
-              <b>₱{todaysSale.toFixed(2)}</b>
+              <b>
+                {todaysSale === null ? (
+                  <span className={styles.loading}>Loading...</span>
+                ) : (
+                  `₱${todaysSale.toFixed(2)}`
+                )}
+              </b>
             </div>
           </div>
 
@@ -200,7 +206,13 @@ const [monthlyData, setMonthlyData] = useState([]); */
               <h3>Today's Profits</h3>
             </div>
             <div className={styles.cardValue}>
-              <b>₱{todaysProfit.toFixed(2)}</b>
+              <b>
+                {todaysProfit === null ? (
+                  <span className={styles.loading}>Loading...</span>
+                ) : (
+                  `₱${todaysProfit.toFixed(2)}`
+                )}
+              </b>
             </div>
           </div>
 
@@ -214,8 +226,21 @@ const [monthlyData, setMonthlyData] = useState([]); */
               <h3>Total Debts</h3>
             </div>
             <div className={styles.cardValue}>
-              <b style={{ color: totalDebts > 0 ? "red" : "#66bb6a" }}>
-                ₱{totalDebts.toFixed(2)}
+              <b
+                style={{
+                  color:
+                    totalDebts === null
+                      ? "#999"
+                      : totalDebts > 0
+                        ? "red"
+                        : "#66bb6a",
+                }}
+              >
+                {totalDebts === null ? (
+                  <span className={styles.loading}>Loading...</span>
+                ) : (
+                  `₱${totalDebts.toFixed(2)}`
+                )}
               </b>
             </div>
           </div>
@@ -230,8 +255,21 @@ const [monthlyData, setMonthlyData] = useState([]); */
               <h3>Low Stocks</h3>
             </div>
             <div className={styles.cardValue}>
-              <b style={{ color: lowStockCount > 0 ? "red" : "#66bb6a" }}>
-                {lowStockCount}
+              <b
+                style={{
+                  color:
+                    lowStockCount === null
+                      ? "#999"
+                      : lowStockCount > 0
+                        ? "red"
+                        : "#66bb6a",
+                }}
+              >
+                {lowStockCount === null ? (
+                  <span className={styles.loading}>Loading...</span>
+                ) : (
+                  lowStockCount
+                )}
               </b>
             </div>
           </div>

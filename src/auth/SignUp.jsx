@@ -7,7 +7,7 @@ import styles from "../css/SignUp.module.css";
 import logo from "../assets/sarimanagelogo.png";
 import hidePasswordIcon from "../assets/hidePassword.png";
 import showPasswordIcon from "../assets/showPassword.png";
-
+import { useEffect } from "react";
 
 const BASE_URL = process.env.REACT_APP_API_URL || "http://localhost:5000";
 
@@ -35,31 +35,31 @@ function SignUp() {
 
   const [usernameError, setUsernameError] = useState("");
 
+  const handleChange = (e) => {
+    const { id, value } = e.target;
 
-const handleChange = (e) => {
-  const { id, value } = e.target;
+    setFormData({
+      ...formData,
+      [id]: value,
+    });
 
-  setFormData({
-    ...formData,
-    [id]: value,
-  });
+    if (id === "username") {
+      // Get saved usernames from localStorage
+      const savedUsernames = JSON.parse(
+        localStorage.getItem("usernames") || "[]",
+      );
 
-  if (id === "username") {
-    // Get saved usernames from localStorage
-    const savedUsernames = JSON.parse(localStorage.getItem("usernames") || "[]");
-
-    if (savedUsernames.includes(value.toLowerCase())) {
-      setUsernameError("Username already taken");
-    } else {
-      setUsernameError("");
+      if (savedUsernames.includes(value.toLowerCase())) {
+        setUsernameError("Username already taken");
+      } else {
+        setUsernameError("");
+      }
     }
-  }
-};
-
+  };
 
   const validatePassword = (password) => {
     const regex =
-      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{12,16}$/;
+      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{12,}$/;
     return regex.test(password);
   };
 
@@ -67,7 +67,7 @@ const handleChange = (e) => {
     e.preventDefault();
     if (!validatePassword(formData.password)) {
       setPasswordError(
-        "Password must be 12–16 chars, include uppercase, lowercase, number, and special character."
+        "Password must include uppercase, lowercase, number, and special character.",
       );
       return;
     }
@@ -85,7 +85,7 @@ const handleChange = (e) => {
       const userCredential = await createUserWithEmailAndPassword(
         auth,
         formData.email,
-        formData.password
+        formData.password,
       );
 
       const user = userCredential.user;
@@ -104,10 +104,11 @@ const handleChange = (e) => {
       });
 
       // Save username to localStorage
-const savedUsernames = JSON.parse(localStorage.getItem("usernames") || "[]");
-savedUsernames.push(formData.username.toLowerCase());
-localStorage.setItem("usernames", JSON.stringify(savedUsernames));
-
+      const savedUsernames = JSON.parse(
+        localStorage.getItem("usernames") || "[]",
+      );
+      savedUsernames.push(formData.username.toLowerCase());
+      localStorage.setItem("usernames", JSON.stringify(savedUsernames));
 
       // ✅ Clear error
       setPasswordError("");
@@ -123,6 +124,13 @@ localStorage.setItem("usernames", JSON.stringify(savedUsernames));
     setShowModal(false);
     navigate("/");
   };
+
+    useEffect(() => {
+    // Wake up backend
+    axios.get(`${BASE_URL}/health`)
+      .then(() => console.log("Backend awake!"))
+      .catch(() => console.log("Failed to wake backend"));
+  }, []);
 
   return (
     <div className={styles.container}>
@@ -174,22 +182,20 @@ localStorage.setItem("usernames", JSON.stringify(savedUsernames));
             />
           </div>
 
-<div className={styles.inputGroup}>
-  <label htmlFor="username">Username</label>
-  <input
-    type="text"
-    id="username"
-    placeholder="Enter your username"
-    value={formData.username}
-    onChange={handleChange}
-    required
-  />
-  {usernameError && (
-    <p className={styles.errorMessage}>{usernameError}</p>
-  )}
-</div>
-
-
+          <div className={styles.inputGroup}>
+            <label htmlFor="username">Username</label>
+            <input
+              type="text"
+              id="username"
+              placeholder="Enter your username"
+              value={formData.username}
+              onChange={handleChange}
+              required
+            />
+            {usernameError && (
+              <p className={styles.errorMessage}>{usernameError}</p>
+            )}
+          </div>
 
           <div className={styles.inputGroup}>
             <label htmlFor="storeName">Store Name</label>
@@ -221,7 +227,7 @@ localStorage.setItem("usernames", JSON.stringify(savedUsernames));
               <small className={styles.hint}>
                 <br />
                 (Mix: lowercase & uppercase letters, numbers, & a special
-                character | 12–16 chars)
+                character)
               </small>
             </label>
             <div className={styles.passwordWrapper}>

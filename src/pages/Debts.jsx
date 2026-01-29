@@ -1219,7 +1219,16 @@ export default function Debts({ setPage }) {
                 </div>
               )}
             </div>
-            <div className={styles.toastContainer}>
+
+          </div>
+
+          
+        )}
+
+        
+      </main>
+
+                  <div className={styles.toastContainer}>
               {toasts.map((toast) => (
                 <div
                   key={toast.id}
@@ -1229,9 +1238,6 @@ export default function Debts({ setPage }) {
                 </div>
               ))}
             </div>
-          </div>
-        )}
-      </main>
     </div>
   );
 }

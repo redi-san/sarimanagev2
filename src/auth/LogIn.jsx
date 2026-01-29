@@ -103,7 +103,7 @@ useEffect(() => {
             <input
               type="text"
               id="identifier"
-              placeholder="Email or Username"
+              placeholder="Enter Email or Username"
               value={identifier}
               onChange={(e) => setIdentifier(e.target.value)}
               required
