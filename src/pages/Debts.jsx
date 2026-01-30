@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import styles from "../css/Debts.module.css";
 import deleteIcon from "../assets/deleteIcon.png";
-import { Html5Qrcode } from "html5-qrcode";
+import { Html5QrcodeScanner } from "html5-qrcode";
 import { getAuth } from "firebase/auth";
 import axios from "axios";
 
@@ -107,33 +107,107 @@ export default function Debts({ setPage }) {
     return () => unsubscribe();
   }, [auth]);
 
+    const updateProduct = useCallback(
+    (index, field, value, productsArray = products) => {
+      const newProducts = [...productsArray];
+      if (!newProducts[index]) newProducts[index] = {};
+
+      newProducts[index][field] = value;
+
+      if (field === "name" || field === "productId") {
+        let match = null;
+
+        if (field === "name") {
+          match = stocks.find(
+            (s) => s.name.toLowerCase() === value.toLowerCase(),
+          );
+        } else if (field === "productId") {
+          match = stocks.find(
+            (s) =>
+              s.barcode?.toString().toLowerCase() ===
+              value.toString().toLowerCase(),
+          );
+        }
+
+        if (match) {
+          newProducts[index].name = match.name;
+          newProducts[index].stock_id = match.id;
+          newProducts[index].buyingPrice = match.buying_price || 0;
+          newProducts[index].sellingPrice = match.selling_price || 0;
+          newProducts[index].productId = match.barcode || "";
+        } else {
+          newProducts[index].stock_id = null;
+          newProducts[index].buyingPrice = "";
+          newProducts[index].sellingPrice = "";
+        }
+      }
+
+      setProducts(newProducts);
+      calculateTotals(newProducts);
+    },
+    [products, stocks],
+  );
+
   useEffect(() => {
     if (!showScanner) return;
 
-    const html5QrCode = new Html5Qrcode("reader");
+    const scanner = new Html5QrcodeScanner(
+      "reader", // id of the div
+      {
+        fps: 10,
+        qrbox: 250,
+        rememberLastUsedCamera: true,
+        showTorchButtonIfSupported: true,
+      },
+      false,
+    );
 
-    html5QrCode.start(
-      { facingMode: "environment" },
-      { fps: 10, qrbox: 180 },
+    scanner.render(
       (decodedText) => {
         const index = scanningIndexRef.current;
 
-        if (index !== null) {
-          const updated = [...productsRef.current];
-          updated[index].productId = decodedText;
-          setProducts(updated);
-        }
+        setProducts((prev) => {
+          let updated = [...prev];
 
-        html5QrCode.stop();
-        setShowScanner(false);
-        setScanningIndex(null);
+          if (index !== null && updated[index]) {
+            updated[index] = { ...updated[index], productId: decodedText };
+            updateProduct(index, "productId", decodedText, updated); // <-- pass updated
+          } else {
+            const newProduct = {
+              name: "",
+              stock_id: null,
+              productId: decodedText,
+              quantity: "1",
+              sellingPrice: "",
+              buyingPrice: "",
+              dateAdded: new Date().toISOString().split("T")[0],
+            };
+            updated.push(newProduct);
+            updateProduct(
+              updated.length - 1,
+              "productId",
+              decodedText,
+              updated,
+            );
+          }
+
+          return updated;
+        });
+
+        scanner.clear().then(() => {
+          setShowScanner(false);
+          setScanningIndex(null);
+        });
+      },
+      (errorMessage) => {
+        console.warn("QR Scan Error:", errorMessage);
       },
     );
 
     return () => {
-      html5QrCode.stop().catch(() => {});
+      scanner.clear().catch(() => {});
     };
-  }, [showScanner]);
+  }, [showScanner, updateProduct]);
 
   const fetchDebts = async () => {
     const user = auth.currentUser;
@@ -147,41 +221,7 @@ export default function Debts({ setPage }) {
     }
   };
 
-  const updateProduct = (index, field, value) => {
-    const newProducts = [...products];
-    newProducts[index][field] = value;
 
-    if (field === "name" || field === "productId") {
-      let match = null;
-
-      if (field === "name") {
-        match = stocks.find(
-          (s) => s.name.toLowerCase() === value.toLowerCase(),
-        );
-      } else if (field === "productId") {
-        match = stocks.find(
-          (s) =>
-            s.barcode?.toString().toLowerCase() ===
-            value.toString().toLowerCase(),
-        );
-      }
-
-      if (match) {
-        newProducts[index].name = match.name;
-        newProducts[index].stock_id = match.id;
-        newProducts[index].buyingPrice = match.buying_price || 0;
-        newProducts[index].sellingPrice = match.selling_price || 0;
-        newProducts[index].productId = match.barcode || "";
-      } else {
-        newProducts[index].stock_id = null;
-        newProducts[index].buyingPrice = "";
-        newProducts[index].sellingPrice = "";
-      }
-    }
-
-    setProducts(newProducts);
-    calculateTotals(newProducts);
-  };
 
   const removeProduct = (index) => {
     const newProducts = products.filter((_, i) => i !== index);
@@ -849,21 +889,24 @@ export default function Debts({ setPage }) {
                 <button
                   className={styles["add-product-btn"]}
                   onClick={() => {
-                    setProducts((prev) => [
-                      ...prev,
-                      {
-                        name: "",
-                        stock_id: null,
-                        productId: "",
-                        quantity: "1",
-                        sellingPrice: "",
-                        buyingPrice: "",
-                        dateAdded: new Date().toISOString().split("T")[0],
-                      },
-                    ]);
+                    setProducts((prev) => {
+                      const newProducts = [
+                        ...prev,
+                        {
+                          name: "",
+                          stock_id: null,
+                          productId: "",
+                          quantity: "1",
+                          sellingPrice: "",
+                          buyingPrice: "",
+                          dateAdded: new Date().toISOString().split("T")[0],
+                        },
+                      ];
+                      setScanningIndex(newProducts.length - 1);
+                      return newProducts;
+                    });
 
-                    // 🔥 make scanner target the newly added product
-                    setScanningIndex(products.length);
+                    setShowScanner(true); // ✅ open the scanner
                   }}
                 >
                   Add Product
@@ -872,7 +915,6 @@ export default function Debts({ setPage }) {
                 <button
                   className={styles["add-product-btn"]}
                   onClick={() => {
-                    // if no products yet, auto-create one
                     if (products.length === 0) {
                       setProducts([
                         {
@@ -887,32 +929,30 @@ export default function Debts({ setPage }) {
                       ]);
                       setScanningIndex(0);
                     }
-
-                    setShowScanner(true);
+                    setShowScanner(true); // ✅ open the scanner
                   }}
                 >
                   Scan Product
                 </button>
               </div>
 
-{showScanner && (
-  <div className={styles.scannerModal}>
-    <div
-      id="reader"
-      style={{ width: "100%", maxWidth: "400px", margin: "auto" }}
-    ></div>
-    <button
-      className={styles.Cancel}
-      onClick={async () => {
-        setShowScanner(false);
-        setScanningIndex(null);
-      }}
-    >
-      Cancel
-    </button>
-  </div>
-)}
-
+              {showScanner && (
+                <div className={styles.scannerModal}>
+                  <div
+                    id="reader"
+                    style={{ width: "100%", maxWidth: "400px", margin: "auto" }}
+                  ></div>
+                  <button
+                    className={styles.Cancel}
+                    onClick={async () => {
+                      setShowScanner(false);
+                      setScanningIndex(null);
+                    }}
+                  >
+                    Cancel
+                  </button>
+                </div>
+              )}
 
               <div className={styles.totals}>
                 <input
