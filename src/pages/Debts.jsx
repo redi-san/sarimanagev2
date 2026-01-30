@@ -597,6 +597,7 @@ export default function Debts({ setPage }) {
               >
                 {/* Form Inputs */}
                 <div className={styles["form-group"]}>
+                  <label>Customer Name</label>
                   <input
                     type="text"
                     value={customer_name}
@@ -605,10 +606,11 @@ export default function Debts({ setPage }) {
                     placeholder=""
                     required
                   />
-                  <label>Customer Name</label>
                 </div>
 
                 <div className={styles["form-group"]}>
+                  <label>Contact Number</label>
+
                   <input
                     type="text"
                     value={contact_number}
@@ -616,11 +618,11 @@ export default function Debts({ setPage }) {
                     onKeyDown={handleEnterKey}
                     placeholder=" "
                   />
-                  <label>Contact Number</label>
                 </div>
 
                 <div className={styles["form-row"]}>
                   <div className={styles["form-group"]}>
+                    <label>Date</label>
                     <input
                       type="date"
                       value={date}
@@ -629,9 +631,10 @@ export default function Debts({ setPage }) {
                       placeholder=" "
                       required
                     />
-                    <label>Date</label>
                   </div>
                   <div className={styles["form-group"]}>
+                    <label>Due Date</label>
+
                     <input
                       type="date"
                       value={due_date}
@@ -639,11 +642,12 @@ export default function Debts({ setPage }) {
                       onKeyDown={handleEnterKey}
                       placeholder=" "
                     />
-                    <label>Due Date</label>
                   </div>
                 </div>
 
                 <div className={styles["form-group"]}>
+                  <label>Note</label>
+
                   <textarea
                     value={note}
                     onChange={(e) => setNote(e.target.value)}
@@ -652,7 +656,6 @@ export default function Debts({ setPage }) {
                     rows="3"
                     className={styles.textarea}
                   />
-                  <label>Note</label>
                 </div>
 
                 {/* Status Dropdown
@@ -698,10 +701,11 @@ export default function Debts({ setPage }) {
               <h2>Add Products</h2>
               {products.map((product, index) => (
                 <div className={styles["product-entry"]} key={index}>
+                  <label className={styles.inputLabel}>Product Name</label>
                   <div style={{ position: "relative" }}>
                     <input
                       type="text"
-                      placeholder="Product Name"
+                      placeholder="Enter the product name"
                       value={product.name}
                       onChange={(e) =>
                         updateProduct(index, "name", e.target.value)
@@ -774,10 +778,10 @@ export default function Debts({ setPage }) {
                         </ul>
                       )}
                   </div>
-
+                  <label className={styles.inputLabel}>Product ID</label>
                   <input
                     type="text"
-                    placeholder="Product ID"
+                    placeholder="Scan to enter Product ID"
                     value={product.productId || ""}
                     onChange={(e) =>
                       updateProduct(index, "productId", e.target.value)
@@ -785,30 +789,38 @@ export default function Debts({ setPage }) {
                   />
 
                   <div className={styles["product-row"]}>
-                    <input
-                      type="number"
-                      placeholder="Quantity"
-                      value={product.quantity}
-                      onChange={(e) =>
-                        updateProduct(index, "quantity", e.target.value)
-                      }
-                    />
-                    <input
-                      type="number"
-                      placeholder="Selling Price"
-                      value={product.sellingPrice}
-                      onChange={(e) =>
-                        updateProduct(index, "sellingPrice", e.target.value)
-                      }
-                    />
+                    <div className={styles["input-group"]}>
+                      <label className={styles.inputLabel}>Quantity</label>
+                      <input
+                        type="number"
+                        placeholder="Quantity"
+                        value={product.quantity}
+                        onChange={(e) =>
+                          updateProduct(index, "quantity", e.target.value)
+                        }
+                      />
+                    </div>
+
+                    <div className={styles["input-group"]}>
+                      <label className={styles.inputLabel}>Price</label>
+                      <input
+                        type="number"
+                        placeholder="0.00"
+                        value={product.sellingPrice}
+                        onChange={(e) =>
+                          updateProduct(index, "sellingPrice", e.target.value)
+                        }
+                      />
+                    </div>
+
                     {/*<input
-                    type="number"
-                    placeholder="Buying Price"
-                    value={product.buyingPrice}
-                    onChange={(e) =>
-                      updateProduct(index, "buyingPrice", e.target.value)
-                    }
-                  /> */}
+    type="number"
+    placeholder="Buying Price"
+    value={product.buyingPrice}
+    onChange={(e) =>
+      updateProduct(index, "buyingPrice", e.target.value)
+    }
+  /> */}
                   </div>
 
                   {/*<input
@@ -828,59 +840,79 @@ export default function Debts({ setPage }) {
                     >
                       Remove
                     </button>
-                    <button
-                      className={styles["scan-product-btn"]}
-                      onClick={() => {
-                        setScanningIndex(index);
-                        setShowScanner(true);
-                      }}
-                    >
-                      Scan
-                    </button>
                   </div>
                 </div>
               ))}
 
-              {showScanner && (
-                <div className={styles.modal}>
-                  <div className={styles["modal-content"]}>
-                    <h2>Scan Barcode</h2>
-                    <div
-                      id="reader"
-                      style={{ width: "300px", margin: "auto" }}
-                    ></div>
-                    <button
-                      className={styles.Cancel}
-                      onClick={() => {
-                        setShowScanner(false);
-                        setScanningIndex(null);
-                      }}
-                    >
-                      Cancel
-                    </button>
-                  </div>
-                </div>
-              )}
+              {/* GLOBAL PRODUCT ACTIONS */}
+              <div className={styles.buttonRow}>
+                <button
+                  className={styles["add-product-btn"]}
+                  onClick={() => {
+                    setProducts((prev) => [
+                      ...prev,
+                      {
+                        name: "",
+                        stock_id: null,
+                        productId: "",
+                        quantity: "1",
+                        sellingPrice: "",
+                        buyingPrice: "",
+                        dateAdded: new Date().toISOString().split("T")[0],
+                      },
+                    ]);
 
-              <button
-                className={styles["add-product-btn"]}
-                onClick={() =>
-                  setProducts([
-                    ...products,
-                    {
-                      name: "",
-                      stock_id: null,
-                      productId: "",
-                      quantity: "",
-                      selling_price: "",
-                      buying_price: "",
-                      dateAdded: new Date().toISOString().split("T")[0], // auto-fill current date
-                    },
-                  ])
-                }
-              >
-                + Add Product
-              </button>
+                    // 🔥 make scanner target the newly added product
+                    setScanningIndex(products.length);
+                  }}
+                >
+                  Add Product
+                </button>
+
+                <button
+                  className={styles["add-product-btn"]}
+                  onClick={() => {
+                    // if no products yet, auto-create one
+                    if (products.length === 0) {
+                      setProducts([
+                        {
+                          name: "",
+                          stock_id: null,
+                          productId: "",
+                          quantity: "1",
+                          sellingPrice: "",
+                          buyingPrice: "",
+                          dateAdded: new Date().toISOString().split("T")[0],
+                        },
+                      ]);
+                      setScanningIndex(0);
+                    }
+
+                    setShowScanner(true);
+                  }}
+                >
+                  Scan Product
+                </button>
+              </div>
+
+{showScanner && (
+  <div className={styles.scannerModal}>
+    <div
+      id="reader"
+      style={{ width: "100%", maxWidth: "400px", margin: "auto" }}
+    ></div>
+    <button
+      className={styles.Cancel}
+      onClick={async () => {
+        setShowScanner(false);
+        setScanningIndex(null);
+      }}
+    >
+      Cancel
+    </button>
+  </div>
+)}
+
 
               <div className={styles.totals}>
                 <input
@@ -1021,19 +1053,18 @@ export default function Debts({ setPage }) {
                 <strong>Contact:</strong> {selectedDebt.contact_number}
               </p>
 
-<p>
-  <strong>Date:</strong>{" "}
-  {selectedDebt.date
-    ? new Date(selectedDebt.date).toLocaleDateString("en-US")
-    : "-"}
-</p>
-<p>
-  <strong>Due Date:</strong>{" "}
-  {selectedDebt.due_date
-    ? new Date(selectedDebt.due_date).toLocaleDateString("en-US")
-    : "-"}
-</p>
-
+              <p>
+                <strong>Date:</strong>{" "}
+                {selectedDebt.date
+                  ? new Date(selectedDebt.date).toLocaleDateString("en-US")
+                  : "-"}
+              </p>
+              <p>
+                <strong>Due Date:</strong>{" "}
+                {selectedDebt.due_date
+                  ? new Date(selectedDebt.due_date).toLocaleDateString("en-US")
+                  : "-"}
+              </p>
 
               <p>
                 <strong>Note:</strong> {selectedDebt.note}
@@ -1219,25 +1250,20 @@ export default function Debts({ setPage }) {
                 </div>
               )}
             </div>
-
           </div>
-
-          
         )}
-
-        
       </main>
 
-                  <div className={styles.toastContainer}>
-              {toasts.map((toast) => (
-                <div
-                  key={toast.id}
-                  className={`${styles.toast} ${styles[toast.type]}`}
-                >
-                  {toast.message}
-                </div>
-              ))}
-            </div>
+      <div className={styles.toastContainer}>
+        {toasts.map((toast) => (
+          <div
+            key={toast.id}
+            className={`${styles.toast} ${styles[toast.type]}`}
+          >
+            {toast.message}
+          </div>
+        ))}
+      </div>
     </div>
   );
 }
