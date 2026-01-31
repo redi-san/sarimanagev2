@@ -455,6 +455,35 @@ export default function Orders({ setPage }) {
 
   const [toasts, setToasts] = useState([]);
 
+const checkStockAvailability = () => {
+  for (let p of products) {
+    const stock = stocks.find(
+      (s) => String(s.barcode).trim() === String(p.stock_id).trim()
+    );
+
+    if (!stock) {
+      showToast(`Product not found in stock: ${p.name}`);
+      return false;
+    }
+
+    const stockQty = Number(stock.stock);
+    const productQty = Number(p.quantity);
+
+    if (isNaN(stockQty) || isNaN(productQty)) {
+      showToast(`Invalid quantity for ${p.name}`);
+      return false;
+    }
+
+    if (productQty > stockQty) {
+      showToast(`Not enough stock for ${p.name}`);
+      return false;
+    }
+  }
+
+  return true;
+};
+
+
   // Function to show toast
   const showToast = (message, duration = 3000) => {
     const id = Date.now(); // unique id
@@ -595,8 +624,7 @@ export default function Orders({ setPage }) {
                             No orders have been created yet.
                           </p>
                           <p style={{ margin: 0 }}>
-                            Tap the <b>+</b> button to add a new
-                            order.
+                            Tap the <b>+</b> button to add a new order.
                           </p>
                         </td>
                       </tr>
@@ -746,27 +774,27 @@ export default function Orders({ setPage }) {
         )}
 
         {/* 2nd Modal */}
-{showSecondModal && (
-  <div
-    className={styles.modal}
-    onClick={() => {
-      // Click outside closes the modal
-      // Stop scanner if running
-      if (scannerRef.current) {
-        scannerRef.current._html5Qrcode?.stop().catch(() => {});
-        scannerRef.current?.clear().catch(() => {});
-        scannerRef.current = null;
-        setShowScanner(false);
-      }
-      setShowSecondModal(false);
-      resetForm();
-      setIsEditing(false);
-    }}
-  >
-    <div
-      className={`${styles["modal-content"]} ${styles["modal-second"]}`}
-      onClick={(e) => e.stopPropagation()} // Prevent modal close on inner click
-    >
+        {showSecondModal && (
+          <div
+            className={styles.modal}
+            onClick={() => {
+              // Click outside closes the modal
+              // Stop scanner if running
+              if (scannerRef.current) {
+                scannerRef.current._html5Qrcode?.stop().catch(() => {});
+                scannerRef.current?.clear().catch(() => {});
+                scannerRef.current = null;
+                setShowScanner(false);
+              }
+              setShowSecondModal(false);
+              resetForm();
+              setIsEditing(false);
+            }}
+          >
+            <div
+              className={`${styles["modal-content"]} ${styles["modal-second"]}`}
+              onClick={(e) => e.stopPropagation()} // Prevent modal close on inner click
+            >
               <h2>Add Products</h2>
               {products.map((product, index) => (
                 <div className={styles["product-entry"]} key={index}>
@@ -874,9 +902,12 @@ export default function Orders({ setPage }) {
                       updateProduct(index, "stock_id", barcode);
 
                       const foundStock = stocks.find(
-                        //(s) => s.id.toString() === id
-                        (s) => s.barcode.toString() === barcode,
+                        (s) =>
+                          s &&
+                          s.barcode != null &&
+                          s.barcode.toString() === barcode,
                       );
+
                       if (foundStock) {
                         updateProduct(index, "name", foundStock.name);
                         updateProduct(
@@ -1017,32 +1048,33 @@ export default function Orders({ setPage }) {
                   {location.state?.autoOpen ? "View Table" : "Cancel"}
                 </button>
 
-<button
-  className={styles.Next}
-  onClick={async () => {
-    // ✅ STOP scanner first (important)
-    await stopScanner();
-    setShowScanner(false);
+                <button
+                  className={styles.Next}
+                  onClick={async () => {
+                    if (!checkStockAvailability()) return; // ✅ stop if stock insufficient
 
-    // ✅ GUARANTEE order number exists
-    setOrderNumber((prev) => prev || generateOrderNumber());
+                    await stopScanner();
+                    setShowScanner(false);
 
-    // ✅ Switch modals
-    setShowSecondModal(false);
-    setShowModal(true);
+                    setOrderNumber((prev) => prev || generateOrderNumber());
 
-    setEditingFromProducts(false);
-  }}
->
-  {editingFromProducts ? "Next" : "Add as Order"}
-</button>
+                    setShowSecondModal(false);
+                    setShowModal(true);
 
+                    setEditingFromProducts(false);
+                  }}
+                >
+                  {editingFromProducts ? "Next" : "Add as Order"}
+                </button>
 
                 {/* Save as Debt button (right) */}
                 {!isEditing && (
                   <button
                     className={styles["add-debt-btn"]}
                     onClick={() => {
+                      // ✅ Check stock before opening debt modal
+                      if (!checkStockAvailability()) return;
+
                       setShowSecondModal(false);
                       setShowDebtModal(true);
                     }}
