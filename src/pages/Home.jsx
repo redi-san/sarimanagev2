@@ -280,7 +280,7 @@ const [monthlyData, setMonthlyData] = useState([]); */
       <MonthlySalesChart orders={orders} />
 
       <h2 className={`${styles.sectionTitle} ${styles.recommendedTitle}`}>
-        Recommended Products
+        Recommended to sell this month
       </h2>
       <div className={styles.recommendationSection}>
         {recommendedProducts.length === 0 ? (

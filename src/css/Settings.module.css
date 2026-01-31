@@ -162,6 +162,7 @@ html {
   font-size: 1.125rem;
   font-weight: 600;
   margin-bottom: 15px;
+  color: var(--text-color);
 }
 
 .buttonRow {
@@ -242,7 +243,6 @@ html {
 .formGroup label {
   font-weight: 600;
   margin-bottom: 5px;
-  color: #333;
   color: var(--text-color); /* matches current theme */
 }
 
@@ -388,5 +388,10 @@ body {
 
 .selectInput option {
   background: var(--card-bg);
+  color: var(--text-color);
+}
+
+.card p,
+.card span {
   color: var(--text-color);
 }

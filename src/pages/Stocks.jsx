@@ -21,7 +21,6 @@ const EXPIRY_WARNING_DAYS = 14;
 
 const audio = new Audio(successSound);
 
-
 const defaultCategories = [
   "Beverages & Drinks",
   "Bread & Biscuits",
@@ -37,7 +36,6 @@ const defaultCategories = [
   "Powdered Drinks & Milk",
   "Snacks & Chips",
 ];
-
 
 export default function Stocks({ setPage }) {
   const [, setLowStockItems] = useState([]);
@@ -103,7 +101,7 @@ export default function Stocks({ setPage }) {
 
       scanner.render(
         (decodedText) => {
-              audio.play().catch(err => console.warn("Sound play failed:", err));
+          audio.play().catch((err) => console.warn("Sound play failed:", err));
 
           if (modalMode === "add") {
             setProductId(decodedText);
@@ -152,111 +150,163 @@ export default function Stocks({ setPage }) {
     setExpiringItems(expiring);
   }, [stocks]);
 
-useEffect(() => {
-  const uniqueStockCategories = [
-    ...new Set(stocks.map((stock) => stock.category).filter(Boolean)),
-  ];
+  useEffect(() => {
+    const uniqueStockCategories = [
+      ...new Set(stocks.map((stock) => stock.category).filter(Boolean)),
+    ];
 
-  const allCategories = [
-    ...new Set([...defaultCategories, ...uniqueStockCategories]),
-  ].sort((a, b) => a.localeCompare(b)); // 🔹 SORT alphabetically
+    const allCategories = [
+      ...new Set([...defaultCategories, ...uniqueStockCategories]),
+    ].sort((a, b) => a.localeCompare(b)); // 🔹 SORT alphabetically
 
-  setCategories(allCategories);
-}, [stocks]);
+    setCategories(allCategories);
+  }, [stocks]);
 
+// Save stock to backend
+const saveStock = async () => {
+  const user = auth.currentUser;
+  if (!user) return;
 
-  // Save stock to backend
-  const saveStock = async () => {
-    const user = auth.currentUser;
+  // Trim product name
+  const cleanedName = stockName.trim().replace(/\s+/g, " ");
+
+  // ✅ Validation: required fields
+  if (
+    !cleanedName ||
+    !category ||
+    !stockAmount ||
+    !lowStock ||
+    !buying_price ||
+    !selling_price
+  ) {
+    showToast("Please fill in all required fields", "warning");
+    return;
+  }
+
+  // ✅ Validation: Buying Price must be <= Selling Price
+  const buy = parseFloat(buying_price);
+  const sell = parseFloat(selling_price);
+
+  if (isNaN(buy) || isNaN(sell)) {
+    showToast(
+      "Buying price and Suggested Retail Price must be valid numbers",
+      "error"
+    );
+    return;
+  }
+
+  if (buy > sell) {
+    showToast(
+      "Buying Price cannot be higher than Suggested Retail Price",
+      "warning"
+    );
+    return;
+  }
+
+  const formData = new FormData();
+  formData.append("firebase_uid", user.uid);
+  formData.append("barcode", productId);
+  formData.append("name", cleanedName);
+  formData.append("category", category);
+  formData.append("stock", stockAmount);
+  formData.append("lowstock", lowStock);
+  formData.append("buying_price", buying_price);
+  formData.append("selling_price", selling_price);
+  if (manufacturing_date) formData.append("manufacturing_date", manufacturing_date);
+  if (expiry_date) formData.append("expiry_date", expiry_date);
+
+  if (productImage) {
+    formData.append("image", productImage);
+  }
+
+  if (!categories.includes(category)) {
+    setCategories([...categories, category]);
+  }
+
+  try {
+    const res = await axios.post(`${BASE_URL}/stocks`, formData, {
+      headers: { "Content-Type": "multipart/form-data" },
+    });
+
+    setStocks([...stocks, res.data]);
+    setShowModal(false);
+    resetFields();
+    showToast("Product added successfully", "success");
+  } catch (err) {
+    console.error("Error saving stock:", err);
+    showToast("Failed to save product. Try again.", "error");
+  }
+};
+
+// Update stock
+const updateStock = async () => {
+  // ✅ Validation: required fields
+  if (
+    !selectedStock?.name ||
+    !selectedStock?.category ||
+    !selectedStock?.stock ||
+    !selectedStock?.lowstock ||
+    !selectedStock?.buying_price ||
+    !selectedStock?.selling_price
+  ) {
+    showToast("Please fill in all required fields", "warning");
+    return;
+  }
+
+  // ✅ Validation: Buying Price must be <= Selling Price
+  const buy = parseFloat(selectedStock.buying_price);
+  const sell = parseFloat(selectedStock.selling_price);
+
+  if (isNaN(buy) || isNaN(sell)) {
+    showToast(
+      "Buying price and Suggested Retail Price must be valid numbers",
+      "error"
+    );
+    return;
+  }
+
+  if (buy > sell) {
+    showToast(
+      "Buying Price cannot be higher than Suggested Retail Price",
+      "warning"
+    );
+    return;
+  }
+
+  try {
     const formData = new FormData();
 
-    // Trim product name
-    const cleanedName = stockName.trim().replace(/\s+/g, " ");
-
-    // ✅ Validation: Buying Price must be <= Selling Price
-    const buy = parseFloat(buying_price);
-    const sell = parseFloat(selling_price);
-
-    if (isNaN(buy) || isNaN(sell)) {
-      return alert(
-        "Buying price and Suggested Retail Price must be valid numbers.",
-      );
-    }
-
-    if (buy > sell) {
-      return alert(
-        "Buying Price cannot be higher than Suggested Retail Price!",
-      );
-    }
-
-    formData.append("firebase_uid", user.uid);
-    formData.append("barcode", productId);
-    formData.append("name", cleanedName);
-    formData.append("category", category);
-    formData.append("stock", stockAmount);
-    formData.append("lowstock", lowStock);
-    formData.append("buying_price", buying_price);
-    formData.append("selling_price", selling_price);
-    if (manufacturing_date)
-      formData.append("manufacturing_date", manufacturing_date);
-    if (expiry_date) formData.append("expiry_date", expiry_date);
-
-    if (productImage) {
-      formData.append("image", productImage);
-    }
-
-    if (!categories.includes(category)) {
-      setCategories([...categories, category]);
-    }
-
-    try {
-      const res = await axios.post(`${BASE_URL}/stocks`, formData, {
-        headers: { "Content-Type": "multipart/form-data" },
-      });
-
-      setStocks([...stocks, res.data]);
-      setShowModal(false);
-      resetFields();
-    } catch (err) {
-      console.error("Error saving stock:", err);
-    }
-  };
-
-  //  Update stock
-  const updateStock = async () => {
-    try {
-      // validations unchanged...
-
-      const formData = new FormData();
-
-      Object.entries(selectedStock).forEach(([key, value]) => {
-        if (
-          value !== null &&
-          value !== undefined &&
-          value !== "" &&
-          key !== "id" &&
-          key !== "image" &&
-          key !== "previewImage" &&
-          key !== "newImageFile"
-        ) {
-          formData.append(key, value);
-        }
-      });
-
-      if (selectedStock.newImageFile) {
-        formData.append("image", selectedStock.newImageFile);
+    Object.entries(selectedStock).forEach(([key, value]) => {
+      if (
+        value !== null &&
+        value !== undefined &&
+        value !== "" &&
+        key !== "id" &&
+        key !== "image" &&
+        key !== "previewImage" &&
+        key !== "newImageFile"
+      ) {
+        formData.append(key, value);
       }
+    });
 
-      await axios.put(`${BASE_URL}/stocks/${selectedStock.id}`, formData, {
-        headers: { "Content-Type": "multipart/form-data" },
-      });
-
-      await fetchStocks(); // 🔥 AUTO REFRESH
-      setShowModal(false);
-    } catch (err) {
-      console.error("Error updating stock:", err);
+    if (selectedStock.newImageFile) {
+      formData.append("image", selectedStock.newImageFile);
     }
-  };
+
+    await axios.put(`${BASE_URL}/stocks/${selectedStock.id}`, formData, {
+      headers: { "Content-Type": "multipart/form-data" },
+    });
+
+    await fetchStocks();
+    setShowModal(false);
+    showToast("Product updated successfully", "success");
+  } catch (err) {
+    console.error("Error updating stock:", err);
+    showToast("Failed to update product. Try again.", "error");
+  }
+};
+
 
   //Delete stock
   const deleteStock = async (id) => {
@@ -265,6 +315,7 @@ useEffect(() => {
       setStocks(stocks.filter((s) => s.id !== id));
     } catch (err) {
       console.error("Error deleting stock:", err);
+      showToast("Failed to delete product.", "error");
     }
   };
 
@@ -281,6 +332,7 @@ useEffect(() => {
     setExpiryDate("");
 
     setProductImage(null);
+    setImagePreview(null); // ✅ ADD THIS
   };
 
   const filteredStocks = stocks
@@ -336,6 +388,20 @@ useEffect(() => {
     const day = d.getDate().toString().padStart(2, "0");
     const year = d.getFullYear();
     return `${year}-${month}-${day}`;
+  };
+
+  const [toast, setToast] = useState({
+    show: false,
+    message: "",
+    type: "info", // "success" | "error" | "warning"
+  });
+
+  const showToast = (message, type = "info", duration = 3000) => {
+    setToast({ show: true, message, type });
+
+    setTimeout(() => {
+      setToast((prev) => ({ ...prev, show: false }));
+    }, duration);
   };
 
   return (
@@ -430,9 +496,7 @@ useEffect(() => {
         <div className={styles["stocks-table-container"]}>
           {stocks.length === 0 ? (
             <div className={styles.noStocks}>
-              <p>
-                Your stock list is empty. Click + to add your products
-              </p>
+              <p>Your stock list is empty. Click + to add your products</p>
             </div>
           ) : (
             <div className={styles.categoryAccordionContainer}>
@@ -492,12 +556,11 @@ useEffect(() => {
                               <td className={styles.productCell}>
                                 <div className={styles.productInfo}>
                                   {stock.image ? (
-<img
-  src={stock.image}
-  alt={stock.name}
-  className={styles.productThumb}
-/>
-
+                                    <img
+                                      src={stock.image}
+                                      alt={stock.name}
+                                      className={styles.productThumb}
+                                    />
                                   ) : (
                                     <div className={styles.noImage}>
                                       No Image
@@ -570,8 +633,7 @@ useEffect(() => {
                 ) : selectedStock?.previewImage ? (
                   <img src={selectedStock.previewImage} alt="Preview" />
                 ) : selectedStock?.image ? (
-<img src={selectedStock.image} alt={selectedStock.name} />
-
+                  <img src={selectedStock.image} alt={selectedStock.name} />
                 ) : (
                   <span>Tap to add image</span>
                 )}
@@ -912,6 +974,11 @@ useEffect(() => {
         )}
       </main>
       <BottomNav />
+      {toast.show && (
+        <div className={`${styles.toast} ${styles[toast.type]}`}>
+          {toast.message}
+        </div>
+      )}
     </div>
   );
 }
