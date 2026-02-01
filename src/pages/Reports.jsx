@@ -398,11 +398,13 @@ export default function Reports() {
     a.name.localeCompare(b.name),
   );
 
-  useEffect(() => {
-  if (sortedInventoryData.length > 0) {
-    setSelectedProduct(sortedInventoryData[0].name);
+useEffect(() => {
+  if (activeTab === "inventory" && stocks.length > 0) {
+    const sorted = [...stocks].sort((a, b) => a.name.localeCompare(b.name));
+    setSelectedProduct(sorted[0].name);
   }
-}, [sortedInventoryData]);
+}, [activeTab, stocks]);
+
 
   const getStockForecastInfo = (productName) => {
     const product = inventoryData.find((p) => p.name === productName);
