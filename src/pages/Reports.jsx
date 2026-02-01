@@ -353,11 +353,8 @@ export default function Reports() {
       year: "numeric",
     });
 
-  useEffect(() => {
-    if (stocks.length > 0 && !selectedProduct) {
-      setSelectedProduct(stocks[0].name);
-    }
-  }, [stocks, selectedProduct]);
+
+
 
   /*const getDailyAverageSold = (productName) => {
   const today = new Date();
@@ -400,6 +397,12 @@ export default function Reports() {
   const sortedInventoryData = [...inventoryData].sort((a, b) =>
     a.name.localeCompare(b.name),
   );
+
+  useEffect(() => {
+  if (sortedInventoryData.length > 0) {
+    setSelectedProduct(sortedInventoryData[0].name);
+  }
+}, [sortedInventoryData]);
 
   const getStockForecastInfo = (productName) => {
     const product = inventoryData.find((p) => p.name === productName);
@@ -827,7 +830,7 @@ export default function Reports() {
                     })()}
 
                   <svg
-                    viewBox={`0 0 ${width} ${height}`}
+                    viewBox={`0 0 ${width} ${height + 65}`}
                     style={{
                       width: "100%",
                       height: "220px",
