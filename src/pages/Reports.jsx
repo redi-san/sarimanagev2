@@ -935,8 +935,8 @@ export default function Reports() {
                           />
                           <text
                             x={x}
-                            y={height - padding - 36}
-                            fontSize="28"
+                            y={height - padding + 100}
+                            fontSize="24"
                             textAnchor="middle"
                             fill="#007BFF"
                             fontWeight="600"
@@ -949,35 +949,36 @@ export default function Reports() {
                       );
                     })}
 
-                    {/* Legend */}
-                    {activeTab === "sales" && showAll && (
-                      <g
-                        transform={`translate(${width / 2 - 150}, ${height + 30})`}
-                      >
-                        {[
-                          { label: "Sales", color: "#4caf50" },
-                          ...(forecastPoints.length > 0
-                            ? [{ label: "Forecast", color: "#007BFF" }]
-                            : []),
-                        ].map((item, index) => (
-                          <g
-                            key={item.label}
-                            transform={`translate(${index * 180}, 0)`}
-                          >
-                            <circle cx={0} cy={0} r={12} fill={item.color} />
-                            <text
-                              x={20}
-                              y={6}
-                              fontSize={24}
-                              fill="var(--chart-text)"
-                              fontWeight="600"
-                            >
-                              {item.label}
-                            </text>
-                          </g>
-                        ))}
-                      </g>
-                    )}
+{/* Legend */}
+{activeTab === "sales" && showAll && (
+  <g
+    transform={`translate(${width / 2 - 150}, ${padding / 2})`} // move inside chart, top
+  >
+    {[
+      { label: "Sales", color: "#4caf50" },
+      ...(forecastPoints.length > 0
+        ? [{ label: "Forecast", color: "#007BFF" }]
+        : []),
+    ].map((item, index) => (
+      <g
+        key={item.label}
+        transform={`translate(${index * 180}, 0)`} // spacing between items
+      >
+        <circle cx={0} cy={0} r={12} fill={item.color} />
+        <text
+          x={20}
+          y={6}
+          fontSize={24}
+          fill="var(--chart-text)"
+          fontWeight="600"
+        >
+          {item.label}
+        </text>
+      </g>
+    ))}
+  </g>
+)}
+
 
                     {points.map((p, i) => (
                       <circle
@@ -1026,20 +1027,20 @@ export default function Reports() {
                       </text>
                     ))}
 
-                    {points.map((p, i) => (
-                      <text
-                        key={i}
-                        x={p.x}
-                        y={p.y - 6}
-                        fontSize="28"
-                        textAnchor="middle"
-                        fill="var(--chart-text)"
-                      >
-                        {p.value.toLocaleString(undefined, {
-                          maximumFractionDigits: 0,
-                        })}
-                      </text>
-                    ))}
+{points.map((p, i) => (
+  <text
+    key={i}
+    x={p.x}
+    y={height - padding + 70} // <- below the axis line
+    fontSize="24"
+    textAnchor="middle"
+    fill="#4caf50"
+    fontWeight="600"
+  >
+    {p.value.toLocaleString(undefined, { maximumFractionDigits: 0 })}
+  </text>
+))}
+
                   </svg>
                 </div>
               );

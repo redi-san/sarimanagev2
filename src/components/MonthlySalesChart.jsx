@@ -1,5 +1,3 @@
-//import { useState } from "react";
-
 const MonthlySalesChart = ({ orders }) => {
   const getOrderDate = (order) => {
     const datePart = order.order_number.split("-")[0];
@@ -91,12 +89,10 @@ const MonthlySalesChart = ({ orders }) => {
   const actualSales = getMonthlySales();
   const forecastSales = getThreeMonthMovingAverage();
 
-  //const chartHeight = 180;   // actual chart area
-  const svgHeight = 210; // background height (taller)
-
   const width = 550;
   const height = 180;
   const padding = 30;
+  const svgHeight = 230; // increased to make room for values below
   const maxValue = Math.max(...actualSales, ...forecastSales) || 1;
 
   const points = actualSales.map((value, i) => ({
@@ -114,14 +110,10 @@ const MonthlySalesChart = ({ orders }) => {
   }));
 
   const linePath = (pts) =>
-    pts
-      .map((p, i) => (i === 0 ? `M ${p.x} ${p.y}` : `L ${p.x} ${p.y}`))
-      .join(" ");
+    pts.map((p, i) => (i === 0 ? `M ${p.x} ${p.y}` : `L ${p.x} ${p.y}`)).join(" ");
 
   return (
-    <div
-      style={{ margin: "20px auto", maxWidth: "600px", textAlign: "center" }}
-    >
+    <div style={{ margin: "20px auto", maxWidth: "600px", textAlign: "center" }}>
       <svg
         viewBox={`0 0 ${width} ${svgHeight}`}
         style={{
@@ -134,96 +126,48 @@ const MonthlySalesChart = ({ orders }) => {
         }}
       >
         {/* Axes */}
-        <line
-          x1={padding}
-          y1={padding}
-          x2={padding}
-          y2={height - padding}
-          stroke="#999"
-        />
-        <line
-          x1={padding}
-          y1={height - padding}
-          x2={width - padding}
-          y2={height - padding}
-          stroke="#999"
-        />
+        <line x1={padding} y1={padding} x2={padding} y2={height - padding} stroke="#999" />
+        <line x1={padding} y1={height - padding} x2={width - padding} y2={height - padding} stroke="#999" />
 
         {/* Actual Sales Line */}
-        <path
-          d={linePath(points)}
-          stroke="#4caf50"
-          strokeWidth="2"
-          fill="none"
-        />
+        <path d={linePath(points)} stroke="#4caf50" strokeWidth="2" fill="none" />
         {points.map((p, i) => (
           <circle key={i} cx={p.x} cy={p.y} r={5} fill="#4caf50" />
         ))}
 
         {/* Forecast Sales Line */}
-        {/* Forecast Sales Line */}
-        <path
-          d={linePath(forecastPoints)}
-          stroke="#007BFF"
-          strokeWidth="2"
-          fill="none"
-        />
+        <path d={linePath(forecastPoints)} stroke="#007BFF" strokeWidth="2" fill="none" />
         {forecastPoints.map((p, i) => (
           <circle key={i} cx={p.x} cy={p.y} r={5} fill="#007BFF" />
         ))}
 
-        {/* Forecast Values above months */}
-        {forecastPoints.map((p, i) => (
-          <text
-            key={"f" + i}
-            x={p.x}
-            y={height - padding - 24} // just above the month labels
-            fontSize="16"
-            textAnchor="middle"
-            fill="#007BFF"
-            fontWeight="600"
-          >
-            {p.value.toLocaleString(undefined, { maximumFractionDigits: 0 })}
-          </text>
-        ))}
-
-        {/* Labels */}
+        {/* Month Labels */}
         {points.map((p, i) => (
-          <text
-            key={i}
-            x={p.x}
-            y={height - padding + 24}
-            fontSize="16"
-            textAnchor="middle"
-            fill="var(--chart-label)"
-          >
+          <text key={"label-" + i} x={p.x} y={height - padding + 24} fontSize="16" textAnchor="middle" fill="var(--chart-label)">
             {p.label}
           </text>
         ))}
 
-        {/* Values */}
+        {/* Actual Sales Values BELOW months */}
         {points.map((p, i) => (
-          <text
-            key={i}
-            x={p.x}
-            y={p.y - 6}
-            fontSize="16"
-            textAnchor="middle"
-            fill="#4caf50"
-          >
+          <text key={"value-" + i} x={p.x} y={height - padding + 50} fontSize="14" textAnchor="middle" fill="#4caf50" fontWeight="600">
             {p.value.toLocaleString(undefined, { maximumFractionDigits: 0 })}
           </text>
         ))}
 
-        {/* Legend */}
-        <g transform={`translate(${width / 2 - 110}, ${height + 16})`}>
-          {/* Actual Sales */}
+        {/* Forecast Values BELOW months */}
+        {forecastPoints.map((p, i) => (
+          <text key={"forecast-" + i} x={p.x} y={height - padding + 70} fontSize="14" textAnchor="middle" fill="#007BFF" fontWeight="600">
+            {p.value.toLocaleString(undefined, { maximumFractionDigits: 0 })}
+          </text>
+        ))}
+
+        {/* Legend inside chart, top */}
+        <g transform={`translate(${width / 2 - 110}, ${padding / 2})`}>
           <circle cx="0" cy="0" r="5" fill="#4caf50" />
           <text x="10" y="4" fontSize="16" fill="var(--chart-text)">
             Sales
           </text>
-
-          {/* Forecast */}
           <circle cx="100" cy="0" r="5" fill="#007BFF" />
           <text x="110" y="4" fontSize="16" fill="var(--chart-text)">
             Forecast

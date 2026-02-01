@@ -455,10 +455,10 @@ export default function Debts({ setPage }) {
         message,
       });
 
-      alert("✅ SMS reminder sent!");
+      showToast("✅ SMS reminder sent!");
     } catch (err) {
       console.error(err);
-      alert("❌ Failed to send SMS");
+      showToast("Failed to send SMS");
     }
   };
 
@@ -1157,43 +1157,46 @@ export default function Debts({ setPage }) {
                   </div>
                 ))}
               </div>
+<div className={styles["receipt-totals"]}>
+  <div className={styles["totals-row"]}>
+    <div className={styles["totals-left"]}>
+      <p><strong>Total:</strong> {formatPeso(selectedDebt.total)}</p>
+      <p><strong>Profit:</strong> {formatPeso(selectedDebt.profit)}</p>
+    </div>
 
-              <div className={styles["receipt-totals"]}>
-                <p>
-                  <strong>Total:</strong> {formatPeso(selectedDebt.total)}
-                </p>
-                <p>
-                  <strong>Profit:</strong> {formatPeso(selectedDebt.profit)}
-                </p>
+    <div className={styles["totals-right"]}>
+      <p>
+        <strong>Payment:</strong>{" "}
+        {formatPeso(
+          paymentHistory.reduce((sum, p) => sum + p.amount, 0),
+        )}
+      </p>
+      {paymentHistory.length > 0 &&
+        paymentHistory[paymentHistory.length - 1].change > 0 && (
+          <p>
+            <strong>Change:</strong>{" "}
+            {formatPeso(
+              paymentHistory[paymentHistory.length - 1].change,
+            )}
+          </p>
+        )}
+    </div>
+  </div>
 
-                <p>
-                  <strong>Payment:</strong>{" "}
-                  {formatPeso(
-                    paymentHistory.reduce((sum, p) => sum + p.amount, 0),
-                  )}
-                </p>
+  <div className={styles["totals-balance"]}>
+    <p>
+      <strong>Current Balance:</strong>{" "}
+      {formatPeso(
+        Math.max(
+          0,
+          selectedDebt.total -
+            paymentHistory.reduce((sum, p) => sum + p.amount, 0),
+        ),
+      )}
+    </p>
+  </div>
+</div>
 
-                <p>
-                  <strong>Current Balance:</strong>{" "}
-                  {formatPeso(
-                    Math.max(
-                      0,
-                      selectedDebt.total -
-                        paymentHistory.reduce((sum, p) => sum + p.amount, 0),
-                    ),
-                  )}
-                </p>
-
-                {paymentHistory.length > 0 &&
-                  paymentHistory[paymentHistory.length - 1].change > 0 && (
-                    <p>
-                      <strong>Change:</strong>{" "}
-                      {formatPeso(
-                        paymentHistory[paymentHistory.length - 1].change,
-                      )}
-                    </p>
-                  )}
-              </div>
 
               {/* Action buttons */}
               <div className={styles["modal-actions"]}>
@@ -1270,7 +1273,7 @@ export default function Debts({ setPage }) {
                     <h2>Payment</h2>
                     <input
                       type="text"
-                      className="enter-payment-input"
+                      className="enterPaymentInput"
                       placeholder="Enter Payment Amount"
                       value={paymentAmount}
                       onChange={(e) => setPaymentAmount(e.target.value)}
