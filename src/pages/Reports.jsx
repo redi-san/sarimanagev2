@@ -439,7 +439,7 @@ useEffect(() => {
       return {
         avgDailySold: 0,
         outOfStockDate: null,
-        predictionText: "Stock sufficient / cannot predict",
+        predictionText: "insufficient sales, cannot estimate",
       };
     }
 

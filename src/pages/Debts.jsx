@@ -455,7 +455,7 @@ export default function Debts({ setPage }) {
         message,
       });
 
-      showToast("✅ SMS reminder sent!");
+      showToast("SMS reminder sent!");
     } catch (err) {
       console.error(err);
       showToast("Failed to send SMS");
@@ -1004,36 +1004,39 @@ export default function Debts({ setPage }) {
 
                     {showKebabMenu && (
                       <div className={styles["kebab-menu"]}>
-                        <button
-                          onClick={() => {
-                            const productList = (selectedDebt.products || [])
-                              .map((p) => `${p.name} x${p.quantity || 0}`)
-                              .join(", ");
+<button
+  onClick={async () => {
+    const productList = (selectedDebt.products || [])
+      .map((p) => `${p.name} x${p.quantity || 0}`)
+      .join(", ");
 
-                            // Get the logged-in user's first name
-                            const user = auth.currentUser;
-                            const firstName =
-                              user?.displayName?.split(" ")[0] || "Your Seller";
+    const user = auth.currentUser;
+    let senderName = "Your Seller";
 
-                            // Construct message with line breaks
-                            const message =
-                              `Hi ${selectedDebt.customer_name}, this is a friendly reminder that your debt of ${formatPeso(
-                                selectedDebt.total -
-                                  (selectedDebt.total_paid || 0),
-                              )} is due${selectedDebt.due_date ? ` on ${selectedDebt.due_date}` : ""}.\n\n` +
-                              `Products: ${productList}.\n\n` +
-                              `Please settle it at your earliest convenience.\n\n` +
-                              `From, ${firstName}`;
+    try {
+      const res = await axios.get(`${BASE_URL}/users/${user.uid}`);
+      const firstName = res.data.name || "";
+      const lastName = res.data.last_name || "";
+      senderName = `${firstName} ${lastName}`.trim();
+    } catch (err) {
+      console.error("Failed to fetch sender name:", err);
+    }
 
-                            sendSMSReminder(
-                              selectedDebt.contact_number,
-                              message,
-                            );
-                            setShowKebabMenu(false);
-                          }}
-                        >
-                          Remind Customer
-                        </button>
+    const message =
+      `Hi ${selectedDebt.customer_name}, this is a friendly reminder that your debt of ${formatPeso(
+        selectedDebt.total - (selectedDebt.total_paid || 0),
+      )} is due${selectedDebt.due_date ? ` on ${selectedDebt.due_date}` : ""}.\n\n` +
+      `Products: ${productList}.\n\n` +
+      `Please settle it at your earliest convenience.\n\n` +
+      `From, ${senderName}`;
+
+    sendSMSReminder(selectedDebt.contact_number, message);
+    setShowKebabMenu(false);
+  }}
+>
+  Remind Customer
+</button>
+
 
                         <button
                           onClick={() => {
