@@ -1012,14 +1012,17 @@ export default function Debts({ setPage }) {
 
     const user = auth.currentUser;
     let senderName = "Your Seller";
+    let storeName = "";
 
     try {
       const res = await axios.get(`${BASE_URL}/users/${user.uid}`);
       const firstName = res.data.name || "";
       const lastName = res.data.last_name || "";
+      storeName = res.data.store_name || "";
+
       senderName = `${firstName} ${lastName}`.trim();
     } catch (err) {
-      console.error("Failed to fetch sender name:", err);
+      console.error("Failed to fetch sender info:", err);
     }
 
     const message =
@@ -1028,7 +1031,7 @@ export default function Debts({ setPage }) {
       )} is due${selectedDebt.due_date ? ` on ${selectedDebt.due_date}` : ""}.\n\n` +
       `Products: ${productList}.\n\n` +
       `Please settle it at your earliest convenience.\n\n` +
-      `From, ${senderName}`;
+      `From, ${senderName}${storeName ? `\n${storeName}` : ""}`;
 
     sendSMSReminder(selectedDebt.contact_number, message);
     setShowKebabMenu(false);
@@ -1036,6 +1039,7 @@ export default function Debts({ setPage }) {
 >
   Remind Customer
 </button>
+
 
 
                         <button
