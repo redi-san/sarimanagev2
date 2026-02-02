@@ -242,91 +242,91 @@ export default function Debts({ setPage }) {
     setTotals({ total, profit });
   };
 
-const saveDebt = async () => {
-  const user = auth.currentUser;
+  const saveDebt = async () => {
+    const user = auth.currentUser;
 
-  // 🔒 Freeze the dates right now
-  const finalDate = date;
-  const finalDueDate = due_date;
+    if (editingDebtIndex !== null) {
+      const debtId = debtsList[editingDebtIndex].id;
 
-  if (editingDebtIndex !== null) {
-    const debtId = debtsList[editingDebtIndex].id;
+      const updatedDebt = {
+        customer_name,
+        contact_number,
+        date,
+        due_date,
+        note,
+        status,
+        total: totals.total,
+        profit: totals.profit,
+        products: products.map((p) => ({
+          stock_id: p.stock_id ?? null,
+          name: p.name,
+          quantity: p.quantity,
+          selling_price: p.sellingPrice ?? p.selling_price ?? 0,
+          buying_price: p.buyingPrice ?? p.buying_price ?? 0,
+          dateAdded: p.dateAdded || new Date().toISOString().split("T")[0],
+        })),
+      };
 
-    const updatedDebt = {
+      try {
+        await axios.put(`${BASE_URL}/debts/${debtId}`, updatedDebt);
+
+        // Update debtsList locally instead of fetching
+        setDebtsList((prev) =>
+          prev.map((d) => (d.id === debtId ? { ...d, ...updatedDebt } : d)),
+        );
+
+        showToast("Debt updated successfully", "success");
+        setShowModal(false);
+        setShowSecondModal(false);
+        setEditingDebtIndex(null);
+        resetForm();
+      } catch (err) {
+        console.error("Error updating debt:", err);
+        showToast(
+          err.response?.data?.error || "Failed to update debt",
+          "error",
+        );
+      }
+
+      return;
+    }
+
+    // New Debt
+    const newDebt = {
+      user_id: user.uid,
       customer_name,
       contact_number,
-      date: finalDate,      // <-- use frozen value
-      due_date: finalDueDate,
+      date,
+      due_date,
       note,
       status,
       total: totals.total,
       profit: totals.profit,
       products: products.map((p) => ({
-        stock_id: p.stock_id ?? null,
         name: p.name,
         quantity: p.quantity,
-        selling_price: p.sellingPrice ?? p.selling_price ?? 0,
-        buying_price: p.buyingPrice ?? p.buying_price ?? 0,
-        dateAdded: p.dateAdded || new Date().toISOString().split("T")[0],
+        selling_price: p.sellingPrice,
+        buying_price: p.buyingPrice,
       })),
     };
 
     try {
-      await axios.put(`${BASE_URL}/debts/${debtId}`, updatedDebt);
+      const res = await axios.post(`${BASE_URL}/debts`, newDebt);
+      showToast("Debt created successfully", "success");
 
-      setDebtsList((prev) =>
-        prev.map((d) => (d.id === debtId ? { ...d, ...updatedDebt } : d))
-      );
+      // Append the new debt immediately to the table
+      setDebtsList((prev) => [...prev, res.data]);
 
-      showToast("Debt updated successfully", "success");
-      setShowModal(false);
+      // ✅ Force tab to unpaid so new debt is visible
+      setActiveTab("unpaid");
+
       setShowSecondModal(false);
-      setEditingDebtIndex(null);
       resetForm();
     } catch (err) {
-      console.error("Error updating debt:", err);
-      showToast(
-        err.response?.data?.error || "Failed to update debt",
-        "error"
-      );
+      console.error("Error saving debt:", err);
+      showToast(err.response?.data?.error || "Failed to save debt", "error");
     }
-
-    return;
-  }
-
-const newDebt = {
-  user_id: user.uid,
-  customer_name,
-  contact_number,
-  date: finalDate,
-  due_date: finalDueDate,
-  note,
-  status,
-  total: totals.total,
-  profit: totals.profit,
-  products: products.map((p) => ({
-    name: p.name,
-    quantity: p.quantity,
-    selling_price: p.sellingPrice,
-    buying_price: p.buyingPrice,
-  })),
-};
-
-
-  try {
-    const res = await axios.post(`${BASE_URL}/debts`, newDebt);
-    showToast("Debt created successfully", "success");
-
-    setDebtsList((prev) => [...prev, res.data]);
-    setActiveTab("unpaid");
-    setShowSecondModal(false);
-    resetForm();
-  } catch (err) {
-    console.error("Error saving debt:", err);
-    showToast(err.response?.data?.error || "Failed to save debt", "error");
-  }
-};
-
+  };
 
   const deleteDebt = async (id) => {
     try {
