@@ -1,4 +1,3 @@
-// src/components/NotificationBell.jsx
 import { useState, useEffect } from "react";
 import styles from "../css/NotificationBell.module.css";
 import bellIcon from "../assets/bell.png";
@@ -7,6 +6,7 @@ import axios from "axios";
 import { getAuth } from "firebase/auth";
 
 const BASE_URL = process.env.REACT_APP_API_URL;
+const LEAD_TIME_DAYS = 7;
 const EXPIRY_WARNING_DAYS = 14;
 const OUT_OF_STOCK_WARNING_DAYS = 7;
 
@@ -15,7 +15,7 @@ export default function NotificationBell() {
   const [expiringItems, setExpiringItems] = useState([]);
   const [nearOutOfStockItems, setNearOutOfStockItems] = useState([]);
   const [showDropdown, setShowDropdown] = useState(false);
-  const auth = getAuth(); // fixed line
+  const auth = getAuth(); 
 
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged(async (user) => {
@@ -31,13 +31,13 @@ export default function NotificationBell() {
         const orders = ordersRes.data;
         const today = new Date();
 
-        // --- Low stock
+        // low stock, safety stock
         const lowStock = stocks.filter(
           (s) => Number(s.stock) <= Number(s.lowstock),
         );
         setLowStockItems(lowStock);
 
-        // --- Expiring soon
+        // expiring soon
         const expiring = stocks.filter((stock) => {
           if (!stock.expiry_date) return false;
           const expiry = new Date(stock.expiry_date);
@@ -46,19 +46,16 @@ export default function NotificationBell() {
         });
         setExpiringItems(expiring);
 
-        // --- Near out-of-stock with predicted date
+        // near out of stock with estimated date
         const nearOut = stocks
           .map((stock) => {
             const stockQty = Number(stock.stock);
             if (stockQty <= 0) return null;
 
             const today = new Date();
-
-            // Determine period to calculate daily average
-            // Option 1: last 30 days (or any custom period)
-            const periodDays = 7; // you can adjust
+            const periodDays = 7; // lead time
             const startDate = new Date(today);
-            startDate.setDate(today.getDate() - (periodDays - 1)); // include today
+            startDate.setDate(today.getDate() - (periodDays - 1));
 
             const totalDays = periodDays;
             let totalSold = 0;
@@ -84,14 +81,18 @@ export default function NotificationBell() {
                 }
               });
 
-              totalSold += soldToday; // include 0 sales
+              totalSold += soldToday; 
             }
 
             const avgDailySold = totalSold / totalDays;
             if (avgDailySold <= 0) return null;
 
-            const daysToDeplete = stockQty / avgDailySold;
+            const reorderPoint = Math.ceil(avgDailySold * LEAD_TIME_DAYS);
+
+            const daysToDeplete = Math.floor(stockQty / avgDailySold);
             if (daysToDeplete > OUT_OF_STOCK_WARNING_DAYS) return null;
+
+            if (stockQty > reorderPoint) return null;
 
             const predictedDate = new Date(today);
             predictedDate.setDate(today.getDate() + Math.floor(daysToDeplete));
@@ -187,4 +188,3 @@ export default function NotificationBell() {
     </div>
   );
 }
-
