@@ -155,7 +155,7 @@ export default function NotificationBell() {
 
               {nearOutOfStockItems.length > 0 && (
                 <div className={styles.notifSection}>
-                  <h4>Near Out of Stock</h4>
+                  <h4>Near Low Stock</h4>
                   <ul>
                     {nearOutOfStockItems.map((item) => (
                       <li key={item.id}>
