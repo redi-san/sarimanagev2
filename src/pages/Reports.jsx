@@ -783,9 +783,9 @@ useEffect(() => {
                       : activeTab === "sales"
                         ? showForecast
                           ? "Sales Forecast"
-                          : `${showAll ? "Sales of the Month" : "Sales of the Day"}`
+                          : `${showAll ? "Sales for the Month" : "Sales for the Day"}`
                         : activeTab === "profit"
-                          ? `${showAll ? "Profits of the Month" : "Profits of the Day"}`
+                          ? `${showAll ? "Profits for the Month" : "Profits for the Day"}`
                           : activeTab === "debt"
                             ? "Debt Overview"
                             : ""}
