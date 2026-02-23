@@ -107,7 +107,7 @@ export default function Debts({ setPage }) {
     return () => unsubscribe();
   }, [auth]);
 
-    const updateProduct = useCallback(
+  const updateProduct = useCallback(
     (index, field, value, productsArray = products) => {
       const newProducts = [...productsArray];
       if (!newProducts[index]) newProducts[index] = {};
@@ -220,8 +220,6 @@ export default function Debts({ setPage }) {
       console.error("Error fetching debts:", err);
     }
   };
-
-
 
   const removeProduct = (index) => {
     const newProducts = products.filter((_, i) => i !== index);
@@ -1004,43 +1002,50 @@ export default function Debts({ setPage }) {
 
                     {showKebabMenu && (
                       <div className={styles["kebab-menu"]}>
-<button
-  onClick={async () => {
-    const productList = (selectedDebt.products || [])
-      .map((p) => `${p.name} x${p.quantity || 0}`)
-      .join(", ");
+                        <button
+                          onClick={async () => {
+                            const productList = (selectedDebt.products || [])
+                              .map((p) => `${p.name} x${p.quantity || 0}`)
+                              .join(", ");
 
-    const user = auth.currentUser;
-    let senderName = "Your Seller";
-    let storeName = "";
+                            const user = auth.currentUser;
+                            let senderName = "Your Seller";
+                            let storeName = "";
 
-    try {
-      const res = await axios.get(`${BASE_URL}/users/${user.uid}`);
-      const firstName = res.data.name || "";
-      const lastName = res.data.last_name || "";
-      storeName = res.data.store_name || "";
+                            try {
+                              const res = await axios.get(
+                                `${BASE_URL}/users/${user.uid}`,
+                              );
+                              const firstName = res.data.name || "";
+                              const lastName = res.data.last_name || "";
+                              storeName = res.data.store_name || "";
 
-      senderName = `${firstName} ${lastName}`.trim();
-    } catch (err) {
-      console.error("Failed to fetch sender info:", err);
-    }
+                              senderName = `${firstName} ${lastName}`.trim();
+                            } catch (err) {
+                              console.error(
+                                "Failed to fetch sender info:",
+                                err,
+                              );
+                            }
 
-    const message =
-      `Hi ${selectedDebt.customer_name}, this is a friendly reminder that your debt of ${formatPeso(
-        selectedDebt.total - (selectedDebt.total_paid || 0),
-      )} is due${selectedDebt.due_date ? ` on ${selectedDebt.due_date}` : ""}.\n\n` +
-      `Products: ${productList}.\n\n` +
-      `Please settle it at your earliest convenience.\n\n` +
-      `From, ${senderName}${storeName ? `\n${storeName}` : ""}`;
+                            const message =
+                              `Hi ${selectedDebt.customer_name}, this is a friendly reminder that your debt of ${formatPeso(
+                                selectedDebt.total -
+                                  (selectedDebt.total_paid || 0),
+                              )} is due${selectedDebt.due_date ? ` on ${selectedDebt.due_date}` : ""}.\n\n` +
+                              `Products: ${productList}.\n\n` +
+                              `Please settle it at your earliest convenience.\n\n` +
+                              `From, ${senderName}${storeName ? `\n${storeName}` : ""}`;
 
-    sendSMSReminder(selectedDebt.contact_number, message);
-    setShowKebabMenu(false);
-  }}
->
-  Remind Customer
-</button>
-
-
+                            sendSMSReminder(
+                              selectedDebt.contact_number,
+                              message,
+                            );
+                            setShowKebabMenu(false);
+                          }}
+                        >
+                          Remind Customer
+                        </button>
 
                         <button
                           onClick={() => {
@@ -1164,46 +1169,49 @@ export default function Debts({ setPage }) {
                   </div>
                 ))}
               </div>
-<div className={styles["receipt-totals"]}>
-  <div className={styles["totals-row"]}>
-    <div className={styles["totals-left"]}>
-      <p><strong>Total:</strong> {formatPeso(selectedDebt.total)}</p>
-      <p><strong>Profit:</strong> {formatPeso(selectedDebt.profit)}</p>
-    </div>
+              <div className={styles["receipt-totals"]}>
+                <div className={styles["totals-row"]}>
+                  <div className={styles["totals-left"]}>
+                    <p>
+                      <strong>Total:</strong> {formatPeso(selectedDebt.total)}
+                    </p>
+                    <p>
+                      <strong>Profit:</strong> {formatPeso(selectedDebt.profit)}
+                    </p>
+                  </div>
 
-    <div className={styles["totals-right"]}>
-      <p>
-        <strong>Payment:</strong>{" "}
-        {formatPeso(
-          paymentHistory.reduce((sum, p) => sum + p.amount, 0),
-        )}
-      </p>
-      {paymentHistory.length > 0 &&
-        paymentHistory[paymentHistory.length - 1].change > 0 && (
-          <p>
-            <strong>Change:</strong>{" "}
-            {formatPeso(
-              paymentHistory[paymentHistory.length - 1].change,
-            )}
-          </p>
-        )}
-    </div>
-  </div>
+                  <div className={styles["totals-right"]}>
+                    <p>
+                      <strong>Payment:</strong>{" "}
+                      {formatPeso(
+                        paymentHistory.reduce((sum, p) => sum + p.amount, 0),
+                      )}
+                    </p>
+                    {paymentHistory.length > 0 &&
+                      paymentHistory[paymentHistory.length - 1].change > 0 && (
+                        <p>
+                          <strong>Change:</strong>{" "}
+                          {formatPeso(
+                            paymentHistory[paymentHistory.length - 1].change,
+                          )}
+                        </p>
+                      )}
+                  </div>
+                </div>
 
-  <div className={styles["totals-balance"]}>
-    <p>
-      <strong>Current Balance:</strong>{" "}
-      {formatPeso(
-        Math.max(
-          0,
-          selectedDebt.total -
-            paymentHistory.reduce((sum, p) => sum + p.amount, 0),
-        ),
-      )}
-    </p>
-  </div>
-</div>
-
+                <div className={styles["totals-balance"]}>
+                  <p>
+                    <strong>Current Balance:</strong>{" "}
+                    {formatPeso(
+                      Math.max(
+                        0,
+                        selectedDebt.total -
+                          paymentHistory.reduce((sum, p) => sum + p.amount, 0),
+                      ),
+                    )}
+                  </p>
+                </div>
+              </div>
 
               {/* Action buttons */}
               <div className={styles["modal-actions"]}>

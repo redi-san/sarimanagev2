@@ -13,6 +13,8 @@ import Settings from "./pages/Settings";
 
 import AuthRedirect from "./components/AuthRedirect";
 
+import InstallPrompt from "./components/InstallPrompt";
+
 function App() {
   // ✅ Apply theme on app load
 useEffect(() => {
@@ -47,6 +49,9 @@ useEffect(() => {
 
   return (
     <div>
+
+            <InstallPrompt />
+
       <Router>
         <Routes>
           {/*<Route path="/" element={<Navigate to="/login" replace />} />*/}
