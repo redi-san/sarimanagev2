@@ -3,7 +3,6 @@ import styles from "../css/Settings.module.css";
 import { useNavigate } from "react-router-dom";
 import { getAuth, signOut } from "firebase/auth";
 import axios from "axios";
-
 import BottomNav from "../components/BottomNav";
 
 const BASE_URL = process.env.REACT_APP_API_URL;
@@ -11,8 +10,12 @@ const BASE_URL = process.env.REACT_APP_API_URL;
 export default function Settings() {
   const [editingProfile, setEditingProfile] = useState(false);
   const [userData, setUserData] = useState(null);
-
   const [showAppSettings, setShowAppSettings] = useState(false);
+  const [showComponents, setShowComponents] = useState(false);
+
+  const [debtsEnabled, setDebtsEnabled] = useState(() => {
+    return localStorage.getItem("debtsEnabled") === "true";
+  });
 
   const [theme, setTheme] = useState(() => {
     return localStorage.getItem("theme") || "light";
@@ -27,7 +30,7 @@ export default function Settings() {
   });
 
   const resetPrimaryColor = () => {
-    const defaultColor = "#F4C430"; // original default
+    const defaultColor = "#F4C430";
     setPrimaryColor(defaultColor);
   };
 
@@ -43,6 +46,17 @@ export default function Settings() {
   const navigate = useNavigate();
   const auth = getAuth();
 
+  const [inventoryEnabled, setInventoryEnabled] = useState(
+    localStorage.getItem("inventoryEnabled") === "true",
+  );
+  const [reportsDebtsEnabled, setReportsDebtsEnabled] = useState(
+    localStorage.getItem("reportsDebtsEnabled") === "true",
+  );
+
+  const [reportsProfitEnabled, setReportsProfitEnabled] = useState(
+    localStorage.getItem("reportsProfitEnabled") === "true",
+  );
+
   const handleLogout = async () => {
     try {
       await signOut(auth);
@@ -52,7 +66,6 @@ export default function Settings() {
     }
   };
 
-  // ✅ Fetch user data from backend
   useEffect(() => {
     const fetchUser = async () => {
       const user = auth.currentUser;
@@ -95,7 +108,6 @@ export default function Settings() {
       const user = auth.currentUser;
       if (!user) return;
 
-      // ✅ Include storeName and mobileNumber in the PUT request
       await axios.put(`${BASE_URL}/users/${user.uid}`, {
         name: editedData.firstName,
         last_name: editedData.lastName,
@@ -105,7 +117,6 @@ export default function Settings() {
         mobile_number: editedData.mobileNumber,
       });
 
-      // ✅ Update local state after successful save
       setUserData({
         ...userData,
         name: editedData.firstName,
@@ -135,7 +146,6 @@ export default function Settings() {
       document.documentElement.setAttribute("data-theme", theme);
     }
 
-    // Save to localStorage
     localStorage.setItem("theme", theme);
   }, [theme]);
 
@@ -160,23 +170,16 @@ export default function Settings() {
 
   return (
     <div>
-      {/* Topbar */}
       <div className={styles.topbar}>
         <h2>Settings</h2>
       </div>
 
-      {/* Main Content */}
       <div className={styles.main}>
-        {/* <h1 className={styles.pageTitle}>Settings</h1> */}
-
-        {/* Profile Card */}
         <div className={styles.card}>
-          {/* Full Name */}
           <h3 className={styles.username}>
             {userData ? `${userData.name} ${userData.last_name}` : "Loading..."}
           </h3>
 
-          {/* Store Name */}
           <p className={styles.storeName}>
             {userData ? userData.store_name : "Loading..."}
           </p>
@@ -191,24 +194,126 @@ export default function Settings() {
           </div>
         </div>
 
-        {/* ✅ Conditional Rendering */}
         {!editingProfile ? (
           <>
-            {/* App Settings Card */}
-            <div
-              className={`${styles.card} ${styles.clickable}`}
-              onClick={() => setShowAppSettings(!showAppSettings)}
-            >
-              <div className={styles.cardHeader}>
-                <span>App Settings</span>
+            {!showComponents && (
+              <div
+                className={`${styles.card} ${styles.clickable}`}
+                onClick={() => {
+                  setShowAppSettings(!showAppSettings);
+                  setShowComponents(false);
+                }}
+              >
+                <div className={styles.cardHeader}>
+                  <span>App Settings</span>
+                </div>
+                <p>Customize your app experience and notifications</p>
               </div>
-              <p>Customize your app experience and notifications</p>
-            </div>
+            )}
 
-            {/* If NOT showing App Settings, show these */}
             {!showAppSettings && (
+              <div
+                className={`${styles.card} ${styles.clickable}`}
+                onClick={() => {
+                  setShowComponents(!showComponents);
+                  setShowAppSettings(false);
+                }}
+              >
+                <div className={styles.cardHeader}>
+                  <span>Components</span>
+                </div>
+                <p>Manage app components</p>
+              </div>
+            )}
+
+            {showComponents && (
+              <div className={styles.card}>
+                <div className={styles.cardHeader}>
+                  <span>Components</span>
+                </div>
+
+                <div className={styles.sectionTitle}>Transactions</div>
+
+                <div className={styles.switchRow}>
+                  <span>Debts</span>
+                  <label className={styles.switch}>
+                    <input
+                      type="checkbox"
+                      checked={debtsEnabled}
+                      onChange={(e) => {
+                        const next = e.target.checked;
+                        setDebtsEnabled(next);
+                        localStorage.setItem("debtsEnabled", String(next));
+                      }}
+                    />
+                    <span className={styles.slider}></span>
+                  </label>
+                </div>
+                <div
+                  className={styles.sectionTitle}
+                  style={{ marginTop: "20px" }}
+                >
+                  Reports
+                </div>
+
+                <div className={styles.switchRow}>
+                  <span>Profit</span>
+                  <label className={styles.switch}>
+                    <input
+                      type="checkbox"
+                      checked={reportsProfitEnabled}
+                      onChange={(e) => {
+                        localStorage.setItem(
+                          "reportsProfitEnabled",
+                          e.target.checked,
+                        );
+                        setReportsProfitEnabled(e.target.checked);
+                      }}
+                    />
+                    <span className={styles.slider}></span>
+                  </label>
+                </div>
+
+                <div className={styles.switchRow}>
+                  <span>Inventory</span>
+                  <label className={styles.switch}>
+                    <input
+                      type="checkbox"
+                      checked={inventoryEnabled}
+                      onChange={(e) => {
+                        localStorage.setItem(
+                          "inventoryEnabled",
+                          e.target.checked,
+                        );
+                        setInventoryEnabled(e.target.checked);
+                      }}
+                    />
+                    <span className={styles.slider}></span>
+                  </label>
+                </div>
+
+                <div className={styles.switchRow}>
+                  <span>Debts</span>
+                  <label className={styles.switch}>
+                    <input
+                      type="checkbox"
+checked={reportsDebtsEnabled}
+                      onChange={(e) => {
+                        localStorage.setItem(
+                          "reportsDebtsEnabled",
+                          e.target.checked,
+                        );
+                        setReportsDebtsEnabled(e.target.checked);
+                      }}
+                    />
+                    <span className={styles.slider}></span>
+                  </label>
+                </div>
+              </div>
+            )}
+
+            {!showAppSettings && !showComponents && (
               <>
-                {/* Help and Support Card */}
                 <div className={`${styles.card} ${styles.clickable}`}>
                   <div className={styles.cardHeader}>
                     <span>Help and Support</span>
@@ -219,14 +324,12 @@ export default function Settings() {
                   </p>
                 </div>
 
-                {/* Logout Button */}
                 <button className={styles.logoutBtn} onClick={handleLogout}>
                   Log Out
                 </button>
               </>
             )}
 
-            {/* If App Settings is opened, show ONLY Application Settings card */}
             {showAppSettings && (
               <div className={styles.card}>
                 <div className={styles.cardHeader}>
@@ -247,6 +350,7 @@ export default function Settings() {
                   </select>
                 </div>
 
+                {/* primary color */}
                 <div className={styles.formGroup}>
                   <label>Primary Color</label>
                   <div
@@ -256,7 +360,6 @@ export default function Settings() {
                       gap: "10px",
                     }}
                   >
-                    {/* Live Preview */}
                     <div
                       style={{
                         width: "50px",
@@ -266,11 +369,9 @@ export default function Settings() {
                         border: "1px solid #ccc",
                       }}
                     ></div>
-
-                    {/* Native Color Picker */}
                     <input
                       type="color"
-                      value={primaryColor} // ✅ ensures hue/saturation/value is initialized
+                      value={primaryColor}
                       onChange={(e) => setPrimaryColor(e.target.value)}
                       style={{
                         width: "50px",
@@ -281,8 +382,6 @@ export default function Settings() {
                         background: "transparent",
                       }}
                     />
-
-                    {/* Reset Button */}
                     <button
                       type="button"
                       onClick={resetPrimaryColor}
@@ -298,7 +397,6 @@ export default function Settings() {
                     </button>
                   </div>
 
-                  {/* Optional: show hex code for instant feedback */}
                   <div
                     style={{
                       marginTop: "6px",
@@ -310,6 +408,7 @@ export default function Settings() {
                   </div>
                 </div>
 
+                {/* font size */}
                 <div className={styles.formGroup}>
                   <label>Font Size</label>
                   <select
@@ -328,7 +427,6 @@ export default function Settings() {
           </>
         ) : (
           <>
-            {/* ✅ Edit Profile Card */}
             <div className={`${styles.card} ${styles.editProfileCard}`}>
               <div className={styles.cardHeader}>
                 <span>Edit Profile</span>

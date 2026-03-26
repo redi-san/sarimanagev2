@@ -19,10 +19,9 @@ self.addEventListener("fetch", (event) => {
       try {
         const response = await fetch(event.request);
 
-        // ✅ Only cache "basic" same-origin, full (200) responses
         const isSameOrigin = new URL(event.request.url).origin === self.location.origin;
         const isOk = response && response.status === 200;
-        const isBasic = response.type === "basic"; // not opaque/cors
+        const isBasic = response.type === "basic"; 
 
         if (isSameOrigin && isOk && isBasic) {
           await cache.put(event.request, response.clone());
@@ -30,7 +29,6 @@ self.addEventListener("fetch", (event) => {
 
         return response;
       } catch (err) {
-        // Offline fallback: return cached version if available
         const cached = await cache.match(event.request);
         return cached || new Response("Offline", { status: 503 });
       }

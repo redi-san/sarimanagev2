@@ -1,6 +1,4 @@
-
 :root {
-  /* chart colors (light mode) */
   --chart-bg: #ffffff;
   --chart-axis: #999;
   --chart-line: #4caf50;
@@ -9,16 +7,12 @@
 }
 
 [data-theme="dark"] {
-  /* chart colors (dark mode) */
   --chart-bg: #1b1b1b;
   --chart-axis: #777;
-  --chart-line: #76ff8b;     /* lighter green for visibility */
+  --chart-line: #76ff8b;     
   --chart-point: #76ff8b;
   --chart-label: #e0e0e0;
 }
-
-
-
 
 .sidebar {
   position: fixed;
@@ -70,39 +64,27 @@
 
 .topbar h2 {
   margin: 0;
-  font-size: 1.5rem; /* 24px */
+  font-size: 1.5rem; 
   font-weight: bold;
   color: var(--header-text-color);
 
 }
 
-/*.hamburger {
-  font-size: 24px;
-  cursor: pointer;
-  border: none;
-  background: transparent;
-  color: #000000;
-  margin-right: 12px;
-} */
-
 .main {
-  margin-top: 60px; /* enough to clear the fixed topbar */
+  margin-top: 60px; 
   padding: 20px;
   display: flex;
   flex-direction: column;
   align-items: center;  
-  min-height: auto; /* remove full height, so content flows naturally */
+  min-height: auto; 
   text-align: center;
 }
-
-
 
 @media (max-width: 768px) {
   .main {
     margin-left: 0;
   }
 }
-
 
 .cards {
   display: grid;
@@ -112,16 +94,6 @@
   max-width: 1200px;
 }
 
-/*.card {
-  background: #fff;
-  padding: 20px;
-  border-radius: 12px;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
-  text-align: left;
-} */
-
-
-
 .cardHeader {
   display: flex;
   align-items: center;
@@ -130,7 +102,7 @@
 
 .cardHeader h3 {
   margin: 0 0 0 10px;
-  font-size: 1.125rem; /* 18px */
+  font-size: 1.125rem; 
   color: var(--text-color);
 }
 
@@ -158,7 +130,6 @@
   width: 100%;
   max-width: 1200px;  
   text-align: left;   
-  /*font-size: 24px;*/
   font-size: 1.5rem;
   font-weight: bold;
   margin: 0 0 20px 0; 
@@ -210,10 +181,9 @@
   color: #66bb6a;
 }
 
-
 .cardValue {
   margin-top: 10px; 
-  font-size: 1.125rem; /*18px;*/
+  font-size: 1.125rem; 
   font-weight: bold;
   color: #333;
 }
@@ -276,70 +246,68 @@
   color: #66bb6a;
 } 
 
-
-/* Compact the recommended products on mobile */
 @media (max-width: 600px) {
   .recommendationList {
-    max-width: 100%;       /* Take full width */
-    padding: 0 10px;       /* Small horizontal padding */
-    margin: 0 auto 20px;   /* Center it */
+    max-width: 100%;      
+    padding: 0 10px;       
+    margin: 0 auto 20px;   
   }
 
   .recommendationItem {
-    padding: 8px 12px;      /* Smaller padding */
-    font-size: 14px;        /* Smaller text */
-    border-radius: 6px;     /* Slightly smaller corners */
+    padding: 8px 12px;     
+    font-size: 14px;        
+    border-radius: 6px;     
   }
 
   .productName {
-    font-size: 14px;        /* Smaller name */
+    font-size: 14px;       
   }
 
   .productSales {
-    font-size: 14px;        /* Smaller sales number */
+    font-size: 14px;       
   }
 }
 
 .recommendationItem a {
   display: flex;
   justify-content: space-between;
-  align-items: center;  /* Vertically center content */
+  align-items: center;  
   width: 100%;
 }
 
-
-/* Center the recommended products list */
 .recommendationList {
   list-style: none;
   padding: 0;
-  margin: 0 auto 20px;  /* Center horizontally and add bottom margin */
+  margin: 0 auto 20px;  
   width: 100%;
   max-width: 600px;
   display: flex;
-  flex-direction: column;  /* Stack items vertically */
-  align-items: center;     /* Center the items horizontally */
+  flex-direction: column;  
+  align-items: flex-start;    
 }
 
-/* Make each item take full width of the list */
 .recommendationItem {
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  width: 100%;            /* Full width of parent */
+  justify-content: flex-start;   
+  gap: 12px;                    
+  border: 1px solid var(--input-border);
+  width: 100%;           
   padding: 12px 16px;
   border: 1px solid #eee;
   border-radius: 8px;
   margin-bottom: 10px;
   background-color: var(--card-bg);
   transition: background 0.2s ease;
-    border: 1px solid var(--input-border);
+  border: 1px solid var(--input-border);
   color: var(--text-color);
+  box-sizing: border-box;
 }
 
-/* Compact version for mobile */
+
 @media (max-width: 600px) {
   .recommendationList {
-    max-width: 90%;   /* Take most of the screen width */
+    max-width: 90%;   
     padding: 0;
   }
 
@@ -350,31 +318,29 @@
   }
 
   .productName, .productSales {
-    font-size: 1 rem; /*14px;*/
+    font-size: 1 rem; 
   }
 }
 
-/* Recommended Products heading smaller and more spaced */
 .recommendedTitle {
-  font-size: 1.25rem; /* 20px */
+  font-size: 1.25rem; 
   font-weight: bold;
-  color: var(--text-color);   /* ✔ auto switches on dark mode */
-  margin: 0 0 15px 10px; /* top 0, bottom 15px, left 10px for spacing */
+  color: var(--text-color);   
+  margin: 0 0 15px 10px; 
 }
 
-/* Mobile adjustment */
 @media (max-width: 600px) {
   .recommendedTitle {
-    font-size: 18px;     /* smaller on mobile */
-    margin-left: 5px;    /* less margin on smaller screens */
+    font-size: 18px;     
+    margin-left: 5px;    
   }
 }
 
 .recommendationSection {
   width: 100%;
-  display: flex;           /* make it a flex container */
-  justify-content: center; /* center the list horizontally */
-  margin-bottom: 50px;     /* space below */
+  display: flex;           
+  justify-content: center; 
+  margin-bottom: 50px;     
 }
 
 .icon {
@@ -395,4 +361,22 @@
   0% { opacity: 0.4; }
   50% { opacity: 1; }
   100% { opacity: 0.4; }
+}
+
+
+.productImageWrapper {
+  width: 50px;     
+  height: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  border-radius: 8px;
+}
+
+.productImage {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;   
+  border-radius: 8px;
 }

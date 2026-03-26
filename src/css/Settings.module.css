@@ -9,7 +9,7 @@
   --input-focus: #ffcc00;
   --logout-color: #ff4d4f;
   --logout-hover: #d9363e;
-  --header-text-color: #000000; /* NEW: topbar & page header text */
+  --header-text-color: #000000;
   --font-scale: 1;
 }
 
@@ -24,27 +24,21 @@
   --input-focus: #ffcc00;
   --logout-color: #ff4d4f;
   --logout-hover: #d9363e;
-  --header-text-color: #ffffff; /* topbar & page header white in dark mode */
+  --header-text-color: #ffffff;
 }
-
-
 
 html {
   font-size: calc(16px * var(--font-scale));
 }
 
 .main {
-  margin-top: 60px; /* topbar */
-  min-height: calc(100svh - 60px); /* mobile-safe viewport */
+  margin-top: 60px;
+  min-height: calc(100svh - 60px);
   overflow-y: auto;
   padding: 20px;
-
-  /* bottom nav + safe area + breathing room */
   padding-bottom: calc(120px + env(safe-area-inset-bottom));
   -webkit-overflow-scrolling: touch;
 }
-
-
 
 .sidebar {
   position: fixed;
@@ -97,12 +91,11 @@ html {
   margin: 0;
   font-size: 1.5rem;
   font-weight: bold;
-  color: var(--header-text-color); /* use variable */
+  color: var(--header-text-color);
 }
 
 .main {
   margin-top: 60px;
-  /*margin-left: 220px;*/
   padding: 20px;
   color: #000000;
   padding-bottom: 100px;
@@ -122,10 +115,8 @@ html {
 }
 
 .card {
-  /*background: #fff;*/
   background: var(--card-bg);
   border-radius: 12px;
-  /*box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);*/
   box-shadow: 0 2px 6px var(--card-shadow);
   padding: 20px;
   margin-bottom: 20px;
@@ -187,7 +178,6 @@ html {
   background: #e6b800;
 }
 
-/* Logout button */
 .logoutBtn {
   width: 100%;
   padding: 12px;
@@ -205,7 +195,6 @@ html {
   background: #d9363e;
 }
 
-/* Mobile responsive */
 @media (max-width: 768px) {
   .card {
     padding: 16px;
@@ -243,7 +232,7 @@ html {
 .formGroup label {
   font-weight: 600;
   margin-bottom: 5px;
-  color: var(--text-color); /* matches current theme */
+  color: var(--text-color);
 }
 
 .formGroup input {
@@ -253,8 +242,8 @@ html {
   font-size: 1rem;
   outline: none;
   transition: border-color 0.2s ease;
-  background: var(--card-bg); /* match card background */
-  color: var(--text-color); /* match text color */
+  background: var(--card-bg);
+  color: var(--text-color);
   border: 1px solid var(--input-border);
 }
 
@@ -299,7 +288,6 @@ html {
   background: #bbb;
 }
 
-/* Smooth Fade Animation */
 @keyframes fadeIn {
   from {
     opacity: 0;
@@ -313,10 +301,10 @@ html {
 
 @media (max-width: 768px) {
   .card {
-    width: 100%; /* ensures cards take full width */
-    min-width: 380px; /* optional, prevent extreme shrinking */
+    width: 100%;
+    min-width: 380px;
     padding: 16px;
-    box-sizing: border-box; /* ensures padding doesn’t shrink card */
+    box-sizing: border-box;
   }
 }
 
@@ -335,7 +323,6 @@ body {
   background: var(--bg-color);
   color: var(--text-color);
 }
-
 
 .topbar {
   background: var(--card-bg);
@@ -372,17 +359,17 @@ body {
   margin-bottom: 20px;
   font-size: 24px;
   font-weight: bold;
-  color: var(--header-text-color); /* use variable for dark mode */
+  color: var(--header-text-color);
 }
 
 .editProfileBtn {
-  color: #2e2e2e; /* always dark text */
+  color: #2e2e2e;
 }
 
 .formGroup input,
 .selectInput {
-  background: var(--card-bg); /* match card background */
-  color: var(--text-color); /* match text color */
+  background: var(--card-bg);
+  color: var(--text-color);
   border: 1px solid var(--input-border);
 }
 
@@ -394,4 +381,66 @@ body {
 .card p,
 .card span {
   color: var(--text-color);
+}
+
+.switchRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 12px;
+  padding: 8px 0;
+  font-weight: 500;
+  font-size: 14px;
+}
+
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 50px;
+  height: 24px;
+}
+
+.switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #ccc;
+  transition: 0.4s;
+  border-radius: 24px;
+}
+
+.slider::before {
+  position: absolute;
+  content: "";
+  height: 18px;
+  width: 18px;
+  left: 3px;
+  bottom: 3px;
+  background-color: white;
+  transition: 0.4s;
+  border-radius: 50%;
+}
+
+.switch input:checked + .slider {
+  background-color: var(--primary-color, #ffcc00);
+}
+
+.switch input:checked + .slider::before {
+  transform: translateX(26px);
+}
+
+.sectionTitle {
+  color: var(--header-text-color);
+  font-weight: 700;
+  margin-top: 10px;
+  margin-bottom: 8px;
 }

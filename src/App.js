@@ -1,8 +1,8 @@
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom"; // Removed unused Navigate
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom"; 
 import { useEffect } from "react";
 import LogIn from "./auth/LogIn";
 import ForgotPassword from "./auth/ForgotPassword";
-import ResetPassword from "./auth/ResetPassword"; // ✅ Import new component
+import ResetPassword from "./auth/ResetPassword"; 
 import SignUp from "./auth/SignUp";
 import Orders from "./pages/Orders";
 import Stocks from "./pages/Stocks";
@@ -16,13 +16,11 @@ import AuthRedirect from "./components/AuthRedirect";
 import InstallPrompt from "./components/InstallPrompt";
 
 function App() {
-  // ✅ Apply theme on app load
 useEffect(() => {
   const theme = localStorage.getItem("theme") || "light";
   const fontScale = localStorage.getItem("fontScale") || "1";
   const primaryColor = localStorage.getItem("primaryColor") || "#ffcc00";
 
-  // 🌗 Theme
   if (theme === "system") {
     const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
     document.documentElement.setAttribute(
@@ -33,13 +31,11 @@ useEffect(() => {
     document.documentElement.setAttribute("data-theme", theme);
   }
 
-  // 🔠 Font scale
   document.documentElement.style.setProperty(
     "--font-scale",
     fontScale
   );
 
-  // 🎨 PRIMARY COLOR (THIS IS WHAT YOU WERE MISSING)
   document.documentElement.style.setProperty(
     "--primary-color",
     primaryColor
@@ -59,7 +55,7 @@ useEffect(() => {
 
           <Route path="/login" element={<LogIn />} />
           <Route path="/forgotpassword" element={<ForgotPassword />} />
-          <Route path="/reset-password" element={<ResetPassword />} /> {/* ✅ New route */}
+          <Route path="/reset-password" element={<ResetPassword />} /> 
           <Route path="/signup" element={<SignUp />} />
           <Route path="/orders" element={<Orders />} />
           <Route path="/stocks" element={<Stocks />} />

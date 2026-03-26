@@ -5,19 +5,17 @@
   --chart-point: #4caf50;
   --chart-point-active: #ffcc00;
   --chart-text: black;
-  --chart-label: #444; /* light mode label text */
-    --selected-bg: #f0f0f0; /* light mode */
-
+  --chart-label: #444;
+  --selected-bg: #f0f0f0;
 }
 
 :root {
-  /* Base font sizes (scale automatically) */
-  --text-xs: 0.75rem; /* 12px */
-  --text-sm: 0.875rem; /* 14px */
-  --text-md: 1rem; /* 16px */
-  --text-lg: 1.125rem; /* 18px */
-  --text-xl: 1.5rem; /* 24px */
-  --text-xxl: 2rem; /* 32px */
+  --text-xs: 0.75rem;
+  --text-sm: 0.875rem;
+  --text-md: 1rem;
+  --text-lg: 1.125rem;
+  --text-xl: 1.5rem;
+  --text-xxl: 2rem;
 }
 
 [data-theme="dark"] {
@@ -27,9 +25,8 @@
   --chart-point: #8fff8f;
   --chart-point-active: #ffd700;
   --chart-text: #eaeaea;
-  --chart-label: #e0e0e0; /* light gray for dark mode */
-  --selected-bg: #333333; /* dark mode */
-
+  --chart-label: #e0e0e0;
+  --selected-bg: #333333;
 }
 
 .sidebar {
@@ -71,8 +68,8 @@
   left: 0;
   width: 100%;
   height: 60px;
-  background: var(--card-bg); /* changes with theme */
-  color: var(--header-text-color); /* also changes with theme */
+  background: var(--card-bg);
+  color: var(--header-text-color);
   display: flex;
   align-items: center;
   padding: 0 20px;
@@ -84,7 +81,7 @@
   margin: 0;
   font-size: var(--text-xl);
   font-weight: bold;
-  color: var(--header-text-color); /* uses your variable */
+  color: var(--header-text-color);
 }
 
 .hamburger {
@@ -98,7 +95,6 @@
 
 .main {
   margin-top: 60px;
-  /* margin-left: 220px; beside sidebar */
   padding: 20px;
   transition: margin-left 0.3s ease;
 
@@ -117,7 +113,6 @@
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   border: none;
   table-layout: auto;
-  /*font-size: 9px;*/
   font-size: var(--text-sm);
   background-color: var(--card-bg);
 
@@ -193,7 +188,9 @@
   min-width: 140px;
   max-width: 250px;
   text-align: center;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
 }
 
 @media (max-width: 768px) {
@@ -291,7 +288,6 @@
   padding: 8px 14px;
   font-weight: 600;
   cursor: pointer;
-  /*font-size: 14px;*/
   font-size: var(--text-sm);
   transition: all 0.2s ease;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
@@ -368,7 +364,9 @@
 .activeBar {
   background: var(--primary-color) !important;
   box-shadow: 0 0 8px rgba(255, 204, 0, 0.8);
-  transition: background 0.3s ease, box-shadow 0.3s ease;
+  transition:
+    background 0.3s ease,
+    box-shadow 0.3s ease;
 }
 
 .weeklyContainer {
@@ -491,46 +489,34 @@
   align-items: stretch;
 }
 
-/*.tabBar {
-  display: flex;
-  justify-content: space-around;
-  background: #f7f7a0;
-  border-bottom: 2px solid #ddd;
-  position: sticky;
-  top: 60px; /* below topbar 
-  z-index: 1200;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-} */
-
 .tabBar {
   display: flex;
-  width: 100vw;          /* full viewport width */
-  max-width: 100%;       /* prevent overflow */
-  margin: 0;             /* remove any margin */
-  padding: 0;            /* remove any padding */
-  justify-content: space-between; /* or space-evenly */
+  width: 100vw;
+  max-width: 100%;
+  margin: 0;
+  padding: 0;
+  justify-content: space-between;
   background: color-mix(in srgb, var(--primary-color) 50%, rgb(255, 255, 255));
   border-bottom: 2px solid #ddd;
   position: sticky;
-  top: 60px; 
+  top: 60px;
   z-index: 1200;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
 }
-
 
 .tabButton {
   flex: 1;
   padding: 12px 0;
   background: color-mix(in srgb, var(--primary-color) 50%, rgb(255, 255, 255));
   border: none;
-  /*font-size: 16px;*/
   font-size: var(--text-md);
   font-weight: bold;
   color: #000;
   cursor: pointer;
-  transition: background 0.3s, color 0.3s;
+  transition:
+    background 0.3s,
+    color 0.3s;
 }
-
 
 .tabButton:hover {
   background: var(--primary-color);
@@ -557,21 +543,21 @@
 
 .salesForecastToggle {
   display: flex;
-  justify-content: flex-start; /* keep buttons aligned to the left */
+  justify-content: flex-start;
   gap: 12px;
   margin: 20px 0;
 }
 
 .toggleButton {
-  padding: 6px 14px; /* smaller size */
+  padding: 6px 14px;
   border: 2px solid var(--primary-color);
-  background: #fff; /* inactive background */
+  background: #fff;
   color: #444;
   font-weight: 600;
   border-radius: 25px;
   cursor: pointer;
   transition: all 0.2s ease;
-  min-width: 80px; /* smaller width */
+  min-width: 80px;
 }
 
 .activeToggle {
@@ -580,12 +566,11 @@
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
 }
 
-/* Desktop */
 .summaryCards {
   display: flex;
   justify-content: center;
   align-items: center;
-  gap: 12px; /* smaller gap */
+  gap: 12px;
   margin: 15px 0;
   flex-wrap: wrap;
 }
@@ -593,14 +578,16 @@
 .card {
   background: var(--primary-color);
   color: #000;
-  padding: 8px 8px; /* smaller padding */
+  padding: 8px 8px;
   border-radius: 12px;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
-  flex: 1 1 120px; /* responsive flex */
+  flex: 1 1 120px;
   min-width: 120px;
-  max-width: 150px; /* smaller max width */
+  max-width: 150px;
   text-align: center;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
 }
 
 .card h3 {
@@ -628,7 +615,7 @@
 }
 
 #report-section {
-  width: 800px; /* better PDF width */
+  width: 800px;
   margin: auto;
 }
 
@@ -660,8 +647,8 @@
 @media (max-width: 768px) {
   .reportTable th,
   .reportTable td {
-    padding: 2px 0px; /* less padding for tight screens */
-    font-size: 13px; /* optional: slightly smaller font */
+    padding: 2px 0px;
+    font-size: 13px;
   }
 }
 
@@ -674,14 +661,13 @@
   position: absolute;
   inset: 0;
   opacity: 0;
-  pointer-events: none; /* 👈 prevents it from blocking buttons */
+  pointer-events: none;
 }
 
-
 .pdfButton {
-  position: fixed;       /* Fix it relative to the viewport */
-  bottom: 100px;          /* 20px from the bottom */
-  right: 20px;           /* 20px from the right */
+  position: fixed;
+  bottom: 100px;
+  right: 20px;
   background-color: var(--primary-color);
   color: #000;
   border: none;
@@ -689,19 +675,179 @@
   font-size: 18px;
   cursor: pointer;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-  transition: transform 0.2s, box-shadow 0.2s;
-  z-index: 1000;         /* Ensure it’s on top */
+  transition:
+    transform 0.2s,
+    box-shadow 0.2s;
+  z-index: 1000;
 }
 
 .arrowButton {
-  background-color: var(--primary-color); /* change background */
+  background-color: var(--primary-color);
   color: var(--header-text-color);
-  border: none; /* optional */
+  border: none;
   border-radius: 6px;
   padding: 6px 12px;
   font-size: 14px;
   cursor: pointer;
   transition: background-color 0.3s;
 
-    margin: 0 16px; /* 10px on left and right */
+  margin: 0 16px;
+}
+
+.currency {
+  text-align: right !important;
+  padding-right: 15px !important;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.toggleButton {
+  background-color: var(--primary-color);
+  color: #fff;
+  border: none;
+  padding: 8px 16px;
+  margin: 8px 0 16px 10px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 14px;
+  transition: background-color 0.2s ease;
+}
+
+.toggleButton:hover {
+  background-color: #1976d2;
+}
+
+.toggleButton:active {
+  background-color: #1565c0;
+}
+
+.customRangeWrap {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.customDatePill {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  border-radius: 999px;
+  background: var(--card-bg);
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+[data-theme="dark"] .customDatePill {
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.35);
+}
+
+.customDateTag {
+  font-size: var(--text-xs);
+  font-weight: 800;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--primary-color) 70%, white);
+  color: #000;
+  letter-spacing: 0.2px;
+}
+
+.customDateInput {
+  border: none;
+  outline: none;
+  background: transparent;
+  font-weight: 700;
+  font-size: var(--text-sm);
+  color: var(--chart-text);
+  padding: 2px 4px;
+}
+
+.customDateInput::-webkit-datetime-edit {
+  padding: 0;
+}
+
+.customDateInput::-webkit-calendar-picker-indicator {
+  cursor: pointer;
+  opacity: 0.85;
+}
+
+.customDateInput:focus {
+  outline: none;
+}
+
+.customRangeText {
+  font-weight: 800;
+  color: var(--chart-text);
+  font-size: var(--text-sm);
+}
+
+.searchInput {
+  width: min(520px, 92%);
+  padding: 10px 14px;
+  border-radius: 10px;
+  border: 1px solid rgba(0, 0, 0, 0.15);
+  background: var(--card-bg);
+  color: var(--chart-text);
+  font-size: var(--text-sm);
+  font-weight: 600;
+  outline: none;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+[data-theme="dark"] .searchInput {
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.35);
+}
+
+.toggleInput {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.toggleTrack {
+  width: 54px;
+  height: 30px;
+  border-radius: 999px;
+  background: #cfcfcf;
+  position: relative;
+  display: inline-block;
+  transition: background 0.2s ease;
+  border: 1px solid #bbb;
+}
+
+.toggleThumb {
+  width: 24px;
+  height: 24px;
+  border-radius: 999px;
+  background: white;
+  position: absolute;
+  top: 50%;
+  left: 3px;
+  transform: translateY(-50%);
+  transition: left 0.2s ease;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+}
+
+.toggleInput:checked + .toggleTrack {
+  background: var(--primary-color);
+  border-color: var(--primary-color);
+}
+
+.toggleInput:checked + .toggleTrack .toggleThumb {
+  left: 27px;
+}
+
+.toggleInput:disabled + .toggleTrack {
+  background: #e5e5e5;
+  border-color: #d6d6d6;
+}
+
+.toggleInput:disabled + .toggleTrack .toggleThumb {
+  box-shadow: none;
 }

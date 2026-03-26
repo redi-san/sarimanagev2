@@ -1,6 +1,5 @@
 import styles from "../css/Home.module.css";
 import { useState, useEffect } from "react";
-//import { Link } from "react-router-dom";
 import axios from "axios";
 import { getAuth } from "firebase/auth";
 import BottomNav from "../components/BottomNav";
@@ -8,12 +7,10 @@ import SalesIcon from "../assets/SalesIcon.png";
 import ProfitsIcon from "../assets/ProfitsIcon.png";
 import TotalDebtsIcon from "../assets/TotalDebtsIcon.png";
 import LowStockIcon from "../assets/LowStockIcon.png";
-
 import NotificationBell from "../components/NotificationBell";
-
 import MonthlySalesChart from "../components/MonthlySalesChart";
 
-const BASE_URL = process.env.REACT_APP_API_URL; // Use live backend URL
+const BASE_URL = process.env.REACT_APP_API_URL;
 
 export default function Home() {
   const [todaysSale, setTodaysSale] = useState(null);
@@ -25,16 +22,12 @@ export default function Home() {
 
   const [recommendedProducts, setRecommendedProducts] = useState([]);
 
-  /* const [showMonthly, setShowMonthly] = useState(true); // Monthly view
-const [showForecast, setShowForecast] = useState(false); // Toggle Actual/Forecast
-const [monthlyData, setMonthlyData] = useState([]); */
-
   const [orders, setOrders] = useState([]);
 
   const getLocalDateString = (date = new Date()) => {
     return new Date(date.getTime() - date.getTimezoneOffset() * 60000)
       .toISOString()
-      .split("T")[0]; // YYYY-MM-DD (LOCAL)
+      .split("T")[0];
   };
 
   useEffect(() => {
@@ -42,12 +35,11 @@ const [monthlyData, setMonthlyData] = useState([]); */
       if (!user) return;
 
       try {
-        // Fetch today's orders
         const ordersRes = await axios.get(
           `${BASE_URL}/orders/user/${user.uid}`,
         );
         const allOrders = ordersRes.data;
-        setOrders(allOrders); // ← add this
+        setOrders(allOrders);
 
         const today = getLocalDateString();
         const getOrderDate = (order) => {
@@ -79,7 +71,6 @@ const [monthlyData, setMonthlyData] = useState([]); */
       }
 
       try {
-        // Fetch stocks
         const stocksRes = await axios.get(
           `${BASE_URL}/stocks/user/${user.uid}`,
         );
@@ -94,7 +85,6 @@ const [monthlyData, setMonthlyData] = useState([]); */
       }
 
       try {
-        // Fetch debts
         const debtsRes = await axios.get(`${BASE_URL}/debts/user/${user.uid}`);
         const allDebts = debtsRes.data;
 
@@ -125,43 +115,66 @@ const [monthlyData, setMonthlyData] = useState([]); */
         );
         const allOrders = ordersRes.data;
 
-        // ----- STEP 1: Get current month and last year -----
-        const now = new Date();
-        const currentMonth = now.getMonth() + 1; // 1–12
-        const lastYear = now.getFullYear() - 1;
+        const stocksRes = await axios.get(
+          `${BASE_URL}/stocks/user/${user.uid}`,
+        );
+        const allStocks = stocksRes.data;
 
-        // ----- STEP 2: Helper to extract date from order_number -----
+        const now = new Date();
+        const currentMonth = now.getMonth() + 1; // 1-12
+        const currentYear = now.getFullYear();
+
+        const targetYears = [currentYear - 3, currentYear - 2, currentYear - 1];
+
         const getOrderDateObj = (order) => {
-          const datePart = order.order_number.split("-")[0]; // MMDDYYYY
+          const datePart = order.order_number.split("-")[0];
           const mm = parseInt(datePart.slice(0, 2), 10);
           const dd = parseInt(datePart.slice(2, 4), 10);
           const yyyy = parseInt(datePart.slice(4), 10);
           return { mm, dd, yyyy };
         };
 
-        // ----- STEP 3: Filter orders from SAME MONTH last year -----
-        const lastYearOrders = allOrders.filter((order) => {
+        const filteredOrders = allOrders.filter((order) => {
           const { mm, yyyy } = getOrderDateObj(order);
-          return mm === currentMonth && yyyy === lastYear;
+          return mm === currentMonth && targetYears.includes(yyyy);
         });
 
-        // ----- STEP 4: Compute product sales -----
-        const productSales = {};
-        lastYearOrders.forEach((order) => {
-          order.products.forEach((p) => {
-            if (!productSales[p.name]) productSales[p.name] = 0;
-            productSales[p.name] +=
-              (parseFloat(p.quantity) || 0) *
-              (parseFloat(p.selling_price) || 0);
+        const productYears = {};
+        const productQty = {};
+
+        filteredOrders.forEach((order) => {
+          const { yyyy } = getOrderDateObj(order);
+
+          (order.products || []).forEach((p) => {
+            const name = p.name;
+            const qty = parseFloat(p.quantity) || 0;
+
+            if (!productYears[name]) productYears[name] = new Set();
+            productYears[name].add(yyyy);
+
+            if (!productQty[name]) productQty[name] = 0;
+            productQty[name] += qty;
           });
         });
 
-        // ----- STEP 5: Sort & store top 5 -----
-        const sortedProducts = Object.entries(productSales)
-          .sort((a, b) => b[1] - a[1]) // sort by sales
-          .map(([name]) => ({ name })); // keep ONLY name
+        const qualified = Object.keys(productYears).filter(
+          (name) => productYears[name].size === 3,
+        );
 
-        setRecommendedProducts(sortedProducts.slice(0, 5));
+        const sortedProducts = qualified
+          .map((name) => [name, productQty[name] || 0])
+          .sort((a, b) => b[1] - a[1])
+          .slice(0, 5)
+          .map(([name], index) => {
+            const stockInfo = allStocks.find((s) => s.name === name);
+            return {
+              rank: index + 1,
+              name,
+              image: stockInfo?.image || null,
+            };
+          });
+
+        setRecommendedProducts(sortedProducts);
       } catch (err) {
         console.error("Error computing recommendations:", err);
       }
@@ -276,7 +289,7 @@ const [monthlyData, setMonthlyData] = useState([]); */
         </div>
       </div>
 
-      {/* Monthly Sales Chart */}
+      {/* monthly sales chart */}
       <MonthlySalesChart orders={orders} />
 
       <h2 className={`${styles.sectionTitle} ${styles.recommendedTitle}`}>
@@ -287,8 +300,22 @@ const [monthlyData, setMonthlyData] = useState([]); */
           <p>No recommendations yet</p>
         ) : (
           <ul className={styles.recommendationList}>
-            {recommendedProducts.map((p, idx) => (
-              <li key={idx} className={styles.recommendationItem}>
+            {recommendedProducts.map((p) => (
+              <li key={p.rank} className={styles.recommendationItem}>
+                <div className={styles.rankBadge}>{p.rank}</div>
+
+                <div className={styles.productImageWrapper}>
+                  {p.image ? (
+                    <img
+                      src={p.image}
+                      alt={p.name}
+                      className={styles.productImage}
+                    />
+                  ) : (
+                    <div className={styles.noImage}>No Image</div>
+                  )}
+                </div>
+
                 <span className={styles.productName}>{p.name}</span>
               </li>
             ))}
