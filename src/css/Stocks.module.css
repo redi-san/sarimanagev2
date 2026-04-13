@@ -15,22 +15,12 @@
   height: 20px;
   padding: 12px 16px;
   border-radius: 8px;
-  /*font-size: 16px;*/
   font-size: 1rem;
   outline: none;
   background: var(--card-bg);
   color: var(--text-color);
   border: 2px solid var(--primary-color);
-} 
-
-
-
-/*.page-header h1 {
-  color: #ffcc00;
-  font-size: 32px;
-  font-weight: bold;
-  margin: 0;
-} */
+}
 
 .create-button {
   position: fixed;
@@ -62,8 +52,8 @@
   left: 0;
   width: 100%;
   height: 60px;
- background: var(--card-bg);        /* changes with theme */
-  color: var(--header-text-color);   /* also changes with theme */  
+  background: var(--card-bg);
+  color: var(--header-text-color);
   display: flex;
   align-items: center;
   padding: 0 20px;
@@ -71,28 +61,11 @@
   z-index: 1300;
 }
 
- /*.topbar h2 {
-  margin: 0;
-  /*font-size: 24px;
-  font-size: 1.5rem;
-  font-weight: bold;
-  color: var(--header-text-color);}*/
-
-/*.hamburger {
-  font-size: 24px;
-  cursor: pointer;
-  border: none;
-  background: transparent;
-  color: #000000;
-  margin-right: 12px;
-} */
-
 .deleteIcon {
   width: 18px;
   height: 18px;
-  pointer-events: none; /* prevents click issues */
+  pointer-events: none;
 }
-
 
 .modal {
   position: fixed;
@@ -121,13 +94,12 @@
 
 .modal-content h2 {
   margin-top: 0;
-  color: var(--text-color); /* was #333 */
+  color: var(--text-color);
 }
 
 .modal-content p {
-  color: var(--text-color); /* was #777 */
+  color: var(--text-color);
   margin-bottom: 20px;
-  /*font-size: 14px; */
   font-size: 0.875rem;
 }
 
@@ -220,7 +192,7 @@
 
 .notifWrapper {
   position: relative;
-  margin-left: auto; /* push to right side */
+  margin-left: auto;
 }
 
 .notifBell {
@@ -274,7 +246,7 @@
 }
 
 .notifIcon {
-  width: 40px; /* adjust size */
+  width: 40px;
   height: 40px;
   object-fit: contain;
   margin-right: 20px;
@@ -288,21 +260,6 @@
   width: 95%;
   margin-left: 9px;
 }
-
-/*.form-group-with-button input {
-  flex: 1;
-  width: 90%;
-  height: 30px;
-  padding: 8px;
-  font-size: 16px;
-  border: 2px solid #ccc;
-  border-radius: 8px;
-  outline: none;
-  background: #d9d9d9;
-  color: #202124;
-  transition: border 0.2s ease;
-  padding-right: 20px; /* keep space for button 
-} */
 
 .barcodeBtn {
   position: absolute;
@@ -318,7 +275,6 @@
   height: 24px;
 }
 
-
 .scannerModal {
   position: fixed;
   top: 0;
@@ -327,12 +283,12 @@
   height: 100%;
   background: rgba(0, 0, 0, 0.7);
   display: flex;
-  justify-content: center; 
-  align-items: center; 
-  padding: 10px; 
+  justify-content: center;
+  align-items: center;
+  padding: 10px;
   box-sizing: border-box;
   z-index: 9999;
-  overflow: auto; 
+  overflow: auto;
   flex-direction: column;
 }
 
@@ -421,13 +377,20 @@ body {
 
 .stocksTable {
   width: 100%;
-  width: 1200px; 
+  width: 1200px;
   border-collapse: collapse;
-  text-align: center;
+  text-align: left;
   font-size: 16px;
-  min-width: 900px; 
-  table-layout: fixed; 
+  min-width: 900px;
+  table-layout: fixed;
   word-wrap: break-word;
+}
+
+.stocksTable {
+  border-collapse: collapse;
+  text-align: left;
+  font-size: 0.95rem;
+  background-color: var(--card-bg);
 }
 
 .stocksTable th {
@@ -512,9 +475,9 @@ body {
 
 .stocks-table-container {
   width: 100%;
-  overflow-x: auto; 
+  overflow-x: auto;
   margin-top: 20px;
-    background-color: var(--card-bg);
+  background-color: var(--card-bg);
   box-shadow: 0 2px 10px var(--card-shadow);
 }
 
@@ -523,8 +486,8 @@ body {
   padding: 12px 16px;
   text-align: left;
   border-bottom: 1px solid #ddd;
-  white-space: normal; 
-  word-break: break-word; 
+  white-space: normal;
+  word-break: break-word;
 }
 
 @media (max-width: 768px) {
@@ -537,12 +500,12 @@ body {
   .stocksTable {
     width: 100px;
     font-size: 14px;
-    min-width: 100px; 
+    min-width: 100px;
   }
 
   .stocksTable th,
   .stocksTable td {
-    padding: 6px 4px; 
+    padding: 6px 4px;
     white-space: nowrap;
   }
 
@@ -550,8 +513,8 @@ body {
     display: flex;
     align-items: center;
     height: 55px;
-    gap: 8px; 
-    min-width: unset; 
+    gap: 8px;
+    min-width: unset;
   }
 
   .stocks-table-container::after {
@@ -563,60 +526,54 @@ body {
     width: 20px;
     background: linear-gradient(to left, rgba(255, 255, 255, 0.9), transparent);
     pointer-events: none;
-  display: none;
+    display: none;
   }
-
-  /*.productThumb,
-  .productCell img {
-    width: 24px;
-    height: 24px;
-  } */
 
   .productName {
     font-size: 13px;
     line-height: 1.2;
-    max-width: 100px; 
+    max-width: 100px;
     min-width: 60px;
-    overflow: visible; 
-    text-overflow: unset; 
-    white-space: normal; 
-    word-break: break-word; 
+    overflow: visible;
+    text-overflow: unset;
+    white-space: normal;
+    word-break: break-word;
   }
 }
 
 @media (max-width: 768px) {
   .stocksTable {
-    width: auto; 
-    min-width: unset; 
-    table-layout: auto; 
+    width: auto;
+    min-width: unset;
+    table-layout: auto;
     font-size: 13px;
   }
 
   .stocksTable th,
   .stocksTable td {
     padding: 6px 4px;
-    white-space: nowrap; 
+    white-space: nowrap;
   }
 
   .stocksTable th {
-    white-space: nowrap; 
+    white-space: nowrap;
   }
 
   .stocksTable td {
-    white-space: normal; 
+    white-space: normal;
     word-break: break-word;
   }
 
   .stocks-table-container {
-    overflow-x: auto; 
+    overflow-x: auto;
   }
   .productName {
-    max-width: 100px; 
+    max-width: 100px;
     white-space: normal;
     overflow: visible;
     text-overflow: unset;
     word-break: break-word;
- font-weight: 500;
+    font-weight: 500;
   }
 }
 
@@ -638,7 +595,6 @@ body {
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
   overflow: hidden;
   transition: all 0.3s ease;
-  
 }
 
 .categoryAccordion:hover {
@@ -649,7 +605,6 @@ body {
 .categoryHeader {
   width: 100%;
   padding: 1rem 1.2rem;
-  /*background: linear-gradient(90deg, #ffd54f, #ffca28);*/
   background-color: var(--primary-color);
   border: none;
   border-radius: 12px 12px 0 0;
@@ -661,7 +616,9 @@ body {
   align-items: center;
   cursor: pointer;
   text-align: left;
-  transition: background 0.3s ease, color 0.2s;
+  transition:
+    background 0.3s ease,
+    color 0.2s;
 }
 
 .categoryHeader:hover {
@@ -683,8 +640,8 @@ body {
 }
 
 .categoryContent.open {
-  max-height: none; 
-  padding: 1rem; 
+  max-height: none;
+  padding: 1rem;
 }
 
 .categoryContent.open ~ .arrow,
@@ -692,20 +649,11 @@ body {
   transform: rotate(180deg);
 }
 
-.stocksTable {
-  width: 100%;
-  border-collapse: collapse;
-  text-align: left;
-  font-size: 0.95rem;
-  background-color:var(--card-bg);
-}
-
 .stocksTable th {
-  background-color:var(--card-bg);
+  background-color: var(--card-bg);
   color: var(--text-color);
   font-weight: 600;
   padding: 0.8rem;
-  /*border-bottom: 2px solid #f0e68c;*/ 
   border-bottom: 2px solid var(--primary-color);
 }
 
@@ -729,9 +677,8 @@ body {
 
 .lowStockRow {
   background-color: var(--low-stock-bg);
-  color: var(--text-color); /* optional if you want text color contrast */
+  color: var(--text-color);
 }
-
 
 .deleteBtn {
   background: none;
@@ -775,7 +722,7 @@ body {
   }
 
   .stocksTable {
-    width: 100px; 
+    width: 100px;
     table-layout: auto;
   }
 
@@ -791,11 +738,12 @@ body {
   max-height: 0;
   overflow: hidden;
   background: var(--card-bg);
-  transition: max-height 0.35s ease, padding 0.35s ease;
-  padding: 0; 
+  transition:
+    max-height 0.35s ease,
+    padding 0.35s ease;
+  padding: 0;
   box-sizing: border-box;
 }
-
 
 .formGroupNew {
   margin: 4px 0;
@@ -821,7 +769,7 @@ body {
   background: #fff !important;
   color: #333;
   margin-bottom: 8px;
-    background: var(--card-bg);
+  background: var(--card-bg);
   color: var(--text-color);
   border: 2px solid var(--input-border);
 }
@@ -860,10 +808,9 @@ body {
   background: #fff;
   outline: none;
   margin-bottom: 8px;
-    background: var(--card-bg);
+  background: var(--card-bg);
   color: var(--text-color);
   border: 2px solid var(--input-border);
-
 }
 
 .productIdInputWrapper input:focus {
@@ -888,7 +835,7 @@ body {
 .formGroupNew {
   flex: 1;
   margin: 0;
-  padding: 0; 
+  padding: 0;
 }
 
 .productIdGroup,
@@ -898,48 +845,35 @@ body {
   width: 99%;
 }
 
-
-/* Filter Buttons Container */
 .filterBar {
   display: flex;
-  justify-content: center; /* center the buttons horizontally */
-  align-items: center;     /* vertically center if buttons have different heights */
-  gap: 8px;                /* spacing between buttons */
+  justify-content: center; 
+  align-items: center; 
+  gap: 8px; 
   margin: 20px 0;
-  flex-wrap: nowrap;        /* prevent wrapping to second line */
-  overflow-x: auto;         /* optional: allow horizontal scroll if very small screen */
-  white-space: nowrap;      /* prevent text inside buttons from breaking */
+  flex-wrap: nowrap; 
+  overflow-x: auto; 
+  white-space: nowrap; 
 }
 
-
-/* General button styling */
 .filterBar button {
   padding: 10px 20px;
-  /*border: 2px solid #ffcc00; */
   border: 2px solid var(--primary-color);
   border-radius: 12px;
   background-color: var(--card-bg);
-  color:  var(--text-color);
+  color: var(--text-color);
   font-weight: 600;
   cursor: pointer;
   transition: all 0.3s ease;
-  min-width: 100px; /* uniform width */
+  min-width: 100px; 
   text-align: center;
 }
 
-/* Hover effect 
-.filterBar button:hover {
-  background-color: #ffcc00;
-  color: #fff;
-  transform: translateY(-2px);
-}*/
-
-/* Active filter */
 .filterBar button.activeFilter {
-  background-color: var(--primary-color);/*#ffcc00;*/
+  background-color: var(--primary-color); 
   color: #333;
-  border-color: var(--primary-color); /*#daae00;*/
-  box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+  border-color: var(--primary-color); 
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
 }
 
 .formGroupNew input,
@@ -956,7 +890,7 @@ select {
   color: var(--text-color);
 }
 
- .toast {
+.toast {
   position: fixed;
   bottom: 80px;
   left: 50%;
@@ -971,21 +905,20 @@ select {
   animation: slideUpFade 0.3s ease;
 }
 
-/* Types */
 .toast.success {
-  background: #22c55e; /* green */
+  background: #22c55e; 
 }
 
 .toast.error {
-  background: #ef4444; /* red */
+  background: #ef4444; 
 }
 
 .toast.warning {
-  background: #f59e0b; /* orange */
+  background: #f59e0b; 
 }
 
 .toast.info {
-  background: #3b82f6; /* blue */
+  background: #3b82f6; 
 }
 
 @keyframes slideUpFade {
@@ -999,3 +932,96 @@ select {
   }
 }
 
+.categoryRow td {
+  border-bottom: 1px solid var(--input-border);
+}
+
+.categoryCell {
+  background: color-mix(in srgb, var(--primary-color) 22%, var(--card-bg));
+  color: var(--text-color);
+  font-weight: 700;
+  padding: 12px 16px;
+  letter-spacing: 0.2px;
+}
+
+.categoryRow {
+  position: sticky;
+  top: 0; 
+  z-index: 2;
+}
+
+.categoryFilterRow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin: 8px 0 12px 0;
+  flex-wrap: wrap;
+}
+
+.categoryFilterLabel {
+  font-weight: 700;
+  color: var(--text-color);
+}
+
+.categoryFilterSelect {
+  min-width: 220px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  border: 2px solid var(--primary-color);
+  background: var(--card-bg);
+  color: var(--text-color);
+  outline: none;
+}
+
+.stocksTable {
+  width: 100% !important;
+  min-width: 0 !important;
+}
+
+.stocks-table-container {
+  overflow-x: auto;
+}
+
+.categoryHeaderRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.categoryTitle {
+  font-weight: 700;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.categoryActions {
+  display: flex;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.categoryEditBtn,
+.categoryDeleteBtn {
+  border: 1px solid var(--input-border);
+  background: var(--card-bg);
+  color: var(--text-color);
+  padding: 6px 10px;
+  border-radius: 10px;
+  font-weight: 700;
+  cursor: pointer;
+  font-size: 0.85rem;
+}
+
+.categoryEditBtn:hover {
+  border-color: var(--primary-color);
+}
+
+.categoryDeleteBtn:hover {
+  border-color: #ef4444;
+}
+.priceCell {
+  text-align: right !important;
+}
